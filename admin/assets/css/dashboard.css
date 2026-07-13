@@ -1,0 +1,493 @@
+/**
+ * RAS Dashboard - Custom Styles
+ * Remote Assistance Support System
+ */
+
+:root {
+    --primary-color: #1976d2;
+    --primary-dark: #1565c0;
+    --secondary-color: #26a69a;
+    --success-color: #4caf50;
+    --warning-color: #ff9800;
+    --danger-color: #f44336;
+    --info-color: #2196f3;
+    --light-bg: #f5f5f5;
+    --card-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    --card-shadow-hover: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+/* Body */
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--light-bg);
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+}
+
+main {
+    flex: 1 0 auto;
+}
+
+/* Navigation */
+.ras-nav {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.ras-nav .brand-logo {
+    font-size: 1.5rem;
+    font-weight: 300;
+    letter-spacing: 1px;
+}
+
+.ras-nav .brand-logo i {
+    margin-right: 8px;
+    font-size: 2rem;
+}
+
+/* Sections */
+main > section {
+    display: none;
+    padding: 2rem 0;
+}
+
+main > section.section-active {
+    display: block;
+}
+
+/* Summary Cards */
+.summary-card {
+    border-radius: 8px;
+    box-shadow: var(--card-shadow);
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.summary-card:hover {
+    box-shadow: var(--card-shadow-hover);
+    transform: translateY(-2px);
+}
+
+.summary-card .card-content {
+    padding: 1.5rem;
+}
+
+.summary-card .card-title {
+    font-size: 1rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.summary-card .card-title i {
+    margin-right: 8px;
+    font-size: 1.5rem;
+}
+
+.summary-card .summary-value {
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+/* Status Colors */
+.online-card {
+    border-left: 4px solid var(--success-color);
+}
+
+.online-card .summary-value {
+    color: var(--success-color);
+}
+
+.offline-card {
+    border-left: 4px solid var(--info-color);
+}
+
+.offline-card .summary-value {
+    color: var(--info-color);
+}
+
+.warning-card {
+    border-left: 4px solid var(--warning-color);
+}
+
+.warning-card .summary-value {
+    color: var(--warning-color);
+}
+
+.critical-card {
+    border-left: 4px solid var(--danger-color);
+}
+
+.critical-card .summary-value {
+    color: var(--danger-color);
+}
+
+/* Metrics */
+.metric-item {
+    padding: 1rem;
+    background: var(--light-bg);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.metric-label {
+    font-size: 0.875rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+}
+
+.metric-bar {
+    height: 8px;
+    background: #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.metric-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--secondary-color), var(--success-color));
+    transition: width 0.5s ease;
+}
+
+.metric-value {
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: var(--primary-color);
+}
+
+/* Tables */
+.table-responsive {
+    overflow-x: auto;
+}
+
+.table-responsive table {
+    margin-bottom: 0;
+}
+
+.table-responsive th {
+    font-weight: 500;
+    color: #666;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.table-responsive td {
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.table-responsive tr:hover {
+    background-color: #f9f9f9;
+}
+
+/* Status Badges */
+.status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.status-online {
+    background-color: #e8f5e9;
+    color: var(--success-color);
+}
+
+.status-offline {
+    background-color: #e3f2fd;
+    color: var(--info-color);
+}
+
+.status-warning {
+    background-color: #fff3e0;
+    color: var(--warning-color);
+}
+
+.status-critical {
+    background-color: #ffebee;
+    color: var(--danger-color);
+}
+
+/* Alerts */
+.alert-item {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    border-left: 4px solid;
+    background: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.alert-critical {
+    border-color: var(--danger-color);
+    background-color: #ffebee;
+}
+
+.alert-warning {
+    border-color: var(--warning-color);
+    background-color: #fff3e0;
+}
+
+.alert-info {
+    border-color: var(--info-color);
+    background-color: #e3f2fd;
+}
+
+.alert-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.alert-title {
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+}
+
+.alert-title i {
+    margin-right: 8px;
+}
+
+.alert-time {
+    font-size: 0.875rem;
+    color: #666;
+}
+
+.alert-message {
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.alert-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.alert-actions button {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+}
+
+/* Charts */
+.charts-container {
+    position: relative;
+    height: 300px;
+    margin-bottom: 2rem;
+}
+
+.chart-canvas {
+    width: 100% !important;
+    height: 300px !important;
+}
+
+/* Progress */
+.progress {
+    background-color: #e0e0e0;
+}
+
+.progress .indeterminate {
+    background-color: var(--primary-color);
+}
+
+/* Cards */
+.card {
+    border-radius: 8px;
+    box-shadow: var(--card-shadow);
+}
+
+.card:hover {
+    box-shadow: var(--card-shadow-hover);
+}
+
+.card .card-title {
+    font-size: 1.25rem;
+    font-weight: 400;
+    display: flex;
+    align-items: center;
+}
+
+.card .card-title i {
+    margin-right: 8px;
+}
+
+/* Buttons */
+.btn {
+    border-radius: 4px;
+}
+
+.btn-large {
+    border-radius: 6px;
+}
+
+/* Forms */
+input[type="text"],
+input[type="email"],
+input[type="number"],
+input[type="password"],
+select {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 0.75rem;
+    box-sizing: border-box;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="number"]:focus,
+input[type="password"]:focus,
+select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.1);
+}
+
+/* Footer */
+.page-footer {
+    background-color: var(--primary-dark);
+    margin-top: auto;
+}
+
+.page-footer p {
+    margin: 1rem 0;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    .summary-card .summary-value {
+        font-size: 2.5rem;
+    }
+}
+
+@media (max-width: 600px) {
+    main > section {
+        padding: 1rem 0;
+    }
+
+    .summary-card .summary-value {
+        font-size: 2rem;
+    }
+
+    .card .card-title {
+        font-size: 1rem;
+    }
+
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+}
+
+/* Animations */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.loading {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Utility classes */
+.text-success {
+    color: var(--success-color);
+}
+
+.text-warning {
+    color: var(--warning-color);
+}
+
+.text-danger {
+    color: var(--danger-color);
+}
+
+.text-info {
+    color: var(--info-color);
+}
+
+.mb-1 {
+    margin-bottom: 0.25rem;
+}
+
+.mb-2 {
+    margin-bottom: 0.5rem;
+}
+
+.mb-3 {
+    margin-bottom: 1rem;
+}
+
+.mt-2 {
+    margin-top: 0.5rem;
+}
+
+.mt-3 {
+    margin-top: 1rem;
+}
+
+/* Toast notifications */
+.toast {
+    border-radius: 4px;
+}
+
+.toast.success {
+    background-color: var(--success-color);
+}
+
+.toast.error {
+    background-color: var(--danger-color);
+}
+
+.toast.warning {
+    background-color: var(--warning-color);
+}
+
+/* Device detail panel */
+.device-detail {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--card-shadow);
+}
+
+.device-detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.device-detail-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.device-info-item {
+    padding: 0.5rem;
+    background: var(--light-bg);
+    border-radius: 4px;
+}
+
+.device-info-label {
+    font-size: 0.75rem;
+    color: #666;
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+}
+
+.device-info-value {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #333;
+}

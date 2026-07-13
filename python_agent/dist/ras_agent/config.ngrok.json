@@ -1,0 +1,22 @@
+{
+    "agent": {
+        "device_id": "test-client-001",
+        "hostname": "Test-Client",
+        "api_endpoint": "https://heathered-dortha-unparsed.ngrok-free.dev/RAS/admin/api/metrics.php",
+        "api_key": "change-this-to-secure-key",
+        "collect_interval": 60,
+        "buffer_max_size": 1000,
+        "buffer_file": "buffer.json",
+        "log_file": "ras_agent.log",
+        "log_max_size_mb": 10,
+        "log_backup_count": 5
+    },
+    "thresholds": {
+        "cpu_warning": 80,
+        "cpu_critical": 90,
+        "memory_warning": 80,
+        "memory_critical": 90,
+        "disk_warning": 75,
+        "disk_critical": 85
+    }
+}

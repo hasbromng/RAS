@@ -1,0 +1,1159 @@
+/**
+ * RAS Device Detail — compact single-view layout
+ */
+
+.dd-page {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 1440px;
+    font-size: 13px;
+    color: #334155;
+}
+
+/* ── Header ─────────────────────────────────────────── */
+.dd-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    position: relative;
+    overflow: hidden;
+}
+
+.dd-header::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: #94a3b8;
+}
+
+.dd-header.dd-status-online::before { background: linear-gradient(180deg, #22c55e, #16a34a); }
+.dd-header.dd-status-warning::before { background: linear-gradient(180deg, #f59e0b, #d97706); }
+.dd-header.dd-status-critical::before { background: linear-gradient(180deg, #ef4444, #dc2626); }
+.dd-header.dd-status-offline::before { background: linear-gradient(180deg, #94a3b8, #64748b); }
+
+.dd-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    flex: 1;
+}
+
+.dd-back {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    text-decoration: none;
+    flex-shrink: 0;
+    transition: all 0.15s;
+}
+
+.dd-back:hover {
+    color: #667eea;
+    border-color: #667eea;
+    background: rgba(102, 126, 234, 0.06);
+}
+
+.dd-back .material-icons { font-size: 18px; }
+
+.dd-header-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    position: relative;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.28);
+}
+
+.dd-header-icon .material-icons { font-size: 22px; }
+
+.dd-status-dot {
+    position: absolute;
+    right: -2px;
+    bottom: -2px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    background: #94a3b8;
+}
+
+.dd-status-online .dd-status-dot { background: #22c55e; box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.25); }
+.dd-status-warning .dd-status-dot { background: #f59e0b; box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.25); }
+.dd-status-critical .dd-status-dot { background: #ef4444; box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.25); }
+.dd-status-offline .dd-status-dot { background: #94a3b8; }
+
+.dd-header-text { min-width: 0; }
+
+.dd-header-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+}
+
+.dd-hostname {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+}
+
+.dd-header-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    font-size: 12px;
+    color: #64748b;
+}
+
+.dd-header-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    max-width: 100%;
+}
+
+.dd-header-meta .material-icons {
+    font-size: 14px;
+    color: #94a3b8;
+}
+
+.dd-header-meta code {
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 11px;
+    background: transparent;
+    color: #475569;
+    word-break: break-all;
+}
+
+.dd-header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.dd-header-chip {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    padding: 6px 12px;
+    background: #f8fafc;
+    border: 1px solid #eef2f7;
+    border-radius: 8px;
+    min-width: 72px;
+}
+
+.dd-chip-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.dd-chip-value {
+    font-size: 12px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+/* ── Badges ─────────────────────────────────────────── */
+.dd-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    line-height: 1.4;
+}
+
+.dd-badge-pulse {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: dd-pulse 1.6s ease infinite;
+}
+
+@keyframes dd-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+.dd-badge-online { background: #dcfce7; color: #15803d; }
+.dd-badge-offline { background: #f1f5f9; color: #64748b; }
+.dd-badge-warning { background: #fef3c7; color: #b45309; }
+.dd-badge-critical { background: #fee2e2; color: #b91c1c; }
+.dd-badge-alert {
+    background: #fff7ed;
+    color: #c2410c;
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 600;
+}
+.dd-badge-alert .material-icons { font-size: 13px; }
+
+/* Level text colors */
+.dd-level-text-good { color: #16a34a !important; }
+.dd-level-text-moderate { color: #ca8a04 !important; }
+.dd-level-text-warning { color: #d97706 !important; }
+.dd-level-text-critical { color: #dc2626 !important; }
+.dd-level-text-unknown { color: #64748b !important; }
+
+.dd-text-warn { color: #ea580c; }
+.dd-muted { color: #94a3b8; font-weight: 400; }
+
+/* ── Dashboard grid ─────────────────────────────────── */
+.dd-dashboard {
+    display: grid;
+    grid-template-columns: 1.35fr 1fr;
+    gap: 12px;
+    align-items: start;
+}
+
+.dd-col {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+}
+
+/* ── Panels ─────────────────────────────────────────── */
+.dd-panel {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+}
+
+.dd-panel-head {
+    padding: 10px 14px 0;
+}
+
+.dd-panel-head h3,
+.dd-panel-head-inner h3 {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 700;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.dd-panel-head h3 .material-icons,
+.dd-panel-head-inner h3 .material-icons {
+    font-size: 18px;
+    color: #667eea;
+}
+
+.dd-panel-body {
+    padding: 10px 14px 14px;
+}
+
+.dd-panel-body-scroll {
+    max-height: 220px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+}
+
+.dd-panel-body-scroll::-webkit-scrollbar { width: 5px; }
+.dd-panel-body-scroll::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 999px;
+}
+
+.dd-alerts-body {
+    max-height: 280px;
+}
+
+/* Collapsible panel toggle */
+.dd-panel-toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 14px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    color: inherit;
+    font: inherit;
+    transition: background 0.15s;
+}
+
+.dd-panel-toggle:hover {
+    background: #f8fafc;
+}
+
+.dd-panel-head-inner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    flex: 1;
+}
+
+.dd-panel-count {
+    font-size: 11px;
+    color: #94a3b8;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.dd-chevron {
+    font-size: 20px !important;
+    color: #94a3b8;
+    flex-shrink: 0;
+    transition: transform 0.2s;
+}
+
+.dd-panel-collapse {
+    overflow: hidden;
+    max-height: 800px;
+    transition: max-height 0.28s ease, opacity 0.2s ease;
+    opacity: 1;
+}
+
+.dd-panel-collapse.is-collapsed {
+    max-height: 0;
+    opacity: 0;
+}
+
+.dd-panel-collapse.is-collapsed .dd-panel-body {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+/* ── Progress bars ──────────────────────────────────── */
+.dd-bar {
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.dd-bar-sm { height: 6px; }
+.dd-bar-xs { height: 5px; }
+
+.dd-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.45s ease;
+    min-width: 0;
+}
+
+/* ── Resource metrics ───────────────────────────────── */
+.dd-metrics {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.dd-metric-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.dd-metric-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.dd-metric-icon .material-icons { font-size: 18px; }
+.dd-icon-cpu { background: linear-gradient(135deg, #667eea, #5a6fd8); }
+.dd-icon-mem { background: linear-gradient(135deg, #764ba2, #9b6dca); }
+.dd-icon-disk { background: linear-gradient(135deg, #22c55e, #16a34a); }
+
+.dd-metric-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.dd-metric-top {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 5px;
+}
+
+.dd-metric-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #1e293b;
+    min-width: 52px;
+}
+
+.dd-metric-detail {
+    font-size: 11px;
+    color: #94a3b8;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dd-metric-pct {
+    font-size: 13px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Disk list ──────────────────────────────────────── */
+.dd-disk-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.dd-disk-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 6px 8px;
+    align-items: center;
+    padding: 8px 10px;
+    background: #f8fafc;
+    border: 1px solid #eef2f7;
+    border-radius: 9px;
+    position: relative;
+}
+
+.dd-disk-main {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.dd-disk-label {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.dd-disk-label strong {
+    font-size: 12px;
+    color: #0f172a;
+}
+
+.dd-disk-label small {
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+.dd-disk-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dd-disk-bar-wrap .dd-bar {
+    flex: 1;
+}
+
+.dd-disk-pct {
+    font-size: 12px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    min-width: 42px;
+    text-align: right;
+}
+
+.dd-disk-usage {
+    font-size: 11px;
+    color: #475569;
+    font-weight: 500;
+}
+
+.dd-disk-usage .dd-free {
+    color: #94a3b8;
+    font-weight: 400;
+    margin-left: 2px;
+}
+
+/* ── Detail popover / open detail ───────────────────── */
+.dd-detail-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    color: #94a3b8;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.15s;
+    padding: 0;
+}
+
+.dd-detail-btn .material-icons { font-size: 16px; }
+
+.dd-detail-btn:hover,
+.dd-detail-btn.is-active {
+    color: #667eea;
+    border-color: #667eea;
+    background: rgba(102, 126, 234, 0.06);
+}
+
+.dd-detail-pop {
+    grid-column: 1 / -1;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 8px 10px;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    animation: dd-pop-in 0.15s ease;
+}
+
+.dd-detail-pop[hidden] {
+    display: none !important;
+}
+
+@keyframes dd-pop-in {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.dd-detail-pop-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    font-size: 11px;
+}
+
+.dd-detail-pop-row span {
+    color: #94a3b8;
+    font-weight: 500;
+}
+
+.dd-detail-pop-row strong,
+.dd-detail-pop-row code {
+    color: #1e293b;
+    font-weight: 600;
+    font-size: 11px;
+    text-align: right;
+    word-break: break-all;
+}
+
+.dd-detail-pop-row code {
+    font-family: 'Consolas', 'Monaco', monospace;
+    background: #f1f5f9;
+    padding: 1px 5px;
+    border-radius: 4px;
+}
+
+.dd-detail-pop-stack {
+    flex-direction: column;
+    align-items: flex-start !important;
+}
+
+.dd-detail-pop-stack code {
+    display: block;
+    width: 100%;
+    text-align: left;
+}
+
+/* ── Network ────────────────────────────────────────── */
+.dd-net-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.dd-net-row {
+    display: grid;
+    grid-template-columns: 8px 1fr auto;
+    gap: 8px;
+    align-items: center;
+    padding: 7px 10px;
+    background: #f8fafc;
+    border: 1px solid #eef2f7;
+    border-radius: 8px;
+    position: relative;
+}
+
+.dd-net-row.is-down {
+    opacity: 0.7;
+}
+
+.dd-net-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #94a3b8;
+    flex-shrink: 0;
+}
+
+.dd-net-row.is-up .dd-net-status-dot {
+    background: #22c55e;
+    box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
+}
+
+.dd-net-row.is-down .dd-net-status-dot {
+    background: #94a3b8;
+}
+
+.dd-net-info { min-width: 0; }
+
+.dd-net-name {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 2px;
+}
+
+.dd-net-name strong {
+    font-size: 12px;
+    color: #0f172a;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dd-net-speed {
+    font-size: 10px;
+    color: #94a3b8;
+    font-weight: 500;
+    flex-shrink: 0;
+}
+
+.dd-net-ips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+}
+
+.dd-net-ips code {
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 10px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    padding: 1px 5px;
+    border-radius: 4px;
+    color: #334155;
+}
+
+.dd-net-ips.dd-muted {
+    font-size: 11px;
+}
+
+/* ── System info ────────────────────────────────────── */
+.dd-sys-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+}
+
+.dd-sys-item {
+    padding: 7px 10px;
+    background: #f8fafc;
+    border: 1px solid #eef2f7;
+    border-radius: 8px;
+    min-width: 0;
+}
+
+.dd-sys-label {
+    display: block;
+    font-size: 10px;
+    color: #94a3b8;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-bottom: 2px;
+}
+
+.dd-sys-value {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #1e293b;
+    line-height: 1.3;
+    word-break: break-word;
+}
+
+/* CPU cores as horizontal progress bars */
+.dd-cores {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #eef2f7;
+}
+
+.dd-cores-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-bottom: 8px;
+}
+
+.dd-cores-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 140px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+.dd-core-row {
+    display: grid;
+    grid-template-columns: 28px 1fr 36px;
+    gap: 6px;
+    align-items: center;
+}
+
+.dd-core-id {
+    font-size: 10px;
+    font-weight: 600;
+    color: #94a3b8;
+}
+
+.dd-core-pct {
+    font-size: 10px;
+    font-weight: 700;
+    color: #334155;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Alerts compact ─────────────────────────────────── */
+.dd-alert-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.dd-alert-row {
+    display: grid;
+    grid-template-columns: 3px 1fr;
+    gap: 0;
+    background: #f8fafc;
+    border: 1px solid #eef2f7;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: background 0.15s;
+}
+
+.dd-alert-row:hover {
+    background: #fff;
+}
+
+.dd-alert-sev {
+    background: #38bdf8;
+}
+
+.dd-alert-row.sev-critical .dd-alert-sev { background: #ef4444; }
+.dd-alert-row.sev-warning .dd-alert-sev { background: #f59e0b; }
+.dd-alert-row.sev-info .dd-alert-sev { background: #38bdf8; }
+
+.dd-alert-row.sev-critical {
+    background: #fef2f2;
+    border-color: #fecaca;
+}
+
+.dd-alert-row.sev-warning {
+    background: #fffbeb;
+    border-color: #fde68a;
+}
+
+.dd-alert-row.status-resolved {
+    opacity: 0.65;
+}
+
+.dd-alert-content {
+    padding: 6px 10px;
+    min-width: 0;
+}
+
+.dd-alert-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 2px;
+    flex-wrap: wrap;
+}
+
+.dd-alert-type {
+    font-size: 11px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.dd-alert-time {
+    font-size: 10px;
+    color: #94a3b8;
+    margin-left: auto;
+}
+
+.dd-alert-status {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+.dd-alert-status.status-open {
+    background: #ffedd5;
+    color: #c2410c;
+}
+
+.dd-alert-status.status-acknowledged {
+    background: #e0e7ff;
+    color: #4338ca;
+}
+
+.dd-alert-status.status-resolved {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.dd-alert-msg {
+    margin: 0;
+    font-size: 11px;
+    color: #475569;
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+.dd-alert-more {
+    margin-top: 2px;
+    padding: 0;
+    border: none;
+    background: none;
+    color: #667eea;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.dd-alert-more:hover {
+    text-decoration: underline;
+}
+
+/* ── Chart ──────────────────────────────────────────── */
+.dd-chart-legend-inline {
+    display: flex;
+    gap: 10px;
+    margin-left: auto;
+    margin-right: 4px;
+}
+
+.dd-chart-legend-inline span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    color: #94a3b8;
+    font-weight: 500;
+}
+
+.dd-chart-legend-inline i {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.dd-chart-body {
+    min-height: 160px;
+    padding-top: 4px !important;
+}
+
+/* ── Empty states ───────────────────────────────────── */
+.dd-empty-sm {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 18px 12px;
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+.dd-empty-sm .material-icons {
+    font-size: 20px;
+    color: #cbd5e1;
+}
+
+.dd-empty-sm.success {
+    color: #16a34a;
+}
+
+.dd-empty-sm.success .material-icons {
+    color: #22c55e;
+}
+
+/* ── Responsive ─────────────────────────────────────── */
+@media (max-width: 1100px) {
+    .dd-dashboard {
+        grid-template-columns: 1fr;
+    }
+
+    .dd-panel-body-scroll,
+    .dd-alerts-body {
+        max-height: 240px;
+    }
+}
+
+@media (max-width: 700px) {
+    .dd-header {
+        padding: 10px 12px;
+    }
+
+    .dd-header-right {
+        width: 100%;
+    }
+
+    .dd-header-chip {
+        flex: 1;
+    }
+
+    .dd-hostname {
+        font-size: 1.05rem;
+    }
+
+    .dd-sys-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dd-chart-legend-inline {
+        display: none;
+    }
+
+    .dd-header-meta code {
+        max-width: 140px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
+@media (max-width: 480px) {
+    .dd-metric-detail {
+        display: none;
+    }
+
+    .dd-disk-usage .dd-free {
+        display: none;
+    }
+}
+
+/* ── Export Button ─────────────────────────────────── */
+.dd-export-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(102,126,234,0.3);
+}
+
+.dd-export-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(102,126,234,0.45);
+    color: #fff;
+}
+
+.dd-export-btn .material-icons {
+    font-size: 16px;
+}
+
+/* ── Hardware Section Title ─────────────────────────── */
+.dd-hw-section-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    color: #94a3b8;
+    margin: 12px 0 6px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+/* Wide sys item (spans full width in grid) */
+.dd-sys-item-wide {
+    grid-column: 1 / -1;
+}
+
+/* ── Memory Slot List ──────────────────────────────── */
+.dd-mem-slot-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.dd-mem-slot-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 8px 10px;
+    transition: box-shadow 0.15s;
+}
+
+.dd-mem-slot-row:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.dd-mem-slot-icon {
+    color: #667eea;
+    display: flex;
+    align-items: center;
+}
+
+.dd-mem-slot-icon .material-icons {
+    font-size: 20px;
+}
+
+.dd-mem-slot-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.dd-mem-slot-label {
+    display: block;
+    font-weight: 600;
+    font-size: 12px;
+    color: #334155;
+}
+
+.dd-mem-slot-mfr {
+    display: block;
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+.dd-mem-slot-spec {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+}
+
+.dd-mem-slot-cap {
+    font-weight: 700;
+    font-size: 13px;
+    color: #334155;
+}
+
+.dd-mem-slot-spd {
+    font-size: 11px;
+    color: #64748b;
+}
+
+/* ── SMART Storage Rows ────────────────────────────── */
+.dd-smart-row {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    transition: box-shadow 0.15s;
+}
+
+.dd-smart-row:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.dd-smart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.dd-smart-name {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    font-size: 13px;
+    color: #334155;
+}
+
+.dd-smart-name .material-icons {
+    font-size: 18px;
+    color: #667eea;
+}
+
+.dd-smart-health {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.dd-smart-grid {
+    margin-top: 2px;
+}
+
+/* ── Level Text Colors ─────────────────────────────── */
+.dd-level-text-good    { color: #16a34a !important; }
+.dd-level-text-warning { color: #d97706 !important; }
+.dd-level-text-critical { color: #dc2626 !important; }
+.dd-level-text-moderate { color: #ca8a04 !important; }
+.dd-level-text-unknown  { color: #94a3b8 !important; }
+

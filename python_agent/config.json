@@ -1,0 +1,22 @@
+{
+    "agent": {
+        "device_id": "",
+        "hostname": "",
+        "api_endpoint": "http://localhost/RAS/admin/api/metrics.php",
+        "api_key": "change-this-to-secure-key",
+        "collect_interval": 10,
+        "buffer_max_size": 1000,
+        "buffer_file": "buffer.json",
+        "log_file": "ras_agent.log",
+        "log_max_size_mb": 10,
+        "log_backup_count": 5
+    },
+    "thresholds": {
+        "cpu_warning": 80,
+        "cpu_critical": 90,
+        "memory_warning": 80,
+        "memory_critical": 90,
+        "disk_warning": 75,
+        "disk_critical": 85
+    }
+}

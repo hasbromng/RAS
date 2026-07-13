@@ -1,0 +1,38 @@
+2026-07-12 09:41:24 [INFO] ras_agent - ============================================================
+2026-07-12 09:41:24 [INFO] ras_agent - RAS Monitoring Agent Starting
+2026-07-12 09:41:24 [INFO] ras_agent - Device ID: dc75752c-e83a-52f6-befa-c247ed4b7fb4
+2026-07-12 09:41:24 [INFO] ras_agent - Hostname: DESKTOP-TTUI4RE
+2026-07-12 09:41:24 [INFO] ras_agent - API Endpoint: http://localhost/RAS/admin/api/metrics.php
+2026-07-12 09:41:24 [INFO] ras_agent - ============================================================
+2026-07-12 09:41:24 [INFO] ras_agent - Starting main agent loop...
+2026-07-12 09:41:24 [INFO] ras_agent - Testing connection to API endpoint...
+2026-07-12 09:41:24 [INFO] ras_agent - Connection test successful: Connection successful
+2026-07-12 09:41:34 [INFO] ras_agent - Metrics sent successfully. Device status: warning, Alerts created: 2
+2026-07-12 09:41:42 [INFO] ras_agent - Metrics sent successfully. Device status: warning, Alerts created: 1
+2026-07-12 09:41:52 [INFO] ras_agent - Metrics sent successfully. Device status: warning, Alerts created: 1
+2026-07-12 09:42:02 [INFO] ras_agent - Metrics sent successfully. Device status: warning, Alerts created: 1
+2026-07-12 09:42:11 [INFO] ras_agent - Metrics sent successfully. Device status: warning, Alerts created: 1
+2026-07-12 09:42:21 [INFO] ras_agent - Metrics sent successfully. Device status: warning, Alerts created: 1
+2026-07-12 09:42:31 [INFO] ras_agent - Metrics sent successfully. Device status: warning, Alerts created: 1
+2026-07-12 09:42:41 [INFO] ras_agent - Metrics sent successfully. Device status: warning, Alerts created: 1
+2026-07-12 09:42:51 [INFO] ras_agent - Metrics sent successfully. Device status: warning, Alerts created: 1
+2026-07-12 09:43:01 [INFO] ras_agent - Metrics sent successfully. Device status: warning, Alerts created: 1
+2026-07-12 09:43:11 [INFO] ras_agent - Metrics sent successfully. Device status: warning, Alerts created: 1
+2026-07-12 09:43:21 [INFO] ras_agent - Metrics sent successfully. Device status: warning, Alerts created: 1
+2026-07-12 09:43:31 [INFO] ras_agent - Metrics sent successfully. Device status: warning, Alerts created: 1
+2026-07-12 09:43:41 [INFO] ras_agent - Metrics sent successfully. Device status: warning, Alerts created: 1
+2026-07-12 09:43:51 [INFO] ras_agent - Metrics sent successfully. Device status: warning, Alerts created: 1
+2026-07-12 09:44:01 [INFO] ras_agent - Metrics sent successfully. Device status: warning, Alerts created: 1
+2026-07-12 09:44:11 [INFO] ras_agent - Metrics sent successfully. Device status: warning, Alerts created: 1
+2026-07-12 09:44:21 [INFO] ras_agent - Metrics sent successfully. Device status: warning, Alerts created: 1
+2026-07-12 09:44:31 [INFO] ras_agent - Metrics sent successfully. Device status: warning, Alerts created: 1
+2026-07-12 09:44:41 [INFO] ras_agent - Metrics sent successfully. Device status: warning, Alerts created: 1
+2026-07-12 09:44:51 [INFO] ras_agent - Metrics sent successfully. Device status: warning, Alerts created: 1
+2026-07-12 09:45:01 [INFO] ras_agent - Metrics sent successfully. Device status: warning, Alerts created: 1
+2026-07-12 09:45:11 [INFO] ras_agent - Metrics sent successfully. Device status: warning, Alerts created: 1
+2026-07-12 09:45:22 [INFO] ras_agent - Metrics sent successfully. Device status: warning, Alerts created: 1
+2026-07-12 09:45:31 [INFO] ras_agent - Metrics sent successfully. Device status: warning, Alerts created: 1
+2026-07-12 09:45:41 [INFO] ras_agent - Metrics sent successfully. Device status: warning, Alerts created: 1
+2026-07-12 09:45:51 [INFO] ras_agent - Metrics sent successfully. Device status: warning, Alerts created: 1
+2026-07-12 09:46:01 [INFO] ras_agent - Metrics sent successfully. Device status: warning, Alerts created: 1
+2026-07-12 09:46:12 [INFO] ras_agent - Metrics sent successfully. Device status: warning, Alerts created: 1
