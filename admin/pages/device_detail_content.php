@@ -532,8 +532,13 @@ $core_count = !empty($additional_info['cpu_per_core']) && is_array($additional_i
                                 if (!empty($iface['addresses']) && is_array($iface['addresses'])) {
                                     foreach ($iface['addresses'] as $addr) {
                                         $family = $addr['family'] ?? null;
-                                        if (in_array($family, [2, 10, 23], true) && !empty($addr['address'])) {
-                                            $addresses[] = $addr['address'];
+                                        if ($family !== null) {
+                                            $family_int = (int)$family;
+                                            if (($family_int === 2 || $family_int === 10 || $family_int === 23 || $family_int === 30 ||
+                                                 in_array($family, ['AF_INET', 'AF_INET6', 'AddressFamily.AF_INET', 'AddressFamily.AF_INET6'], true)) &&
+                                                !empty($addr['address'])) {
+                                                $addresses[] = $addr['address'];
+                                            }
                                         }
                                     }
                                 }
