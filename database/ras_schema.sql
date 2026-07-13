@@ -54,6 +54,7 @@ CREATE TABLE alerts (
     severity ENUM('info', 'warning', 'critical') DEFAULT 'info',
     message TEXT NOT NULL,
     status ENUM('open', 'acknowledged', 'resolved') DEFAULT 'open',
+    snapshot_data JSON NULL COMMENT 'Process snapshot when alert was triggered',
     resolved_at DATETIME NULL,
     acknowledged_at DATETIME NULL,
     acknowledged_by VARCHAR(255) NULL,
@@ -62,6 +63,18 @@ CREATE TABLE alerts (
     INDEX idx_device_status (device_id, status),
     INDEX idx_severity (severity),
     INDEX idx_timestamp (timestamp)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Device Commands table: stores commands queued for agents
+CREATE TABLE IF NOT EXISTS device_commands (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    device_id VARCHAR(100) NOT NULL,
+    command VARCHAR(50) NOT NULL,
+    status ENUM('pending', 'completed', 'failed') DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    completed_at DATETIME NULL,
+    FOREIGN KEY (device_id) REFERENCES devices(device_id) ON DELETE CASCADE,
+    INDEX idx_device_status (device_id, status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Create view for device summary

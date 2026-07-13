@@ -34,69 +34,46 @@ def signal_handler(signum, frame):
 def install_service(config_path=None):
     """Install agent as Windows service."""
     try:
-        import win32serviceutil
-        from service.windows_service import RASAgentService
-
-        # Install service
-        win32serviceutil.InstallService(
-            RASAgentService._svc_name_,
-            RASAgentService._svc_name_,
-            RASAgentService._svc_display_name_,
-            description=RASAgentService._svc_description_,
-            startType=win32service.SERVICE_AUTO_START
-        )
-
-        print(f"✅ Service '{RASAgentService._svc_name_}' installed successfully")
-        return True
+        from service.windows_service import install_service as service_install
+        return service_install(config_path)
     except Exception as e:
-        print(f"❌ Error installing service: {e}")
+        print(f"[ERROR] Error installing service: {e}")
         return False
 
 
 def remove_service():
     """Remove agent Windows service."""
     try:
-        import win32serviceutil
-        from service.windows_service import RASAgentService
-
-        win32serviceutil.RemoveService(RASAgentService._svc_name_)
-        print(f"✅ Service '{RASAgentService._svc_name_}' removed successfully")
-        return True
+        from service.windows_service import remove_service as service_remove
+        return service_remove()
     except Exception as e:
-        print(f"❌ Error removing service: {e}")
+        print(f"[ERROR] Error removing service: {e}")
         return False
 
 
 def start_service():
     """Start agent Windows service."""
     try:
-        import win32serviceutil
-        from service.windows_service import RASAgentService
-
-        win32serviceutil.StartService(RASAgentService._svc_name_)
-        print(f"✅ Service '{RASAgentService._svc_name_}' started successfully")
-        return True
+        from service.windows_service import start_service as service_start
+        return service_start()
     except Exception as e:
-        print(f"❌ Error starting service: {e}")
+        print(f"[ERROR] Error starting service: {e}")
         return False
 
 
 def stop_service():
     """Stop agent Windows service."""
     try:
-        import win32serviceutil
-        from service.windows_service import RASAgentService
-
-        win32serviceutil.StopService(RASAgentService._svc_name_)
-        print(f"✅ Service '{RASAgentService._svc_name_}' stopped successfully")
-        return True
+        from service.windows_service import stop_service as service_stop
+        return service_stop()
     except Exception as e:
-        print(f"❌ Error stopping service: {e}")
+        print(f"[ERROR] Error stopping service: {e}")
         return False
 
 
 def test_connection(config_path=None):
     """Test connection to API endpoint."""
+    client = None
     try:
         from ras_agent.api_client import APIClient
 
@@ -111,17 +88,22 @@ def test_connection(config_path=None):
         )
 
         success, message = client.test_connection()
-        client.close()
 
         if success:
-            print(f"✅ Connection test successful: {message}")
+            print(f"[OK] Connection test successful: {message}")
         else:
-            print(f"❌ Connection test failed: {message}")
+            print(f"[ERROR] Connection test failed: {message}")
 
         return success
     except Exception as e:
-        print(f"❌ Error testing connection: {e}")
+        print(f"[ERROR] Error testing connection: {e}")
         return False
+    finally:
+        if client is not None:
+            try:
+                client.close()
+            except Exception:
+                pass
 
 
 def run_agent(config_path=None):

@@ -24,15 +24,9 @@ Var StartMenuFolder
 
 ; Interface configuration
 !define MUI_ABORTWARNING
-!define MUI_ICON "icon.ico"
-!define MUI_UNICON "icon.ico"
-!define MUI_HEADERIMAGE
-; !define MUI_HEADERIMAGE_BITMAP "header.bmp"  ; Optional: Add header image
-!define MUI_WELCOMEFINISHPAGE_BITMAP "side.bmp"   ; Optional: Add side image
 
 ; Pages
 !insertmacro MUI_PAGE_WELCOME
-!insertmacro MUI_PAGE_LICENSE "LICENSE.txt"
 !insertmacro MUI_PAGE_COMPONENTS
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_STARTMENU Application $StartMenuFolder
@@ -63,8 +57,10 @@ Section "RAS Agent (required)" SecAgent
 
   ; Documentation
   File "README.md"
+  File "INSTALL_GUIDE.md"
   File "NGROK_SETUP.md"
   File "CONFIGURATION_GUIDE.md"
+  File "test_connection.bat"
 
   ; Store installation folder
   WriteRegStr HKLM "Software\RAS Agent" "" $INSTDIR
@@ -92,6 +88,7 @@ Section "Start Menu Shortcuts" SecShortcuts
   CreateShortCut "$SMPROGRAMS\$StartMenuFolder\Uninstall.lnk" "$INSTDIR\uninstall.exe"
   CreateShortCut "$SMPROGRAMS\$StartMenuFolder\Configuration.lnk" "notepad.exe" "$INSTDIR\config.json"
   CreateShortCut "$SMPROGRAMS\$StartMenuFolder\View Logs.lnk" "notepad.exe" "$INSTDIR\ras_agent.log"
+  CreateShortCut "$SMPROGRAMS\$StartMenuFolder\Test Connection.lnk" "$INSTDIR\test_connection.bat"
 SectionEnd
 
 Section "Desktop Shortcut" SecDesktop
@@ -154,8 +151,10 @@ Section "Uninstall"
   Delete "$INSTDIR\config.local.json.template"
   Delete "$INSTDIR\config.production.json.template"
   Delete "$INSTDIR\README.md"
+  Delete "$INSTDIR\INSTALL_GUIDE.md"
   Delete "$INSTDIR\NGROK_SETUP.md"
   Delete "$INSTDIR\CONFIGURATION_GUIDE.md"
+  Delete "$INSTDIR\test_connection.bat"
   Delete "$INSTDIR\ras_agent.log"
   Delete "$INSTDIR\buffer.json"
   Delete "$INSTDIR\uninstall.exe"
@@ -165,6 +164,7 @@ Section "Uninstall"
   Delete "$SMPROGRAMS\$StartMenuFolder\Uninstall.lnk"
   Delete "$SMPROGRAMS\$StartMenuFolder\Configuration.lnk"
   Delete "$SMPROGRAMS\$StartMenuFolder\View Logs.lnk"
+  Delete "$SMPROGRAMS\$StartMenuFolder\Test Connection.lnk"
   Delete "$DESKTOP\RAS Agent.lnk"
 
   ; Remove directories

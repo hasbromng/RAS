@@ -13,7 +13,6 @@ REM Check if Python is available
 python --version >nul 2>&1
 if %errorlevel% neq 0 (
     echo Error: Python is not installed or not in PATH
-    pause
     exit /b 1
 )
 
@@ -21,10 +20,9 @@ echo Step 1: Installing build dependencies...
 echo.
 
 REM Install PyInstaller and dependencies
-pip install pyinstaller pywin32 requests psutil schedule
+python -m pip install pyinstaller pywin32 requests psutil schedule
 if %errorlevel% neq 0 (
     echo Error: Failed to install dependencies
-    pause
     exit /b 1
 )
 
@@ -58,8 +56,7 @@ pyinstaller --onefile ^
 
 if %errorlevel% neq 0 (
     echo Error: Failed to build executable
-    pause
-    exit /b 1
+        exit /b 1
 )
 
 echo.
@@ -75,8 +72,7 @@ REM Copy executable
 copy "dist\ras_agent.exe" "%DIST_DIR%\"
 if %errorlevel% neq 0 (
     echo Error: Failed to copy executable
-    pause
-    exit /b 1
+        exit /b 1
 )
 
 REM Copy configuration templates
@@ -89,6 +85,11 @@ REM Copy documentation
 copy "README.md" "%DIST_DIR%\"
 copy "NGROK_SETUP.md" "%DIST_DIR%\"
 copy "CONFIGURATION_GUIDE.md" "%DIST_DIR%\"
+if exist "CLIENT_INSTALL_GUIDE.md" (
+    copy "CLIENT_INSTALL_GUIDE.md" "%DIST_DIR%\INSTALL_GUIDE.md"
+) else if exist "INSTALL_GUIDE.md" (
+    copy "INSTALL_GUIDE.md" "%DIST_DIR%\INSTALL_GUIDE.md"
+)
 
 REM Create empty config.json for first run
 echo { > "%DIST_DIR%\config.json"
@@ -98,7 +99,10 @@ echo     "hostname": "", >> "%DIST_DIR%\config.json"
 echo     "api_endpoint": "https://your-server.com/RAS/admin/api/metrics.php", >> "%DIST_DIR%\config.json"
 echo     "api_key": "change-this-to-secure-key", >> "%DIST_DIR%\config.json"
 echo     "collect_interval": 60, >> "%DIST_DIR%\config.json"
+echo     "extended_refresh_interval": 300, >> "%DIST_DIR%\config.json"
+echo     "command_poll_interval": 15, >> "%DIST_DIR%\config.json"
 echo     "buffer_max_size": 1000, >> "%DIST_DIR%\config.json"
+echo     "buffer_flush_batch_size": 100, >> "%DIST_DIR%\config.json"
 echo     "buffer_file": "buffer.json", >> "%DIST_DIR%\config.json"
 echo     "log_file": "ras_agent.log", >> "%DIST_DIR%\config.json"
 echo     "log_max_size_mb": 10, >> "%DIST_DIR%\config.json"
@@ -121,29 +125,30 @@ echo.
 REM Copy installer that safely replaces old agents and preserves configuration
 copy /y "install_or_upgrade.bat" "%DIST_DIR%\install.bat"
 
+REM Create quick connection test script
+(
+echo @echo off
+echo echo Testing RAS Agent connection...
+echo ras_agent.exe test
+echo ) > "%DIST_DIR%\test_connection.bat"
+
 REM Create uninstall script
 echo @echo off > "%DIST_DIR%\uninstall.bat"
 echo echo ======================================== >> "%DIST_DIR%\uninstall.bat"
 echo echo RAS Agent Uninstallation >> "%DIST_DIR%\uninstall.bat"
 echo echo ======================================== >> "%DIST_DIR%\uninstall.bat"
-echo echo. >> "%DIST_DIR%\uninstall.bat"
-echo. >> "%DIST_DIR%\uninstall.bat"
 echo set /p CONFIRM="Are you sure you want to uninstall RAS Agent? (y/n): " >> "%DIST_DIR%\uninstall.bat"
 echo if /i not "%%CONFIRM%%"=="y" ( >> "%DIST_DIR%\uninstall.bat"
 echo     echo Uninstallation cancelled >> "%DIST_DIR%\uninstall.bat"
 echo     pause >> "%DIST_DIR%\uninstall.bat"
 echo     exit /b 0 >> "%DIST_DIR%\uninstall.bat"
 echo ^) >> "%DIST_DIR%\uninstall.bat"
-echo. >> "%DIST_DIR%\uninstall.bat"
 echo echo Stopping service... >> "%DIST_DIR%\uninstall.bat"
 echo ras_agent.exe stop >> "%DIST_DIR%\uninstall.bat"
-echo. >> "%DIST_DIR%\uninstall.bat"
 echo echo Removing service... >> "%DIST_DIR%\uninstall.bat"
 echo ras_agent.exe remove >> "%DIST_DIR%\uninstall.bat"
-echo. >> "%DIST_DIR%\uninstall.bat"
 echo echo Cleaning up files... >> "%DIST_DIR%\uninstall.bat"
 echo del /q config.json buffer.json ras_agent.log 2^>nul >> "%DIST_DIR%\uninstall.bat"
-echo. >> "%DIST_DIR%\uninstall.bat"
 echo echo ======================================== >> "%DIST_DIR%\uninstall.bat"
 echo echo Uninstallation Complete! >> "%DIST_DIR%\uninstall.bat"
 echo echo ======================================== >> "%DIST_DIR%\uninstall.bat"
@@ -163,6 +168,7 @@ echo   - config.json (default configuration)
 echo   - Configuration templates
 echo   - Documentation
 echo   - install.bat (installer script)
+echo   - test_connection.bat (connection tester)
 echo   - uninstall.bat (uninstaller script)
 echo.
 echo To create installer:
@@ -172,4 +178,3 @@ echo.
 echo For NSIS script, run: makensis /DVERSION=1.0.0 installer.nsi
 echo.
 
-pause

@@ -11,6 +11,7 @@ A lightweight Python monitoring agent that collects system metrics and sends the
 - **Cross-Platform**: Support for Windows (as service) and Linux (as daemon)
 - **Configurable**: JSON-based configuration with environment variable overrides
 - **Comprehensive Logging**: Rotating log files with multiple log levels
+- **Performance Optimized**: Heavy Windows inventory is cached and refreshed less often than core metrics
 
 ## Requirements
 
@@ -37,7 +38,10 @@ A lightweight Python monitoring agent that collects system metrics and sends the
          "hostname": "auto-detected-hostname",
          "api_endpoint": "http://your-server/RAS/admin/api/metrics.php",
          "api_key": "your-api-key-from-dashboard",
-         "collect_interval": 60
+         "collect_interval": 60,
+         "extended_refresh_interval": 300,
+         "command_poll_interval": 15,
+         "buffer_flush_batch_size": 100
        }
      }
      ```
@@ -86,8 +90,11 @@ The agent supports multiple endpoint types:
     "hostname": "",                          // Auto-detected if empty
     "api_endpoint": "http://localhost/RAS/admin/api/metrics.php",
     "api_key": "change-this-to-secure-key",
-    "collect_interval": 60,                   // Seconds between collections
+    "collect_interval": 60,                   // Seconds between fast collections
+    "extended_refresh_interval": 300,         // Seconds between heavy Windows inventory refreshes
+    "command_poll_interval": 15,              // Seconds between command polls
     "buffer_max_size": 1000,                 // Max buffered metrics
+    "buffer_flush_batch_size": 100,          // Buffer items sent per recovery batch
     "buffer_file": "buffer.json",
     "log_file": "ras_agent.log",
     "log_max_size_mb": 10,
@@ -130,6 +137,9 @@ You can override configuration using environment variables:
 - `RAS_DEVICE_ID` - Device identifier
 - `RAS_HOSTNAME` - Device hostname
 - `RAS_COLLECT_INTERVAL` - Collection interval in seconds
+- `RAS_EXTENDED_REFRESH_INTERVAL` - Heavy inventory refresh interval
+- `RAS_COMMAND_POLL_INTERVAL` - Server command polling interval
+- `RAS_BUFFER_FLUSH_BATCH_SIZE` - Buffered metric batch size when reconnecting
 
 ## Usage
 
@@ -197,6 +207,7 @@ The agent collects the following metrics:
 - **Storage Health**: Overall storage status (healthy/warning/critical)
 - **Network**: Status (good/degraded/down) and primary IP
 - **System**: Hostname, OS, uptime
+- **Hardware Inventory**: CPU model, memory slots, GPU, SMART data, security status, and active users
 
 ## API Integration
 

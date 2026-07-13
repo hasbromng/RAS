@@ -361,6 +361,12 @@ try {
                     <h1 class="page-title"><?php echo getPageTitle($current_page); ?></h1>
                 </div>
                 <div class="top-bar-right">
+                    <?php if ($current_page === 'devices' && empty($_GET['device_id'])): ?>
+                    <a href="?page=help" class="btn btn-sm btn-primary" style="border-radius: 8px; font-size: 13px; padding: 6px 12px; height: 32px; box-shadow: none; display: inline-flex; align-items: center; gap: 6px; text-decoration: none;">
+                        <i class="material-icons" style="font-size: 16px;">add</i>
+                        <span>Perangkat</span>
+                    </a>
+                    <?php endif; ?>
                     <div class="quick-stats">
                         <div class="quick-stat">
                             <i class="material-icons tiny">check_circle</i>

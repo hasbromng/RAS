@@ -155,8 +155,11 @@ nano config.json
 | `hostname` | auto-detected | Nama hostname komputer |
 | `api_endpoint` | required | URL API endpoint |
 | `api_key` | required | Kunci autentikasi |
-| `collect_interval` | 60 | Interval pengiriman (detik) |
+| `collect_interval` | 60 | Interval pengiriman metrik cepat (detik) |
+| `extended_refresh_interval` | 300 | Interval refresh inventory berat Windows (detik) |
+| `command_poll_interval` | 15 | Interval polling command server (detik) |
 | `buffer_max_size` | 1000 | Maksimal buffer saat offline |
+| `buffer_flush_batch_size` | 100 | Jumlah item buffer yang dikirim per batch recovery |
 | `buffer_file` | buffer.json | File buffer lokal |
 | `log_file` | ras_agent.log | File log |
 | `log_max_size_mb` | 10 | Maksimal ukuran log (MB) |

@@ -229,6 +229,45 @@ class APIClient:
 
         return successful, failed
 
+    def fetch_pending_command(self) -> dict:
+        """Fetch the latest pending command from the server."""
+        command_endpoint = self.api_endpoint.replace('metrics.php', 'commands.php')
+        try:
+            params = {'action': 'fetch', 'device_id': self.device_id}
+            response = self.session.get(
+                command_endpoint,
+                params=params,
+                timeout=(self.CONNECT_TIMEOUT, self.DEFAULT_TIMEOUT)
+            )
+            if response.status_code == 200:
+                result = response.json()
+                if result.get('success') and result.get('command'):
+                    return result.get('command')
+        except Exception as e:
+            if self.logger:
+                self.logger.debug(f"Failed to fetch commands: {e}")
+        return None
+
+    def update_command_status(self, command_id: str, status: str) -> bool:
+        """Update the status of a command."""
+        command_endpoint = self.api_endpoint.replace('metrics.php', 'commands.php')
+        try:
+            data = {
+                'action': 'complete',
+                'command_id': command_id,
+                'status': status
+            }
+            response = self.session.post(
+                command_endpoint,
+                json=data,
+                timeout=(self.CONNECT_TIMEOUT, self.DEFAULT_TIMEOUT)
+            )
+            return response.status_code == 200
+        except Exception as e:
+            if self.logger:
+                self.logger.error(f"Failed to update command status: {e}")
+            return False
+
     def close(self) -> None:
         """Close the session and cleanup resources."""
         if self.session:

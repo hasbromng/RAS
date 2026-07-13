@@ -13,16 +13,62 @@ require_once __DIR__ . '/../../config/config.php';
 // Set headers
 header('Content-Type: application/json');
 
-// Only allow GET requests
-if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+$method = $_SERVER['REQUEST_METHOD'];
+
+if ($method !== 'GET' && $method !== 'POST' && $method !== 'DELETE') {
     sendJsonResponse([
         'success' => false,
-        'message' => 'Method not allowed. Use GET.'
+        'message' => 'Method not allowed. Use GET, POST, or DELETE.'
     ], 405);
 }
 
 try {
     $pdo = getDbConnection();
+
+    if ($method === 'POST') {
+        // Edit device (hostname and ip_address)
+        $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+        $device_id = $input['device_id'] ?? null;
+        $hostname = $input['hostname'] ?? null;
+        $ip_address = $input['ip_address'] ?? null;
+
+        if (!$device_id || !$hostname || !$ip_address) {
+            sendJsonResponse([
+                'success' => false,
+                'message' => 'Missing required fields: device_id, hostname, ip_address.'
+            ], 400);
+        }
+
+        $stmt = $pdo->prepare("UPDATE devices SET hostname = ?, ip_address = ? WHERE device_id = ?");
+        $stmt->execute([$hostname, $ip_address, $device_id]);
+
+        sendJsonResponse([
+            'success' => true,
+            'message' => 'Device updated successfully.'
+        ]);
+        exit;
+    }
+
+    if ($method === 'DELETE') {
+        // Delete device (cascades to metrics and alerts)
+        $device_id = $_GET['id'] ?? null;
+
+        if (!$device_id) {
+            sendJsonResponse([
+                'success' => false,
+                'message' => 'Missing required parameter: id.'
+            ], 400);
+        }
+
+        $stmt = $pdo->prepare("DELETE FROM devices WHERE device_id = ?");
+        $stmt->execute([$device_id]);
+
+        sendJsonResponse([
+            'success' => true,
+            'message' => 'Device deleted successfully.'
+        ]);
+        exit;
+    }
 
     $device_id = isset($_GET['id']) ? $_GET['id'] : null;
 

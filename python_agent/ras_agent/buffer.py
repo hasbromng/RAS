@@ -94,10 +94,8 @@ class MetricsBuffer:
                 with open(temp_file, 'w', encoding='utf-8') as f:
                     json.dump(data, f, indent=2)
 
-                # Rename temp file to actual buffer file
-                if os.path.exists(self.buffer_file):
-                    os.remove(self.buffer_file)
-                os.rename(temp_file, self.buffer_file)
+                # Atomically replace the actual buffer file
+                os.replace(temp_file, self.buffer_file)
 
                 self._dirty = False
                 return True
@@ -263,6 +261,27 @@ class MetricsBuffer:
                 self.logger.error(f"Error clearing buffer: {e}")
             return False
 
+    def replace_all(self, metrics: List[Dict[str, Any]]) -> bool:
+        """
+        Replace the entire buffer contents in one operation.
+
+        Args:
+            metrics: New list of metrics to store
+
+        Returns:
+            True if successful
+        """
+        try:
+            with self._lock:
+                self._buffer = deque(metrics[-self.max_size:], maxlen=self.max_size)
+                self._dirty = True
+
+            return self._save_buffer()
+        except Exception as e:
+            if self.logger:
+                self.logger.error(f"Error replacing buffer contents: {e}")
+            return False
+
     def sync(self) -> bool:
         """
         Force sync buffer to disk.
@@ -337,30 +356,31 @@ class BufferedMetricsSender:
         failed = 0
 
         try:
-            # Get metrics to send (respecting max_batch)
             all_metrics = self.buffer.get_all_metrics()
             metrics_to_send = all_metrics[:max_batch]
+            remaining_metrics = all_metrics[max_batch:]
 
-            for metric in metrics_to_send:
+            for idx, metric in enumerate(metrics_to_send):
                 # Remove internal fields before sending
                 clean_metric = {k: v for k, v in metric.items()
-                              if not k.startswith('_')}
+                                if not k.startswith('_')}
 
                 if self.api_client.send_metrics(clean_metric):
-                    self.buffer.remove_metric(metric)
                     successful += 1
-                else:
-                    failed += 1
-                    # If we're failing, stop trying to avoid spamming
-                    break
+                    continue
 
-            # Save buffer state after processing
-            self.buffer.sync()
+                failed += 1
+                # Stop on first failure to avoid excessive retries.
+                remaining_metrics = metrics_to_send[idx:] + remaining_metrics
+                break
+
+            # Save buffer state once after processing
+            self.buffer.replace_all(remaining_metrics)
 
             result = {
                 'successful': successful,
                 'failed': failed,
-                'remaining': self.buffer.get_buffered_count()
+                'remaining': len(remaining_metrics)
             }
 
             if self.logger:

@@ -61,7 +61,10 @@ Buka `config.json` dan update:
     "hostname": "John-Laptop",
     "api_endpoint": "https://heathered-dortha-unparsed.ngrok-free.dev/RAS/admin/api/metrics.php",
     "api_key": "your-actual-api-key",
-    "collect_interval": 60
+    "collect_interval": 60,
+    "extended_refresh_interval": 300,
+    "command_poll_interval": 15,
+    "buffer_flush_batch_size": 100
   }
 }
 ```

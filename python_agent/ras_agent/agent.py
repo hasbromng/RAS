@@ -8,6 +8,7 @@ It runs the main loop for collecting and sending metrics.
 import signal
 import sys
 import time
+import threading
 from typing import Optional
 
 # Import agent modules
@@ -74,12 +75,18 @@ class RASAgent:
         # Control flags
         self.running = False
         self.shutdown_requested = False
+        self.wake_event = threading.Event()
+        self.command_thread = None
 
         # Setup signal handlers
         self._setup_signal_handlers()
 
         # Store interval
         self.collect_interval = agent_config['collect_interval']
+        self.extended_refresh_interval = agent_config.get('extended_refresh_interval', max(300, self.collect_interval * 5))
+        self._last_extended_refresh = 0.0
+        self.command_poll_interval = agent_config.get('command_poll_interval', max(10, min(30, self.collect_interval // 2 or 10)))
+        self.buffer_flush_batch_size = agent_config.get('buffer_flush_batch_size', 100)
 
     def _setup_signal_handlers(self) -> None:
         """Setup signal handlers for graceful shutdown."""
@@ -123,9 +130,18 @@ class RASAgent:
             True if successful, False otherwise
         """
         try:
+            now = time.time()
+            refresh_extended = (now - self._last_extended_refresh) >= self.extended_refresh_interval
+
             # Collect metrics
             self.logger.debug("Collecting system metrics...")
-            metrics = self.collector.collect_all_metrics()
+            metrics = self.collector.collect_all_metrics(
+                include_extended=refresh_extended,
+                force_refresh=refresh_extended
+            )
+
+            if refresh_extended:
+                self._last_extended_refresh = now
 
             # Add hostname from config
             metrics['hostname'] = self.config.get('agent', 'hostname')
@@ -135,7 +151,7 @@ class RASAgent:
                 # Success - try to send any buffered metrics
                 if not self.buffer.is_empty():
                     self.logger.info(f"Connection restored, sending {self.buffer.get_buffered_count()} buffered metrics")
-                    self.buffered_sender.send_buffered_metrics()
+                    self.buffered_sender.send_buffered_metrics(max_batch=self.buffer_flush_batch_size)
 
                 return True
             else:
@@ -157,6 +173,29 @@ class RASAgent:
         """
         return self.collect_and_send_metrics()
 
+    def _command_listener_loop(self) -> None:
+        """Background thread to poll for commands from server."""
+        self.logger.info("Command listener thread started.")
+        while self.running and not self.shutdown_requested:
+            try:
+                command = self.api_client.fetch_pending_command()
+                if command:
+                    cmd_id = command.get('id')
+                    cmd_action = command.get('command')
+                    self.logger.info(f"Received command '{cmd_action}' (ID: {cmd_id})")
+                    if cmd_action == 'audit':
+                        self.logger.info("Executing immediate audit...")
+                        self.wake_event.set()  # Wake up main loop
+                        self.api_client.update_command_status(cmd_id, 'completed')
+            except Exception as e:
+                self.logger.debug(f"Command listener error: {e}")
+            
+            # Poll at a moderate cadence to reduce request overhead
+            for _ in range(self.command_poll_interval):
+                if not self.running or self.shutdown_requested:
+                    break
+                time.sleep(1)
+
     def run(self) -> None:
         """
         Run the main agent loop.
@@ -165,6 +204,10 @@ class RASAgent:
         """
         self.logger.info("Starting main agent loop...")
         self.running = True
+
+        # Start command listener thread
+        self.command_thread = threading.Thread(target=self._command_listener_loop, daemon=True)
+        self.command_thread.start()
 
         # Test initial connection
         if not self.test_connection():
@@ -189,11 +232,9 @@ class RASAgent:
                 # Sleep with interrupt check
                 if sleep_time > 0:
                     self.logger.debug(f"Sleeping for {sleep_time:.1f} seconds...")
-
-                    # Sleep in small increments to check for shutdown
-                    sleep_end = time.time() + sleep_time
-                    while time.time() < sleep_end and not self.shutdown_requested:
-                        time.sleep(min(1, sleep_end - time.time()))
+                    # Wait using event, will wake up immediately if set
+                    self.wake_event.wait(timeout=sleep_time)
+                    self.wake_event.clear()
 
         except Exception as e:
             self.logger.error(f"Error in main loop: {e}")
@@ -209,6 +250,10 @@ class RASAgent:
 
         self.logger.info("Shutting down RAS Agent...")
         self.running = False
+        
+        # Wake up main loop so it exits quickly
+        if hasattr(self, 'wake_event'):
+            self.wake_event.set()
 
         # Sync buffer to disk
         buffer_info = self.buffer.get_buffer_info()

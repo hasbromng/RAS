@@ -25,6 +25,8 @@ class TestConfig:
         # Check default values
         assert config.get('agent', 'api_endpoint') == 'http://localhost/RAS/admin/api/metrics.php'
         assert config.get('agent', 'collect_interval') == 60
+        assert config.get('agent', 'extended_refresh_interval') == 300
+        assert config.get('agent', 'command_poll_interval') == 15
         assert config.get('agent', 'buffer_max_size') == 1000
 
         # Check threshold defaults
@@ -59,7 +61,10 @@ class TestConfig:
                 "api_endpoint": "http://test.example.com/api/metrics.php",
                 "api_key": "test-api-key",
                 "collect_interval": 120,
+                "extended_refresh_interval": 600,
+                "command_poll_interval": 20,
                 "buffer_max_size": 500,
+                "buffer_flush_batch_size": 50,
                 "buffer_file": "test_buffer.json",
                 "log_file": "test.log",
                 "log_max_size_mb": 20,
@@ -83,6 +88,8 @@ class TestConfig:
         assert config.get('agent', 'hostname') == 'test-host'
         assert config.get('agent', 'api_endpoint') == 'http://test.example.com/api/metrics.php'
         assert config.get('agent', 'collect_interval') == 120
+        assert config.get('agent', 'extended_refresh_interval') == 600
+        assert config.get('agent', 'command_poll_interval') == 20
         assert config.get('agent', 'buffer_max_size') == 500
         assert config.get('thresholds', 'cpu_warning') == 70
         assert config.get('thresholds', 'cpu_critical') == 85
@@ -110,7 +117,10 @@ class TestConfig:
                 "api_endpoint": "http://localhost/RAS/admin/api/metrics.php",
                 "api_key": "test-key",
                 "collect_interval": 60,
+                "extended_refresh_interval": 300,
+                "command_poll_interval": 15,
                 "buffer_max_size": 1000,
+                "buffer_flush_batch_size": 100,
                 "buffer_file": "buffer.json",
                 "log_file": "agent.log",
                 "log_max_size_mb": 10,
@@ -158,7 +168,10 @@ class TestConfig:
                 "api_endpoint": "invalid-url",  # Missing http:// or https://
                 "api_key": "test-key",
                 "collect_interval": 60,
+                "extended_refresh_interval": 300,
+                "command_poll_interval": 15,
                 "buffer_max_size": 1000,
+                "buffer_flush_batch_size": 100,
                 "buffer_file": "buffer.json",
                 "log_file": "agent.log",
                 "log_max_size_mb": 10
@@ -183,7 +196,10 @@ class TestConfig:
                 "api_endpoint": "http://localhost/RAS/admin/api/metrics.php",
                 "api_key": "test-key",
                 "collect_interval": 5,  # Below minimum (10)
+                "extended_refresh_interval": 30,  # Below minimum (60)
+                "command_poll_interval": 2,  # Below minimum (5)
                 "buffer_max_size": 20000,  # Above maximum (10000)
+                "buffer_flush_batch_size": 0,  # Below minimum (1)
                 "buffer_file": "buffer.json",
                 "log_file": "agent.log",
                 "log_max_size_mb": 10
@@ -208,6 +224,9 @@ class TestConfig:
         assert 'device_id' in agent_config
         assert 'api_endpoint' in agent_config
         assert 'collect_interval' in agent_config
+        assert 'extended_refresh_interval' in agent_config
+        assert 'command_poll_interval' in agent_config
+        assert 'buffer_flush_batch_size' in agent_config
 
     def test_get_thresholds(self):
         """Test getting thresholds configuration section."""
@@ -263,3 +282,5 @@ class TestConfig:
         assert template['agent']['hostname'] == ''
         # Other values should have defaults
         assert template['agent']['collect_interval'] == 60
+        assert template['agent']['extended_refresh_interval'] == 300
+        assert template['agent']['command_poll_interval'] == 15

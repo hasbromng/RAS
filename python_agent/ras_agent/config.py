@@ -24,7 +24,10 @@ class Config:
             "api_endpoint": "http://localhost/RAS/admin/api/metrics.php",
             "api_key": "change-this-to-secure-key",
             "collect_interval": 60,
+            "extended_refresh_interval": 300,
+            "command_poll_interval": 15,
             "buffer_max_size": 1000,
+            "buffer_flush_batch_size": 100,
             "buffer_file": "buffer.json",
             "log_file": "ras_agent.log",
             "log_max_size_mb": 10,
@@ -47,7 +50,10 @@ class Config:
         "RAS_API_ENDPOINT": ("agent", "api_endpoint"),
         "RAS_API_KEY": ("agent", "api_key"),
         "RAS_COLLECT_INTERVAL": ("agent", "collect_interval"),
+        "RAS_EXTENDED_REFRESH_INTERVAL": ("agent", "extended_refresh_interval"),
+        "RAS_COMMAND_POLL_INTERVAL": ("agent", "command_poll_interval"),
         "RAS_BUFFER_MAX_SIZE": ("agent", "buffer_max_size"),
+        "RAS_BUFFER_FLUSH_BATCH_SIZE": ("agent", "buffer_flush_batch_size"),
         "RAS_BUFFER_FILE": ("agent", "buffer_file"),
         "RAS_LOG_FILE": ("agent", "log_file"),
         "RAS_LOG_MAX_SIZE_MB": ("agent", "log_max_size_mb")
@@ -151,7 +157,14 @@ class Config:
             value = os.environ.get(env_var)
             if value is not None:
                 # Convert to appropriate type
-                if key in ["collect_interval", "buffer_max_size", "log_max_size_mb"]:
+                if key in [
+                    "collect_interval",
+                    "extended_refresh_interval",
+                    "command_poll_interval",
+                    "buffer_max_size",
+                    "buffer_flush_batch_size",
+                    "log_max_size_mb"
+                ]:
                     try:
                         value = int(value)
                     except ValueError:
@@ -256,7 +269,10 @@ class Config:
         # Validate numeric values
         numeric_fields = {
             "collect_interval": (10, 3600),  # 10 seconds to 1 hour
+            "extended_refresh_interval": (60, 86400),  # 1 minute to 24 hours
+            "command_poll_interval": (5, 300),  # 5 seconds to 5 minutes
             "buffer_max_size": (1, 10000),  # 1 to 10000 entries
+            "buffer_flush_batch_size": (1, 1000),  # 1 to 1000 entries
             "log_max_size_mb": (1, 1000)  # 1MB to 1GB
         }
 

@@ -249,6 +249,10 @@ $core_count = !empty($additional_info['cpu_per_core']) && is_array($additional_i
                 <span class="dd-chip-label">Network</span>
                 <span class="dd-chip-value dd-level-text-<?php echo $network_class; ?>"><?php echo ucfirst(htmlspecialchars($device['network_status'] ?? '—')); ?></span>
             </div>
+            <button class="dd-export-btn btn-refresh-detail" data-id="<?php echo htmlspecialchars($device['device_id']); ?>" style="margin-right: 8px; background: #e0f2f1; color: #00897b; border: 1px solid #b2dfdb; cursor: pointer;" title="Audit Seketika">
+                <i class="material-icons">sync</i>
+                <span>Refresh</span>
+            </button>
             <a href="?page=devices&device_id=<?php echo urlencode($device_id); ?>&export=csv"
                class="dd-export-btn" title="Ekspor System Snapshot ke CSV" download>
                 <i class="material-icons">download</i>
@@ -424,47 +428,53 @@ $core_count = !empty($additional_info['cpu_per_core']) && is_array($additional_i
                                     $color   = getMetricColorDetail($percent);
                                     $level   = getMetricLevelDetail($percent);
                                     $fstype  = $disk['fstype']    ?? '—';
-                                    $mount   = $disk['mountpoint'] ?? '';
-                                    $devpath = $disk['device']     ?? '—';
                                     // Proportional width (% of physical disk total)
                                     $prop_pct = $partition_total > 0 ? round(($total / $partition_total) * 100, 1) : 0;
                                     $prop_pct = max($prop_pct, 8); // minimum 8% so tiny partitions are still visible
                                 ?>
                                 <div class="dd-partition-block"
-                                     style="flex: 0 0 <?php echo $prop_pct; ?>%;"
+                                     style="flex: <?php echo $prop_pct; ?>;"
                                      title="<?php echo htmlspecialchars($part_letter . ' – ' . formatBytesDetail($used) . ' / ' . formatBytesDetail($total)); ?>">
-                                    <div class="dd-partition-block-inner">
-                                        <div class="dd-partition-top">
-                                            <span class="dd-partition-drive"><?php echo htmlspecialchars($part_letter); ?></span>
-                                            <span class="dd-partition-fstype"><?php echo htmlspecialchars($fstype); ?></span>
-                                        </div>
-                                        <div class="dd-partition-size-row">
-                                            <span class="dd-partition-free"><?php echo formatBytesDetail($free); ?> bebas</span>
-                                            <span class="dd-partition-total dd-muted"><?php echo formatBytesDetail($total); ?></span>
-                                        </div>
-                                        <div class="dd-partition-usage-bar">
-                                            <div class="dd-partition-usage-fill" style="width: <?php echo min($percent, 100); ?>%; background: <?php echo $color; ?>;"></div>
-                                        </div>
-                                        <div class="dd-partition-pct dd-level-text-<?php echo $level; ?>"><?php echo $percent; ?>%</div>
-                                        <!-- Detail popup trigger -->
-                                        <button type="button" class="dd-detail-btn dd-partition-info-btn"
-                                                data-dd-detail="disk-<?php echo htmlspecialchars($part_id); ?>"
-                                                title="Detail partisi">
-                                            <i class="material-icons">info_outline</i>
-                                        </button>
-                                        <div class="dd-detail-pop" id="dd-detail-disk-<?php echo htmlspecialchars($part_id); ?>" hidden>
-                                            <div class="dd-detail-pop-row"><span>Drive</span><strong><?php echo htmlspecialchars($part_letter); ?></strong></div>
-                                            <div class="dd-detail-pop-row"><span>Filesystem</span><strong><?php echo htmlspecialchars($fstype); ?></strong></div>
-                                            <div class="dd-detail-pop-row"><span>Device</span><code><?php echo htmlspecialchars($devpath); ?></code></div>
-                                            <div class="dd-detail-pop-row"><span>Terpakai</span><strong><?php echo formatBytesDetail($used); ?></strong></div>
-                                            <div class="dd-detail-pop-row"><span>Bebas</span><strong><?php echo formatBytesDetail($free); ?></strong></div>
-                                            <div class="dd-detail-pop-row"><span>Total</span><strong><?php echo formatBytesDetail($total); ?></strong></div>
-                                            <div class="dd-detail-pop-row"><span>Penggunaan</span><strong class="dd-level-text-<?php echo $level; ?>"><?php echo $percent; ?>%</strong></div>
-                                        </div>
-                                    </div>
+                                     <div class="dd-partition-block-inner" data-dd-detail="disk-<?php echo htmlspecialchars($part_id); ?>">
+                                         <div class="dd-partition-top">
+                                             <span class="dd-partition-drive"><?php echo htmlspecialchars($part_letter); ?></span>
+                                             <span class="dd-partition-fstype"><?php echo htmlspecialchars($fstype); ?></span>
+                                         </div>
+                                         <div class="dd-partition-size-row">
+                                             <span class="dd-partition-free"><?php echo formatBytesDetail($free); ?> bebas</span>
+                                             <span class="dd-partition-total dd-muted"><?php echo formatBytesDetail($total); ?></span>
+                                         </div>
+                                         <div class="dd-partition-usage-bar">
+                                             <div class="dd-partition-usage-fill" style="width: <?php echo min($percent, 100); ?>%; background: <?php echo $color; ?>;"></div>
+                                         </div>
+                                         <div class="dd-partition-pct dd-level-text-<?php echo $level; ?>"><?php echo $percent; ?>%</div>
+                                     </div>
                                 </div>
                                 <?php endforeach; ?>
                             </div>
+
+                            <!-- Detail popups outside scroll container -->
+                            <?php foreach ($partitions as $disk_key => $disk):
+                                $part_letter = strtoupper(str_replace('_', ':', $disk_key));
+                                $part_id     = preg_replace('/[^a-zA-Z0-9_-]/', '_', (string)$disk_key);
+                                $used   = floatval($disk['used']  ?? 0);
+                                $total  = floatval($disk['total'] ?? 0);
+                                $free   = floatval($disk['free']  ?? max($total - $used, 0));
+                                $percent = round($total > 0 ? ($used / $total) * 100 : 0, 1);
+                                $level   = getMetricLevelDetail($percent);
+                                $fstype  = $disk['fstype']    ?? '—';
+                                $devpath = $disk['device']     ?? '—';
+                            ?>
+                            <div class="dd-detail-pop dd-partition-detail-pop" id="dd-detail-disk-<?php echo htmlspecialchars($part_id); ?>" hidden>
+                                <div class="dd-detail-pop-row"><span>Drive</span><strong><?php echo htmlspecialchars($part_letter); ?></strong></div>
+                                <div class="dd-detail-pop-row"><span>Filesystem</span><strong><?php echo htmlspecialchars($fstype); ?></strong></div>
+                                <div class="dd-detail-pop-row"><span>Device</span><code><?php echo htmlspecialchars($devpath); ?></code></div>
+                                <div class="dd-detail-pop-row"><span>Terpakai</span><strong><?php echo formatBytesDetail($used); ?></strong></div>
+                                <div class="dd-detail-pop-row"><span>Bebas</span><strong><?php echo formatBytesDetail($free); ?></strong></div>
+                                <div class="dd-detail-pop-row"><span>Total</span><strong><?php echo formatBytesDetail($total); ?></strong></div>
+                                <div class="dd-detail-pop-row"><span>Penggunaan</span><strong class="dd-level-text-<?php echo $level; ?>"><?php echo $percent; ?>%</strong></div>
+                            </div>
+                            <?php endforeach; ?>
                         </div>
                         <?php endforeach; ?>
                         </div>
@@ -1024,6 +1034,51 @@ $core_count = !empty($additional_info['cpu_per_core']) && is_array($additional_i
                                         Selengkapnya
                                     </button>
                                     <?php endif; ?>
+                                    
+                                    <?php 
+                                    $snapshot = null;
+                                    if (!empty($alert['snapshot_data'])) {
+                                        $snapshot = json_decode($alert['snapshot_data'], true);
+                                    }
+                                    if ($snapshot && (empty($snapshot['top_cpu']) === false || empty($snapshot['top_memory']) === false)): 
+                                    ?>
+                                        <div style="margin-top: 8px;">
+                                            <button type="button" class="btn btn-tiny btn-outline" style="background: white; border: 1px solid #cbd5e1; color: #475569; padding: 2px 8px; font-size: 0.75rem; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 4px;" onclick="document.getElementById('snapshot-<?php echo $alert['id']; ?>').style.display = document.getElementById('snapshot-<?php echo $alert['id']; ?>').style.display === 'none' ? 'block' : 'none';">
+                                                <i class="material-icons" style="font-size: 14px;">camera_alt</i> Snapshot Proses
+                                            </button>
+                                            <div id="snapshot-<?php echo $alert['id']; ?>" style="display: none; margin-top: 8px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px;">
+                                                <div style="display: flex; gap: 16px;">
+                                                    <?php if (!empty($snapshot['top_cpu'])): ?>
+                                                    <div style="flex: 1;">
+                                                        <strong style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Top CPU</strong>
+                                                        <table style="width: 100%; font-size: 0.8rem; margin-top: 4px; border-collapse: collapse;">
+                                                            <?php foreach($snapshot['top_cpu'] as $proc): ?>
+                                                                <tr>
+                                                                    <td style="padding: 3px 0; color: #334155; border-bottom: 1px solid #f1f5f9;"><?php echo htmlspecialchars($proc['name']); ?></td>
+                                                                    <td style="padding: 3px 0; color: #ef4444; border-bottom: 1px solid #f1f5f9; text-align: right; font-family: monospace; font-weight: 600;"><?php echo $proc['cpu_percent']; ?>%</td>
+                                                                </tr>
+                                                            <?php endforeach; ?>
+                                                        </table>
+                                                    </div>
+                                                    <?php endif; ?>
+                                                    
+                                                    <?php if (!empty($snapshot['top_memory'])): ?>
+                                                    <div style="flex: 1;">
+                                                        <strong style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Top Memory</strong>
+                                                        <table style="width: 100%; font-size: 0.8rem; margin-top: 4px; border-collapse: collapse;">
+                                                            <?php foreach($snapshot['top_memory'] as $proc): ?>
+                                                                <tr>
+                                                                    <td style="padding: 3px 0; color: #334155; border-bottom: 1px solid #f1f5f9;"><?php echo htmlspecialchars($proc['name']); ?></td>
+                                                                    <td style="padding: 3px 0; color: #3b82f6; border-bottom: 1px solid #f1f5f9; text-align: right; font-family: monospace; font-weight: 600;"><?php echo $proc['memory_percent']; ?>%</td>
+                                                                </tr>
+                                                            <?php endforeach; ?>
+                                                        </table>
+                                                    </div>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                             <?php endforeach; ?>
@@ -1208,5 +1263,69 @@ $core_count = !empty($additional_info['cpu_per_core']) && is_array($additional_i
         }
     });
 })();
+
+// Refresh Device (Audit) Logic
+document.querySelectorAll('.btn-refresh-detail').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const deviceId = this.dataset.id;
+        const icon = this.querySelector('i');
+        const span = this.querySelector('span');
+        const originalText = span.textContent;
+        const originalIcon = icon.textContent;
+        
+        icon.textContent = 'hourglass_empty';
+        span.textContent = 'Meminta...';
+        this.disabled = true;
+        this.style.opacity = '0.7';
+        
+        fetch('api/commands.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'create', device_id: deviceId, command: 'audit' })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success && data.command_id) {
+                let pollInterval = setInterval(() => {
+                    fetch('api/commands.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'check', command_id: data.command_id })
+                    })
+                    .then(res => res.json())
+                    .then(checkData => {
+                        if (checkData.success && checkData.status === 'completed') {
+                            clearInterval(pollInterval);
+                            location.reload();
+                        }
+                    });
+                }, 2000);
+                
+                setTimeout(() => {
+                    clearInterval(pollInterval);
+                    icon.textContent = originalIcon;
+                    span.textContent = originalText;
+                    this.disabled = false;
+                    this.style.opacity = '1';
+                    alert('Timeout (45s): Agent mungkin offline atau proses audit memakan waktu lebih lama.');
+                }, 45000);
+            } else {
+                icon.textContent = originalIcon;
+                span.textContent = originalText;
+                this.disabled = false;
+                this.style.opacity = '1';
+                alert('Gagal mengirim perintah.');
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            icon.textContent = originalIcon;
+            span.textContent = originalText;
+            this.disabled = false;
+            this.style.opacity = '1';
+        });
+    });
+});
 </script>
 <?php endif; ?>

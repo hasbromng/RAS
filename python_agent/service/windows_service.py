@@ -155,20 +155,10 @@ def install_service(config_path: str = None) -> bool:
         return False
 
     try:
-        # Get current directory
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        parent_dir = os.path.dirname(current_dir)
+        service_class = f"{RASAgentService.__module__}.{RASAgentService.__name__}"
 
-        # Build service command
-        service_script = os.path.join(current_dir, "windows_service.py")
-        python_exe = sys.executable
-
-        # Create service command
-        command = f'"{python_exe}" "{service_script}"'
-
-        # Install service
         win32serviceutil.InstallService(
-            command,
+            service_class,
             RASAgentService._svc_name_,
             RASAgentService._svc_display_name_,
             description=RASAgentService._svc_description_,
@@ -178,17 +168,6 @@ def install_service(config_path: str = None) -> bool:
         print(f"Service '{RASAgentService._svc_name_}' installed successfully")
         print(f"Display name: {RASAgentService._svc_display_name_}")
         print(f"Service will start automatically on system boot")
-
-        # Set service description
-        try:
-            import win32con
-            hscm = win32service.OpenSCManager(None, None, win32con.SC_MANAGER_ALL_ACCESS)
-            hs = win32service.OpenService(hscm, RASAgentService._svc_name_, win32service.SERVICE_ALL_ACCESS)
-            win32service.ChangeServiceConfig2(hs, win32service.SERVICE_CONFIG_DESCRIPTION, RASAgentService._svc_description_)
-            win32service.CloseServiceHandle(hs)
-            win32service.CloseServiceHandle(hscm)
-        except Exception as e:
-            print(f"Warning: Could not set service description: {e}")
 
         return True
 

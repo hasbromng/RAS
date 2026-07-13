@@ -7,27 +7,24 @@ setlocal enabledelayedexpansion
 echo ========================================
 echo RAS Agent - Complete Build Process
 echo ========================================
-echo.
+echo(
 echo This script will:
 echo   1. Install build dependencies
 echo   2. Create standalone EXE with PyInstaller
 echo   3. Create distribution package
 echo   4. (Optional) Create NSIS installer
-echo.
-
-pause
+echo(
 
 echo ========================================
 echo Step 1: Environment Check
 echo ========================================
-echo.
+echo(
 
 REM Check Python
 python --version >nul 2>&1
 if %errorlevel% neq 0 (
     echo [ERROR] Python is not installed or not in PATH
     echo Please install Python 3.7+ from https://www.python.org/
-    pause
     exit /b 1
 )
 echo [OK] Python is available
@@ -36,7 +33,7 @@ REM Check PyInstaller
 python -c "import PyInstaller" >nul 2>&1
 if %errorlevel% neq 0 (
     echo [INFO] Installing PyInstaller...
-    pip install pyinstaller
+    python -m pip install pyinstaller
 )
 echo [OK] PyInstaller is available
 
@@ -45,11 +42,11 @@ echo [INFO] Checking required packages...
 python -c "import psutil, requests, schedule, win32service" >nul 2>&1
 if %errorlevel% neq 0 (
     echo [INFO] Installing dependencies...
-    pip install psutil requests schedule pywin32
+    python -m pip install psutil requests schedule pywin32
 )
 echo [OK] All dependencies are installed
 
-echo.
+echo(
 echo ========================================
 echo Step 2: Build Standalone EXE
 echo ========================================
@@ -69,9 +66,6 @@ python -m PyInstaller ^
     --add-data "ras_agent;ras_agent" ^
     --hidden-import "psutil" ^
     --hidden-import "requests" ^
-    --hidden-import "requests.packages.urllib3" ^
-    --hidden-import "requests.packages.urllib3.exceptions" ^
-    --hidden-import "requests.packages.urllib3.util" ^
     --hidden-import "schedule" ^
     --hidden-import "win32service" ^
     --hidden-import "win32serviceutil" ^
@@ -90,7 +84,6 @@ python -m PyInstaller ^
 if %errorlevel% neq 0 (
     echo [ERROR] PyInstaller build failed
     echo Checking for detailed error information...
-    pause
     exit /b 1
 )
 
@@ -116,7 +109,7 @@ echo   [OK] ras_agent.exe
 REM Copy configuration files
 if exist "config.json" (
     copy "config.json" "%DIST_DIR%\" >nul
-    echo   [OK] config.json (existing)
+    echo   [OK] config.json existing
 ) else (
     copy "config.json.template" "%DIST_DIR%\config.json" >nul
     echo   [OK] config.json (from template)
@@ -161,6 +154,11 @@ if exist "CONFIGURATION_GUIDE.md" (
     echo   [OK] CONFIGURATION_GUIDE.md
 )
 
+if exist "INSTALL_GUIDE.md" (
+    copy "INSTALL_GUIDE.md" "%DIST_DIR%\" >nul
+    echo   [OK] INSTALL_GUIDE.md
+)
+
 REM Create installer script
 echo [INFO] Creating installation script...
 
@@ -170,34 +168,22 @@ echo title RAS Agent Installation
 echo echo ========================================
 echo echo RAS Monitoring Agent Installation
 echo echo ========================================
-echo echo.
 echo echo This will install RAS Agent as a Windows service.
-echo echo.
-echo pause
-echo.
 echo echo Installing RAS Agent service...
-echo.
 echo cd /d "%%~dp0"
 echo ras_agent.exe install
 echo if %%errorlevel%% neq 0 ^(
-echo     echo.
 echo     echo [ERROR] Failed to install service
 echo     echo Please run this script as Administrator.
-echo     pause
 echo     exit /b 1
 echo ^)
-echo.
-echo echo.
 echo echo ========================================
 echo echo Installation Complete!
 echo echo ========================================
-echo echo.
 echo echo Next steps:
 echo echo   1. Edit config.json with your server settings
 echo echo   2. Run: ras_agent.exe test
 echo echo   3. Start service: ras_agent.exe start
-echo echo.
-echo pause
 ) > "%DIST_DIR%\install.bat"
 
 echo   [OK] install.bat
@@ -209,27 +195,20 @@ echo title RAS Agent Uninstallation
 echo echo ========================================
 echo echo RAS Monitoring Agent Uninstallation
 echo echo ========================================
-echo echo.
 echo set /p CONFIRM="Are you sure you want to uninstall? (y/n): "
 echo if /i not "%%CONFIRM%%"=="y" ^(
 echo     echo Uninstallation cancelled.
-echo     pause
 echo     exit /b 0
 echo ^)
-echo.
 echo echo Stopping service...
 echo ras_agent.exe stop
-echo.
 echo echo Removing service...
 echo ras_agent.exe remove
-echo.
 echo echo Cleaning up files...
 echo del /q config.json buffer.json ras_agent.log 2^>nul
-echo.
 echo echo ========================================
 echo echo Uninstallation Complete!
 echo echo ========================================
-echo pause
 ) > "%DIST_DIR%\uninstall.bat"
 
 echo   [OK] uninstall.bat
@@ -238,16 +217,24 @@ REM Create quick test script
 (
 echo @echo off
 echo echo Testing RAS Agent connection...
-echo echo.
 echo ras_agent.exe test
-echo.
-echo pause
 ) > "%DIST_DIR%\test_connection.bat"
 
 echo   [OK] test_connection.bat
 
 echo.
 echo [OK] Distribution package created: dist\ras_agent\
+
+if exist "test_connection.bat" (
+    copy "test_connection.bat" "%DIST_DIR%\" >nul
+    echo   [OK] test_connection.bat
+)
+
+REM Mirror distribution into ras_agent_package for direct packaging workflows
+set "PKG_DIR=dist\ras_agent_package"
+if exist "%PKG_DIR%" rmdir /s /q "%PKG_DIR%"
+xcopy "%DIST_DIR%" "%PKG_DIR%" /E /I /Q >nul
+echo   [OK] ras_agent_package mirror created
 
 echo.
 echo ========================================
@@ -299,4 +286,3 @@ echo   5. Start service: ras_agent.exe start
 echo   6. Verify in services.msc
 echo.
 
-pause

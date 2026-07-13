@@ -39,23 +39,7 @@ try {
 }
 ?>
 
-<!-- Page Actions -->
-<div class="card">
-    <div class="card-content">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-            <div>
-                <h5 style="margin: 0;">Daftar Perangkat</h5>
-                <small class="text-muted">Total: <?php echo $stats['total'] ?? 0; ?> perangkat terdaftar</small>
-            </div>
-            <div>
-                <a href="../test_client.php" target="_blank" class="btn btn-primary">
-                    <i class="material-icons left">add</i>
-                    Test Perangkat Baru
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
+
 
 <!-- Filter Tabs -->
 <div class="card">
@@ -118,8 +102,11 @@ try {
                                     </span>
                                 </td>
                                 <td>
-                                    <span class="status-badge <?php echo $device['status']; ?>">
-                                        <?php echo ucfirst($device['status']); ?>
+                                    <?php 
+                                    $conn_status = ($device['status'] === 'offline') ? 'offline' : 'online';
+                                    ?>
+                                    <span class="status-badge <?php echo $conn_status; ?>">
+                                        <?php echo ucfirst($conn_status); ?>
                                     </span>
                                 </td>
                                 <td>
@@ -199,23 +186,164 @@ try {
                                     <small style="color: #636e72; font-size: 0.85rem;"><?php echo date('M j, H:i', strtotime($device['last_seen'])); ?></small>
                                 </td>
                                 <td>
+                                    <?php if ($device['status'] === 'warning' || $device['status'] === 'critical'): ?>
+                                        <span class="status-badge <?php echo $device['status']; ?>" style="margin-bottom: 4px; display: inline-block;">
+                                            <?php echo strtoupper($device['status']); ?>
+                                        </span><br>
+                                    <?php endif; ?>
+                                    
                                     <?php if ($device['open_alerts'] > 0): ?>
-                                        <span class="status-badge critical"><?php echo $device['open_alerts']; ?></span>
-                                    <?php else: ?>
+                                        <span class="status-badge critical" style="display: inline-block; padding: 2px 6px; font-size: 0.75rem;">
+                                            <?php echo $device['open_alerts']; ?> Alert
+                                        </span>
+                                    <?php elseif ($device['status'] !== 'warning' && $device['status'] !== 'critical'): ?>
                                         <span style="color: #bdc3c7;">-</span>
                                     <?php endif; ?>
                                 </td>
-                                <td>
-                                    <a href="?page=devices&device_id=<?php echo htmlspecialchars($device['device_id']); ?>"
-                                       class="btn btn-sm btn-primary" title="Lihat Detail">
-                                        <i class="material-icons tiny">visibility</i>
-                                    </a>
-                                </td>
+                                 <td>
+                                     <div style="display: flex; gap: 6px; justify-content: center;">
+                                         <a href="?page=devices&device_id=<?php echo htmlspecialchars($device['device_id']); ?>"
+                                            class="btn btn-tiny btn-primary" title="Lihat Detail">
+                                             <i class="material-icons">visibility</i>
+                                         </a>
+                                         <button type="button" class="btn btn-tiny btn-success btn-refresh-device" 
+                                                 data-id="<?php echo htmlspecialchars($device['device_id']); ?>" 
+                                                 title="Audit Seketika">
+                                             <i class="material-icons">sync</i>
+                                         </button>
+                                         <button type="button" class="btn btn-tiny btn-secondary btn-edit-device" 
+                                                 data-id="<?php echo htmlspecialchars($device['device_id']); ?>" 
+                                                 data-hostname="<?php echo htmlspecialchars($device['hostname']); ?>"
+                                                 data-ip="<?php echo htmlspecialchars($device['ip_address']); ?>"
+                                                 title="Edit Perangkat">
+                                             <i class="material-icons">edit</i>
+                                         </button>
+                                         <button type="button" class="btn btn-tiny btn-danger btn-delete-device" 
+                                                 data-id="<?php echo htmlspecialchars($device['device_id']); ?>" 
+                                                 data-hostname="<?php echo htmlspecialchars($device['hostname']); ?>"
+                                                 title="Hapus Perangkat">
+                                             <i class="material-icons">delete</i>
+                                         </button>
+                                     </div>
+                                 </td>
                             </tr>
                         <?php endforeach; ?>
                     <?php endif; ?>
                 </tbody>
             </table>
+        </div>
+
+        <div class="device-cards-mobile">
+            <?php if (empty($devices)): ?>
+                <div class="empty-state">
+                    <i class="material-icons">devices</i>
+                    <p>Belum ada perangkat terdaftar</p>
+                    <small>
+                        Gunakan agent Python untuk mengirim data metrik.<br>
+                        <a href="../test_client.php" target="_blank">Test API Client</a>
+                    </small>
+                </div>
+            <?php else: ?>
+                <?php foreach ($devices as $device): ?>
+                    <?php
+                        $conn_status = ($device['status'] === 'offline') ? 'offline' : 'online';
+                        $mem_percent = $device['memory_total'] > 0
+                            ? (($device['memory_used'] / $device['memory_total']) * 100)
+                            : 0;
+                        $all_disks = [];
+                        if (!empty($device['additional_info'])) {
+                            $additional_info = json_decode($device['additional_info'], true);
+                            if (isset($additional_info['all_disks']) && is_array($additional_info['all_disks'])) {
+                                $all_disks = $additional_info['all_disks'];
+                            }
+                        }
+                    ?>
+                    <div class="device-mobile-card" data-status="<?php echo $device['status']; ?>">
+                        <div class="device-mobile-head">
+                            <div>
+                                <div class="device-mobile-host"><?php echo htmlspecialchars($device['hostname']); ?></div>
+                                <div class="device-mobile-id">ID: <?php echo htmlspecialchars(substr($device['device_id'], 0, 8)); ?>...</div>
+                            </div>
+                            <span class="status-badge <?php echo $conn_status; ?>">
+                                <?php echo ucfirst($conn_status); ?>
+                            </span>
+                        </div>
+
+                        <div class="device-mobile-meta">
+                            <div><span>IP</span><strong><?php echo htmlspecialchars($device['ip_address']); ?></strong></div>
+                            <div><span>Last Seen</span><strong><?php echo date('M j, H:i', strtotime($device['last_seen'])); ?></strong></div>
+                            <div><span>CPU</span><strong><?php echo number_format($device['cpu_usage'] ?? 0, 1); ?>%</strong></div>
+                            <div><span>Memory</span><strong><?php echo number_format($mem_percent, 1); ?>%</strong></div>
+                        </div>
+
+                        <div class="device-mobile-extra">
+                            <div>
+                                <span>Disk</span>
+                                <strong>
+                                    <?php if (!empty($all_disks)): ?>
+                                        <?php
+                                            $diskText = [];
+                                            $counter = 0;
+                                            foreach ($all_disks as $disk_key => $disk):
+                                                $disk_name = strtoupper(str_replace('_', ':', $disk_key));
+                                                $percent = round($disk['percent'], 1);
+                                                $diskText[] = $disk_name . ' ' . $percent . '%';
+                                                $counter++;
+                                                if ($counter >= 2) break;
+                                            endforeach;
+                                            echo htmlspecialchars(implode(' · ', $diskText));
+                                            if (count($all_disks) > 2) {
+                                                echo ' +' . (count($all_disks) - 2);
+                                            }
+                                        ?>
+                                    <?php else: ?>
+                                        <?php echo number_format($device['disk_usage'] ?? 0, 1); ?>%
+                                    <?php endif; ?>
+                                </strong>
+                            </div>
+                            <div>
+                                <span>Storage</span>
+                                <strong><?php echo ucfirst($device['storage_health'] ?? 'Unknown'); ?></strong>
+                            </div>
+                            <div>
+                                <span>Alerts</span>
+                                <strong>
+                                    <?php if ($device['open_alerts'] > 0): ?>
+                                        <span class="status-badge critical" style="padding: 2px 6px; font-size: 0.72rem;"><?php echo $device['open_alerts']; ?> Alert</span>
+                                    <?php else: ?>
+                                        -
+                                    <?php endif; ?>
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div class="device-mobile-actions">
+                            <a href="?page=devices&device_id=<?php echo htmlspecialchars($device['device_id']); ?>"
+                               class="btn btn-tiny btn-primary" title="Lihat Detail">
+                                <i class="material-icons">visibility</i>
+                            </a>
+                            <button type="button" class="btn btn-tiny btn-success btn-refresh-device"
+                                    data-id="<?php echo htmlspecialchars($device['device_id']); ?>"
+                                    title="Audit Seketika">
+                                <i class="material-icons">sync</i>
+                            </button>
+                            <button type="button" class="btn btn-tiny btn-secondary btn-edit-device"
+                                    data-id="<?php echo htmlspecialchars($device['device_id']); ?>"
+                                    data-hostname="<?php echo htmlspecialchars($device['hostname']); ?>"
+                                    data-ip="<?php echo htmlspecialchars($device['ip_address']); ?>"
+                                    title="Edit Perangkat">
+                                <i class="material-icons">edit</i>
+                            </button>
+                            <button type="button" class="btn btn-tiny btn-danger btn-delete-device"
+                                    data-id="<?php echo htmlspecialchars($device['device_id']); ?>"
+                                    data-hostname="<?php echo htmlspecialchars($device['hostname']); ?>"
+                                    title="Hapus Perangkat">
+                                <i class="material-icons">delete</i>
+                            </button>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
         </div>
     </div>
 </div>
@@ -247,28 +375,50 @@ try {
     border-color: transparent;
 }
 
+.table-container {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+
+.data-table {
+    width: max-content;
+    min-width: 100%;
+    table-layout: auto;
+}
+
+.data-table th {
+    padding: 8px 10px;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
 .data-table td {
+    padding: 8px 10px;
+    font-size: 12px;
     vertical-align: middle;
 }
 
 .data-table th:nth-child(1),
 .data-table td:nth-child(1) {
-    width: 20%;
+    width: 210px;
     min-width: 180px;
 }
 
 .data-table th:nth-child(2),
 .data-table td:nth-child(2) {
-    width: 12%;
-    min-width: 120px;
+    width: 120px;
+    min-width: 110px;
     text-align: center;
+    white-space: nowrap;
 }
 
 .data-table th:nth-child(3),
 .data-table td:nth-child(3) {
-    width: 10%;
+    width: 84px;
     min-width: 80px;
     text-align: center;
+    white-space: nowrap;
 }
 
 .data-table th:nth-child(4),
@@ -277,39 +427,328 @@ try {
 .data-table td:nth-child(5),
 .data-table th:nth-child(6),
 .data-table td:nth-child(6) {
-    width: 18%;
-    min-width: 180px;
+    width: 110px;
+    min-width: 100px;
     text-align: left;
+    white-space: nowrap;
 }
 
 .data-table th:nth-child(7),
 .data-table td:nth-child(7) {
-    width: 10%;
-    min-width: 100px;
+    width: 120px;
+    min-width: 110px;
     text-align: center;
+    white-space: nowrap;
 }
 
 .data-table th:nth-child(8),
 .data-table td:nth-child(8) {
-    width: 12%;
-    min-width: 120px;
+    width: 110px;
+    min-width: 100px;
     text-align: center;
+    white-space: nowrap;
 }
 
 .data-table th:nth-child(9),
 .data-table td:nth-child(9) {
-    width: 8%;
-    min-width: 60px;
+    width: 88px;
+    min-width: 80px;
     text-align: center;
+    white-space: nowrap;
 }
 
 .data-table th:nth-child(10),
 .data-table td:nth-child(10) {
-    width: 8%;
-    min-width: 60px;
+    width: 132px;
+    min-width: 120px;
     text-align: center;
+    white-space: nowrap;
+}
+
+.data-table td:nth-child(10) > div {
+    flex-wrap: nowrap;
+    gap: 4px;
+}
+
+.device-cards-mobile {
+    display: none;
+}
+
+.device-mobile-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    background: #fff;
+}
+
+.device-mobile-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.device-mobile-host {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #1f2937;
+    line-height: 1.2;
+}
+
+.device-mobile-id {
+    font-size: 0.68rem;
+    color: #6b7280;
+    margin-top: 2px;
+}
+
+.device-mobile-meta,
+.device-mobile-extra {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px 8px;
+    margin-bottom: 8px;
+}
+
+.device-mobile-meta div,
+.device-mobile-extra div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.device-mobile-meta span,
+.device-mobile-extra span {
+    font-size: 0.65rem;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.device-mobile-meta strong,
+.device-mobile-extra strong {
+    font-size: 0.78rem;
+    color: #111827;
+    font-weight: 600;
+    word-break: break-word;
+}
+
+.device-mobile-actions {
+    display: flex;
+    gap: 4px;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+    .filter-tabs {
+        gap: 6px;
+    }
+
+    .filter-tab {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+    }
+
+    .data-table {
+        display: none;
+    }
+
+    .table-container {
+        overflow: visible;
+    }
+
+    .device-cards-mobile {
+        display: block;
+    }
+
+    .device-mobile-meta,
+    .device-mobile-extra {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .device-mobile-actions {
+        justify-content: space-between;
+    }
+
+    .device-mobile-actions .btn.btn-tiny {
+        flex: 1 1 calc(25% - 4px);
+    }
+
+    .btn.btn-tiny {
+        padding: 0 5px;
+    }
+}
+
+@media (max-width: 420px) {
+    .device-mobile-meta,
+    .device-mobile-extra {
+        grid-template-columns: 1fr;
+    }
+
+    .device-mobile-actions .btn.btn-tiny {
+        flex: 1 1 calc(50% - 4px);
+    }
+}
+
+/* Custom Modal Styling */
+.custom-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: modal-fade-in 0.2s ease;
+}
+
+.custom-modal-card {
+    background: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 450px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+    animation: modal-scale-in 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.custom-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.custom-modal-header h5 {
+    margin: 0;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #0f172a;
+}
+
+.custom-modal-close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #94a3b8;
+    transition: color 0.15s;
+}
+
+.custom-modal-close-btn:hover {
+    color: #0f172a;
+}
+
+.custom-modal-card form {
+    padding: 20px;
+    margin: 0;
+}
+
+.custom-modal-body {
+    padding: 20px;
+    text-align: left;
+}
+
+.custom-modal-card label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #475569;
+    text-align: left;
+}
+
+.custom-modal-card input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    color: #0f172a;
+    box-sizing: border-box;
+    background: #fff;
+    margin-bottom: 15px;
+}
+
+.custom-modal-card input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.custom-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 16px 20px;
+    background: #f8fafc;
+    border-top: 1px solid #f1f5f9;
+}
+
+@keyframes modal-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes modal-scale-in {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
 }
 </style>
+
+<!-- Edit Device Modal -->
+<div id="edit-modal" class="custom-modal-overlay" style="display: none;">
+    <div class="custom-modal-card">
+        <div class="custom-modal-header">
+            <h5>Edit Perangkat</h5>
+            <button type="button" class="custom-modal-close-btn">&times;</button>
+        </div>
+        <form id="edit-device-form">
+            <input type="hidden" id="edit-device-id" name="device_id">
+            <div class="form-group">
+                <label for="edit-hostname">Hostname / Alias</label>
+                <input type="text" id="edit-hostname" required placeholder="Nama perangkat">
+            </div>
+            <div class="form-group">
+                <label for="edit-ip-address">IP Address</label>
+                <input type="text" id="edit-ip-address" required placeholder="IP Address">
+            </div>
+            <div class="custom-modal-footer">
+                <button type="button" class="btn btn-secondary custom-modal-close-btn">Batal</button>
+                <button type="submit" class="btn btn-primary">Simpan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Delete Device Modal -->
+<div id="delete-modal" class="custom-modal-overlay" style="display: none;">
+    <div class="custom-modal-card">
+        <div class="custom-modal-header">
+            <h5>Hapus Perangkat</h5>
+            <button type="button" class="custom-modal-close-btn">&times;</button>
+        </div>
+        <div class="custom-modal-body">
+            <p>Apakah Anda yakin ingin menghapus perangkat <strong id="delete-device-name"></strong>?</p>
+            <p style="color: #ff5252; font-size: 0.85rem; margin-top: 10px; display: flex; align-items: center; gap: 4px;">
+                <i class="material-icons" style="font-size: 16px;">warning</i>
+                Tindakan ini akan menghapus semua metrik dan log alert terkait secara permanen.
+            </p>
+        </div>
+        <div class="custom-modal-footer">
+            <button type="button" class="btn btn-secondary custom-modal-close-btn">Batal</button>
+            <button type="button" id="confirm-delete-btn" class="btn btn-danger">Hapus</button>
+        </div>
+    </div>
+</div>
 
 <script>
 // Filter functionality
@@ -327,6 +766,167 @@ document.querySelectorAll('.filter-tab').forEach(tab => {
             } else {
                 row.style.display = 'none';
             }
+        });
+    });
+});
+
+// Modal Logic
+const editModal = document.getElementById('edit-modal');
+const deleteModal = document.getElementById('delete-modal');
+
+// Close modals
+document.querySelectorAll('.custom-modal-close-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        editModal.style.display = 'none';
+        deleteModal.style.display = 'none';
+    });
+});
+
+[editModal, deleteModal].forEach(modal => {
+    modal.addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.style.display = 'none';
+        }
+    });
+});
+
+// Open Edit Modal
+document.querySelectorAll('.btn-edit-device').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        document.getElementById('edit-device-id').value = this.dataset.id;
+        document.getElementById('edit-hostname').value = this.dataset.hostname;
+        document.getElementById('edit-ip-address').value = this.dataset.ip;
+        editModal.style.display = 'flex';
+    });
+});
+
+// Submit Edit
+document.getElementById('edit-device-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const deviceId = document.getElementById('edit-device-id').value;
+    const hostname = document.getElementById('edit-hostname').value;
+    const ipAddress = document.getElementById('edit-ip-address').value;
+
+    fetch('api/devices.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            device_id: deviceId,
+            hostname: hostname,
+            ip_address: ipAddress
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Gagal mengedit perangkat: ' + data.message);
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('Terjadi kesalahan koneksi.');
+    });
+});
+
+// Open Delete Modal
+let deviceIdToDelete = null;
+document.querySelectorAll('.btn-delete-device').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        deviceIdToDelete = this.dataset.id;
+        document.getElementById('delete-device-name').textContent = this.dataset.hostname;
+        deleteModal.style.display = 'flex';
+    });
+});
+
+// Confirm Delete
+document.getElementById('confirm-delete-btn').addEventListener('click', function() {
+    if (!deviceIdToDelete) return;
+
+    fetch(`api/devices.php?id=${deviceIdToDelete}`, {
+        method: 'DELETE'
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Gagal menghapus perangkat: ' + data.message);
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('Terjadi kesalahan koneksi.');
+    });
+});
+
+// Refresh Device (Audit)
+document.querySelectorAll('.btn-refresh-device').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const deviceId = this.dataset.id;
+        const icon = this.querySelector('i');
+        const originalIcon = icon.textContent;
+        
+        // Set loading state
+        icon.textContent = 'hourglass_empty';
+        this.disabled = true;
+        this.style.opacity = '0.5';
+        
+        // Queue command
+        fetch('api/commands.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'create', device_id: deviceId, command: 'audit' })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success && data.command_id) {
+                // Poll for completion
+                let pollInterval = setInterval(() => {
+                    fetch('api/commands.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'check', command_id: data.command_id })
+                    })
+                    .then(res => res.json())
+                    .then(checkData => {
+                        if (checkData.success && checkData.status === 'completed') {
+                            clearInterval(pollInterval);
+                            location.reload();
+                        }
+                    });
+                }, 2000);
+                
+                // Timeout after 45 seconds
+                setTimeout(() => {
+                    clearInterval(pollInterval);
+                    icon.textContent = originalIcon;
+                    this.disabled = false;
+                    this.style.opacity = '1';
+                    alert('Timeout (45s): Agent mungkin offline atau proses audit perangkat memakan waktu lebih lama dari perkiraan.');
+                }, 45000);
+            } else {
+                icon.textContent = originalIcon;
+                this.disabled = false;
+                this.style.opacity = '1';
+                alert('Gagal mengirim perintah: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            icon.textContent = originalIcon;
+            this.disabled = false;
+            this.style.opacity = '1';
         });
     });
 });

@@ -188,23 +188,48 @@ try {
         $check_stmt->execute([$device_id, $alert['type'], $alert['severity']]);
 
         if (!$check_stmt->fetch()) {
+            $snapshot_data = null;
+            if (isset($data['additional_info']['top_processes'])) {
+                $snapshot_data = json_encode($data['additional_info']['top_processes']);
+            }
+
             // Create new alert
             $alert_stmt = $pdo->prepare("
-                INSERT INTO alerts (device_id, timestamp, alert_type, severity, message)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO alerts (device_id, timestamp, alert_type, severity, message, snapshot_data)
+                VALUES (?, ?, ?, ?, ?, ?)
             ");
             $alert_stmt->execute([
                 $device_id,
                 $now,
                 $alert['type'],
                 $alert['severity'],
-                $alert['message']
+                $alert['message'],
+                $snapshot_data
             ]);
 
             // Send email notification if critical
             if ($alert['severity'] === 'critical') {
                 sendEmailNotification($pdo, $device_id, $hostname, $alert);
             }
+        }
+    }
+
+    // Auto-resolve alerts that are no longer active
+    $active_alert_types = array_column($alerts_to_create, 'type');
+    $all_alert_types = ['cpu', 'memory', 'disk', 'storage', 'network'];
+    
+    foreach ($all_alert_types as $type) {
+        if (!in_array($type, $active_alert_types)) {
+            // This metric is healthy, auto-resolve any open alerts for it
+            $resolve_stmt = $pdo->prepare("
+                UPDATE alerts 
+                SET status = 'resolved', 
+                    resolved_at = ?
+                WHERE device_id = ? 
+                AND alert_type = ? 
+                AND status = 'open'
+            ");
+            $resolve_stmt->execute([$now, $device_id, $type]);
         }
     }
 

@@ -41,7 +41,10 @@
          "hostname": "Laptop-Budi",
          "api_endpoint": "https://heathered-dortha-unparsed.ngrok-free.dev/RAS/admin/api/metrics.php",
          "api_key": "api-key-anda",
-         "collect_interval": 60
+         "collect_interval": 60,
+         "extended_refresh_interval": 300,
+         "command_poll_interval": 15,
+         "buffer_flush_batch_size": 100
        }
      }
      ```
@@ -144,7 +147,10 @@ Cek halaman **Devices** - device klien harus muncul!
 | `hostname` | `"Laptop-Budi"` | Nama komputer |
 | `api_endpoint` | Full URL ke API | Server RAS |
 | `api_key` | `"abc123..."` | Kunci autentikasi |
-| `collect_interval` | `60` | Interval (detik) |
+| `collect_interval` | `60` | Interval metrik cepat (detik) |
+| `extended_refresh_interval` | `300` | Interval refresh inventory berat (detik) |
+| `command_poll_interval` | `15` | Interval polling command (detik) |
+| `buffer_flush_batch_size` | `100` | Jumlah item buffer per recovery batch |
 
 ---
 
