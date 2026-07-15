@@ -79,13 +79,6 @@ try {
             'severity' => 'critical',
             'message' => "CPU usage critical: {$data['cpu_usage']}%"
         ];
-    } elseif (isset($data['cpu_usage']) && $data['cpu_usage'] >= ($cpu_threshold - 10)) {
-        $status = ($status === 'online') ? 'warning' : $status;
-        $alerts_to_create[] = [
-            'type' => 'cpu',
-            'severity' => 'warning',
-            'message' => "CPU usage high: {$data['cpu_usage']}%"
-        ];
     }
 
     if (isset($data['memory_used'], $data['memory_total']) && $data['memory_total'] > 0) {
@@ -96,13 +89,6 @@ try {
                 'type' => 'memory',
                 'severity' => 'critical',
                 'message' => "Memory usage critical: " . round($memory_percent, 2) . "%"
-            ];
-        } elseif ($memory_percent >= ($memory_threshold - 10)) {
-            $status = ($status === 'online') ? 'warning' : $status;
-            $alerts_to_create[] = [
-                'type' => 'memory',
-                'severity' => 'warning',
-                'message' => "Memory usage high: " . round($memory_percent, 2) . "%"
             ];
         }
     }
@@ -125,14 +111,7 @@ try {
             $alerts_to_create[] = [
                 'type' => 'disk',
                 'severity' => 'critical',
-                'message' => "Disk {$mountpoint} usage critical: {$percent}%"
-            ];
-        } elseif ($percent >= ($disk_threshold - 10)) {
-            $status = ($status === 'online') ? 'warning' : $status;
-            $alerts_to_create[] = [
-                'type' => 'disk',
-                'severity' => 'warning',
-                'message' => "Disk {$mountpoint} usage high: {$percent}%"
+                'message' => "Disk {$mountpoint} critical: " . round($percent, 2) . "%"
             ];
         }
     }
@@ -158,6 +137,11 @@ try {
         updated_at = CURRENT_TIMESTAMP
     ");
     $stmt->execute([$device_id, $hostname, $ip_address, $now, $status]);
+    
+    // rowCount is 1 for new inserts, 2 for updates on duplicate key
+    if ($stmt->rowCount() === 1) {
+        logActivity($pdo, 'DEVICE_REGISTER', "New device registered in system: {$device_id} ({$hostname})", 'INFO');
+    }
 
     // Insert metrics
     $stmt = $pdo->prepare("
@@ -189,6 +173,8 @@ try {
 
     // Create alerts
     foreach ($alerts_to_create as $alert) {
+        logActivity($pdo, 'ALERT_CREATE', "Alert [{$alert['severity']}] for device {$device_id} ({$hostname}): {$alert['message']}", strtoupper($alert['severity']));
+        
         // Check if similar alert exists in last hour
         $check_stmt = $pdo->prepare("
             SELECT id FROM alerts
@@ -278,8 +264,8 @@ try {
     $offline_stmt->execute([$offline_minutes]);
 
     $pdo->commit();
-
-    logMessage("Metrics received from device: {$device_id} ({$hostname})", 'INFO');
+    // Log agent ping to the agent log
+    logMessage("Metrics received from device: {$device_id} ({$hostname})", 'INFO', 'agent');
 
     sendJsonResponse([
         'success' => true,

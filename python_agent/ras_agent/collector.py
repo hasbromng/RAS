@@ -369,10 +369,49 @@ class MetricsCollector:
 
             # Determine network status
             network_status = self._determine_network_status(interfaces, primary_ip)
+            
+            # Fetch Gateway and DNS via PowerShell (Windows only)
+            default_gateway = []
+            dns_servers = []
+            
+            if platform.system() == "Windows":
+                try:
+                    cmd = ["powershell", "-NoProfile", "-Command", 
+                           "Get-WmiObject Win32_NetworkAdapterConfiguration -Filter 'IPEnabled = True' | Select-Object DefaultIPGateway, DNSServerSearchOrder | ConvertTo-Json -Compress"]
+                    result = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
+                    if result.returncode == 0 and result.stdout.strip():
+                        net_conf = json.loads(result.stdout.strip())
+                        # It might return a dict (single active NIC) or list (multiple active NICs)
+                        if isinstance(net_conf, dict):
+                            net_conf = [net_conf]
+                            
+                        for conf in net_conf:
+                            if conf.get('DefaultIPGateway'):
+                                gws = conf['DefaultIPGateway']
+                                if isinstance(gws, list):
+                                    default_gateway.extend(gws)
+                                elif isinstance(gws, str):
+                                    default_gateway.append(gws)
+                            
+                            if conf.get('DNSServerSearchOrder'):
+                                dns = conf['DNSServerSearchOrder']
+                                if isinstance(dns, list):
+                                    dns_servers.extend(dns)
+                                elif isinstance(dns, str):
+                                    dns_servers.append(dns)
+                                    
+                        # Remove duplicates
+                        default_gateway = list(dict.fromkeys(default_gateway))
+                        dns_servers = list(dict.fromkeys(dns_servers))
+                except Exception as e:
+                    if self.logger:
+                        self.logger.warning(f"Failed to get Gateway/DNS: {e}")
 
             return {
                 "network_status": network_status,
                 "primary_ip": primary_ip,
+                "default_gateway": default_gateway,
+                "dns_servers": dns_servers,
                 "bytes_sent": net_io.bytes_sent,
                 "bytes_recv": net_io.bytes_recv,
                 "packets_sent": net_io.packets_sent,
@@ -386,6 +425,8 @@ class MetricsCollector:
             return {
                 "network_status": "unknown",
                 "primary_ip": "0.0.0.0",
+                "default_gateway": [],
+                "dns_servers": [],
                 "bytes_sent": 0, "bytes_recv": 0,
                 "packets_sent": 0, "packets_recv": 0,
                 "interfaces": {}
@@ -867,6 +908,7 @@ class MetricsCollector:
         security_info = bundle.get("security", {}) if bundle else self.get_security_info(force_refresh=force_refresh)
         active_users = bundle.get("active_users", []) if bundle else self.get_active_users(force_refresh=force_refresh)
         top_processes = self.get_top_processes(force_refresh=force_refresh)
+        net_info = self.get_network_info()
 
         return {
             # CPU
@@ -884,7 +926,9 @@ class MetricsCollector:
             "storage_layout": disk_metrics.get("storage_layout", []),
             "storage_smart": storage_smart,
             # Network
-            "network_interfaces": self.get_network_info().get("interfaces", {}),
+            "network_interfaces": net_info.get("interfaces", {}),
+            "default_gateway": net_info.get("default_gateway", []),
+            "dns_servers": net_info.get("dns_servers", []),
             # System
             "system": system_info.get("system", "unknown"),
             "system_release": system_info.get("release", ""),
@@ -929,6 +973,8 @@ class MetricsCollector:
                 "storage_layout": base["_disk_metrics"].get("storage_layout", []),
                 "storage_smart": self.get_storage_smart(force_refresh=False),
                 "network_interfaces": base["_network_metrics"].get("interfaces", {}),
+                "default_gateway": base["_network_metrics"].get("default_gateway", []),
+                "dns_servers": base["_network_metrics"].get("dns_servers", []),
                 "system": base["_system_info"].get("system", "unknown"),
                 "system_release": base["_system_info"].get("release", ""),
                 "system_machine": base["_system_info"].get("machine", ""),

@@ -113,7 +113,7 @@ try {
         $stmt->execute([$new_status, $new_status, $new_status, $new_status, $acknowledged_by, $alert_id]);
 
         if ($stmt->rowCount() > 0) {
-            logMessage("Alert {$alert_id} status updated to {$new_status} by {$acknowledged_by}", 'INFO');
+            logActivity($pdo, 'ALERT_UPDATE', "Alert {$alert_id} status updated to {$new_status} by {$acknowledged_by}", 'INFO');
 
             sendJsonResponse([
                 'success' => true,

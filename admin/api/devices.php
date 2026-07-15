@@ -62,6 +62,8 @@ try {
 
         $stmt = $pdo->prepare("DELETE FROM devices WHERE device_id = ?");
         $stmt->execute([$device_id]);
+        
+        logActivity($pdo, 'DEVICE_DELETE', "Device deleted from system: {$device_id}", 'INFO');
 
         sendJsonResponse([
             'success' => true,

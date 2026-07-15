@@ -88,6 +88,7 @@ class RASAgent:
         self.extended_refresh_interval = agent_config.get('extended_refresh_interval', max(300, self.collect_interval * 5))
         self._last_extended_refresh = 0.0
         self.command_poll_interval = agent_config.get('command_poll_interval', max(10, min(30, self.collect_interval // 2 or 10)))
+        self._force_next_extended = True
         self.buffer_flush_batch_size = agent_config.get('buffer_flush_batch_size', 100)
 
     def _setup_signal_handlers(self) -> None:
@@ -136,7 +137,7 @@ class RASAgent:
         """
         try:
             now = time.time()
-            refresh_extended = (now - self._last_extended_refresh) >= self.extended_refresh_interval
+            refresh_extended = self._force_next_extended or (now - self._last_extended_refresh) >= self.extended_refresh_interval
 
             # Collect metrics
             self.logger.debug("Collecting system metrics...")
@@ -147,6 +148,7 @@ class RASAgent:
 
             if refresh_extended:
                 self._last_extended_refresh = now
+                self._force_next_extended = False
 
             # Add hostname from config
             metrics['hostname'] = self.config.get('agent', 'hostname')
@@ -190,6 +192,7 @@ class RASAgent:
                     self.logger.info(f"Received command '{cmd_action}' (ID: {cmd_id})")
                     if cmd_action == 'audit':
                         self.logger.info("Executing immediate audit...")
+                        self._force_next_extended = True
                         self.wake_event.set()  # Wake up main loop
                         self.api_client.update_command_status(cmd_id, 'completed')
             except Exception as e:

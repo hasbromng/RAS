@@ -35,6 +35,7 @@ try {
 
         $success_msg = "Pengaturan berhasil disimpan!";
         $settings = array_merge($settings, $updates);
+        logActivity($pdo, 'SETTINGS_UPDATE', "Admin memperbarui pengaturan sistem", 'INFO');
     }
 
 } catch (PDOException $e) {
@@ -74,7 +75,7 @@ try {
                     <div class="form-group">
                         <label>CPU Threshold (%)</label>
                         <input type="number" name="cpu_threshold" value="<?php echo (int)($settings['alert_threshold_cpu'] ?? $setting_defaults['alert_threshold_cpu']); ?>"
-                               class="form-control" min="0" max="100" step="5">
+                               class="form-control" min="0" max="100" step="1">
                         <small class="text-muted">Alert ketika CPU melebihi nilai ini</small>
                     </div>
                 </div>
@@ -82,7 +83,7 @@ try {
                     <div class="form-group">
                         <label>Memory Threshold (%)</label>
                         <input type="number" name="memory_threshold" value="<?php echo (int)($settings['alert_threshold_memory'] ?? $setting_defaults['alert_threshold_memory']); ?>"
-                               class="form-control" min="0" max="100" step="5">
+                               class="form-control" min="0" max="100" step="1">
                         <small class="text-muted">Alert ketika Memory melebihi nilai ini</small>
                     </div>
                 </div>
@@ -90,7 +91,7 @@ try {
                     <div class="form-group">
                         <label>Disk Threshold (%)</label>
                         <input type="number" name="disk_threshold" value="<?php echo (int)($settings['alert_threshold_disk'] ?? $setting_defaults['alert_threshold_disk']); ?>"
-                               class="form-control" min="0" max="100" step="5">
+                               class="form-control" min="0" max="100" step="1">
                         <small class="text-muted">Alert ketika Disk usage melebihi nilai ini</small>
                     </div>
                 </div>

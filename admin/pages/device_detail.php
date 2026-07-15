@@ -100,7 +100,7 @@ if ($export === 'csv' && $device_id) {
         fputcsv($out, ['Display Version', $sd['display_version'] ?? '']);
         fputcsv($out, ['OS Build', $sd['os_build'] ?? '']);
         fputcsv($out, ['Tanggal Install', $sd['installed_on'] ?? '']);
-        $uptime_sec = floatval($ai['uptime_seconds'] ?? 0);
+        $uptime_sec = (int)floatval($ai['uptime_seconds'] ?? 0);
         $days = floor($uptime_sec / 86400);
         $hours = floor(($uptime_sec % 86400) / 3600);
         $mins  = floor(($uptime_sec % 3600) / 60);

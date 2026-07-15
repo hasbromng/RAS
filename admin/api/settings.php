@@ -89,7 +89,7 @@ try {
             }
         }
 
-        logMessage("Settings updated: " . implode(', ', $updated), 'INFO');
+        logActivity($pdo, 'SETTINGS_UPDATE', "Settings updated: " . implode(', ', $updated), 'INFO');
 
         sendJsonResponse([
             'success' => true,

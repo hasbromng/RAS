@@ -9,6 +9,10 @@ try {
     // Gunakan NOW() MySQL murni (bukan date() PHP) untuk menghindari timezone mismatch.
     // PHP pakai Asia/Jakarta (UTC+7), MySQL SYSTEM bisa berbeda timezone.
     $offline_minutes = getSetting($pdo, 'device_offline_minutes', 5);
+    $cpu_thresh = getSetting($pdo, 'alert_threshold_cpu', 90);
+    $mem_thresh = getSetting($pdo, 'alert_threshold_memory', 90);
+    $disk_thresh = getSetting($pdo, 'alert_threshold_disk', 90);
+
     $pdo->prepare("
         UPDATE devices
         SET status = 'offline'
@@ -124,7 +128,7 @@ try {
                                 <td>
                                     <div class="metric-inline compact">
                                         <div class="metric-track">
-                                            <div class="metric-fill" style="width: <?php echo min($device['cpu_usage'] ?? 0, 100); ?>%; background: <?php echo getMetricColor($device['cpu_usage'] ?? 0); ?>;"></div>
+                                            <div class="metric-fill" style="width: <?php echo min($device['cpu_usage'] ?? 0, 100); ?>%; background: <?php echo getMetricColor($device['cpu_usage'] ?? 0, $cpu_thresh); ?>;"></div>
                                         </div>
                                         <span class="metric-value"><?php echo number_format($device['cpu_usage'] ?? 0, 1); ?>%</span>
                                     </div>
@@ -136,7 +140,7 @@ try {
                                     ?>
                                     <div class="metric-inline compact">
                                         <div class="metric-track">
-                                            <div class="metric-fill" style="width: <?php echo min($mem_percent, 100); ?>%; background: <?php echo getMetricColor($mem_percent); ?>;"></div>
+                                            <div class="metric-fill" style="width: <?php echo min($mem_percent, 100); ?>%; background: <?php echo getMetricColor($mem_percent, $mem_thresh); ?>;"></div>
                                         </div>
                                         <span class="metric-value"><?php echo number_format($mem_percent, 1); ?>%</span>
                                     </div>
@@ -159,18 +163,15 @@ try {
                                             $counter = 0;
                                             foreach ($all_disks as $disk_key => $disk): 
                                                 $disk_name = strtoupper(str_replace('_', ':', $disk_key));
-                                                $used_gb = number_format(round($disk['used'] / (1024**3), 2), 2);
-                                                $free_gb = number_format(round($disk['free'] / (1024**3), 2), 2);
-                                                $total_gb = number_format(round($disk['total'] / (1024**3), 2), 2);
-                                                $percent = round($disk['percent'], 1);
-                                                $color = getMetricColor($percent);
+                                                $percent = ($disk['total'] > 0) ? ($disk['used'] / $disk['total']) * 100 : 0;
+                                                $color = getMetricColor($percent, $disk_thresh);
                                                 $counter++;
                                                 if ($counter > 2) break; // Show max 2 disks in table
                                             ?>
                                                 <div class="disk-inline-item">
                                                     <span class="disk-inline-label"><?php echo $disk_name; ?></span>
                                                     <span class="disk-inline-dot" style="background: <?php echo $color; ?>;"></span>
-                                                    <span class="disk-inline-meta"><?php echo $percent; ?>%</span>
+                                                    <span class="disk-inline-meta"><?php echo round($percent, 1); ?>%</span>
                                                 </div>
                                             <?php endforeach; ?>
                                             <?php if (count($all_disks) > 2): ?>
@@ -180,7 +181,7 @@ try {
                                     <?php else: ?>
                                         <div class="metric-inline compact">
                                             <div class="metric-track">
-                                                <div class="metric-fill" style="width: <?php echo min($device['disk_usage'] ?? 0, 100); ?>%; background: <?php echo getMetricColor($device['disk_usage'] ?? 0); ?>;"></div>
+                                                <div class="metric-fill" style="width: <?php echo min($device['disk_usage'] ?? 0, 100); ?>%; background: <?php echo getMetricColor($device['disk_usage'] ?? 0, $disk_thresh); ?>;"></div>
                                             </div>
                                             <span class="metric-value"><?php echo number_format($device['disk_usage'] ?? 0, 1); ?>%</span>
                                         </div>
@@ -944,19 +945,19 @@ document.querySelectorAll('.btn-refresh-device').forEach(btn => {
     });
 });
 
-function getMetricColor(value) {
-    if (value >= 90) return '#ff5252';
-    if (value >= 75) return '#ffab00';
-    if (value >= 50) return '#ffca28';
+function getMetricColor(value, threshold = 90) {
+    if (value >= threshold) return '#ff5252';
+    if (value >= (threshold - 15)) return '#ffab00';
+    if (value >= (threshold - 40)) return '#ffca28';
     return '#00c851';
 }
 </script>
 
 <?php
-function getMetricColor($value) {
-    if ($value >= 90) return '#ff5252';
-    if ($value >= 75) return '#ffab00';
-    if ($value >= 50) return '#ffca28';
+function getMetricColor($value, $threshold = 90) {
+    if ($value >= $threshold) return '#ff5252';
+    if ($value >= ($threshold - 15)) return '#ffab00';
+    if ($value >= ($threshold - 40)) return '#ffca28';
     return '#00c851';
 }
 ?>

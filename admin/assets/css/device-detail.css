@@ -1486,18 +1486,22 @@ body[data-theme="dark"] .dd-export-btn-refresh {
 
 .dd-smart-header {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
     margin-bottom: 8px;
+    gap: 8px;
 }
 
 .dd-smart-name {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 6px;
     font-weight: 600;
     font-size: 13px;
     color: #334155;
+    flex: 1;
+    min-width: 0;
+    word-break: break-word;
 }
 
 .dd-smart-name .material-icons {
@@ -1513,7 +1517,14 @@ body[data-theme="dark"] .dd-export-btn-refresh {
 }
 
 .dd-smart-grid {
-    margin-top: 2px;
+    margin-top: 4px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+}
+
+.dd-item-full {
+    grid-column: 1 / -1;
 }
 
 /* ── Level Text Colors ─────────────────────────────── */

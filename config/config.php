@@ -67,7 +67,7 @@ function getDbConnection() {
  * @param string $message Log message
  * @param string $level Log level (INFO, WARNING, ERROR)
  */
-function logMessage($message, $level = 'INFO') {
+function logMessage($message, $level = 'INFO', $type = 'system') {
     $timestamp = date('Y-m-d H:i:s');
     $logEntry = "[{$timestamp}] [{$level}] {$message}" . PHP_EOL;
 
@@ -76,8 +76,49 @@ function logMessage($message, $level = 'INFO') {
         mkdir(LOG_PATH, 0755, true);
     }
 
+    // Determine log file based on type
+    $filename = $type === 'agent' ? 'ras_' : 'system_';
+    $logFile = LOG_PATH . $filename . date('Y-m-d') . '.log';
+
     // Append to log file
-    file_put_contents(LOG_FILE, $logEntry, FILE_APPEND);
+    file_put_contents($logFile, $logEntry, FILE_APPEND);
+}
+
+/**
+ * Log activity to database
+ * 
+ * @param PDO $pdo Database connection
+ * @param string $action Action name (e.g. DEVICE_ADD, SETTINGS_UPDATE)
+ * @param string $description Detailed description
+ * @param string $level Level (INFO, WARNING, ERROR, CRITICAL)
+ */
+function logActivity($pdo, $action, $description, $level = 'INFO') {
+    try {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        // Advanced IP detection
+        $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+        if (isset($_SERVER['HTTP_CLIENT_IP']) && !empty($_SERVER['HTTP_CLIENT_IP'])) {
+            $ip = $_SERVER['HTTP_CLIENT_IP'];
+        } elseif (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && !empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            // Can be a comma-separated list, grab the first one
+            $ips = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+            $ip = trim($ips[0]);
+        }
+        // Normalize IPv6 loopback to IPv4 loopback for cleaner UI
+        if ($ip === '::1') {
+            $ip = '127.0.0.1';
+        }
+        
+        $user = $_SESSION['admin_username'] ?? 'System';
+        
+        $stmt = $pdo->prepare("INSERT INTO activity_logs (username, action, description, level, ip_address) VALUES (?, ?, ?, ?, ?)");
+        $stmt->execute([$user, $action, $description, $level, $ip]);
+    } catch (PDOException $e) {
+        // Fallback to file log if DB fails
+        logMessage("Failed to log activity to DB: {$action} - {$description}", 'ERROR', 'system');
+    }
 }
 
 /**

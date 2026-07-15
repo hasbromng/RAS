@@ -15,6 +15,10 @@ if (!$device_id) {
 try {
     $pdo = getDbConnection();
 
+    $cpu_thresh = getSetting($pdo, 'alert_threshold_cpu', 90);
+    $mem_thresh = getSetting($pdo, 'alert_threshold_memory', 90);
+    $disk_thresh = getSetting($pdo, 'alert_threshold_disk', 90);
+
     // Get device details with latest metrics
     $stmt = $pdo->prepare("
         SELECT
@@ -74,6 +78,45 @@ try {
     return;
 }
 
+// Get logs for this device
+$log_days = isset($_GET['log_days']) ? $_GET['log_days'] : '1';
+$device_logs = [];
+$log_dir = __DIR__ . '/../../logs/';
+$files_to_check = [];
+
+if ($log_days === 'all') {
+    if (is_dir($log_dir)) {
+        $files = scandir($log_dir);
+        foreach ($files as $f) {
+            if (preg_match('/^ras_\d{4}-\d{2}-\d{2}\.log$/', $f)) {
+                $files_to_check[] = $log_dir . $f;
+            }
+        }
+        rsort($files_to_check); // newest files first
+    }
+} else {
+    $days = (int)$log_days;
+    if ($days < 1) $days = 1;
+    for ($i = 0; $i < $days; $i++) {
+        $files_to_check[] = $log_dir . 'ras_' . date('Y-m-d', strtotime("-$i days")) . '.log';
+    }
+}
+
+foreach ($files_to_check as $log_file) {
+    if (file_exists($log_file)) {
+        $lines = file($log_file);
+        if (is_array($lines)) {
+            $lines = array_reverse($lines); // Newest first
+            foreach ($lines as $line) {
+                if (strpos($line, $device_id) !== false) {
+                    $device_logs[] = htmlspecialchars(trim($line));
+                    if (count($device_logs) >= 200) break 2; // limit to 200 total
+                }
+            }
+        }
+    }
+}
+
 // Helper functions
 if (!function_exists('formatBytesDetail')) {
     function formatBytesDetail($bytes, $precision = 2) {
@@ -87,19 +130,19 @@ if (!function_exists('formatBytesDetail')) {
 }
 
 if (!function_exists('getMetricColorDetail')) {
-    function getMetricColorDetail($value) {
-        if ($value >= 90) return '#ef4444';
-        if ($value >= 75) return '#f59e0b';
-        if ($value >= 50) return '#eab308';
+    function getMetricColorDetail($value, $threshold = 90) {
+        if ($value >= $threshold) return '#ef4444';
+        if ($value >= ($threshold - 15)) return '#f59e0b';
+        if ($value >= ($threshold - 40)) return '#eab308';
         return '#22c55e';
     }
 }
 
 if (!function_exists('getMetricLevelDetail')) {
-    function getMetricLevelDetail($value) {
-        if ($value >= 90) return 'critical';
-        if ($value >= 75) return 'warning';
-        if ($value >= 50) return 'moderate';
+    function getMetricLevelDetail($value, $threshold = 90) {
+        if ($value >= $threshold) return 'critical';
+        if ($value >= ($threshold - 15)) return 'warning';
+        if ($value >= ($threshold - 40)) return 'moderate';
         return 'good';
     }
 }
@@ -284,6 +327,7 @@ $core_count = !empty($additional_info['cpu_per_core']) && is_array($additional_i
                                 'detail' => !empty($additional_info['cpu_count_logical'])
                                     ? $additional_info['cpu_count_physical'] . 'P / ' . $additional_info['cpu_count_logical'] . 'L cores'
                                     : 'Prosesor',
+                                'threshold' => $cpu_thresh
                             ],
                             [
                                 'key' => 'mem',
@@ -291,6 +335,7 @@ $core_count = !empty($additional_info['cpu_per_core']) && is_array($additional_i
                                 'icon' => 'sd_card',
                                 'value' => $mem_percent,
                                 'detail' => formatBytesDetail($device['memory_used'] ?? 0) . ' / ' . formatBytesDetail($device['memory_total'] ?? 0),
+                                'threshold' => $mem_thresh
                             ],
                             [
                                 'key' => 'disk',
@@ -298,11 +343,12 @@ $core_count = !empty($additional_info['cpu_per_core']) && is_array($additional_i
                                 'icon' => 'storage',
                                 'value' => $disk_percent,
                                 'detail' => formatBytesDetail($device['disk_used'] ?? 0) . ' / ' . formatBytesDetail($device['disk_total'] ?? 0),
+                                'threshold' => $disk_thresh
                             ],
                         ];
                         foreach ($metrics_rows as $mr):
-                            $level = getMetricLevelDetail($mr['value']);
-                            $color = getMetricColorDetail($mr['value']);
+                            $level = getMetricLevelDetail($mr['value'], $mr['threshold']);
+                            $color = getMetricColorDetail($mr['value'], $mr['threshold']);
                         ?>
                         <div class="dd-metric-row">
                             <div class="dd-metric-icon dd-icon-<?php echo $mr['key']; ?>">
@@ -437,8 +483,8 @@ $core_count = !empty($additional_info['cpu_per_core']) && is_array($additional_i
                                     $total  = floatval($disk['total'] ?? 0);
                                     $free   = floatval($disk['free']  ?? max($total - $used, 0));
                                     $percent = round($total > 0 ? ($used / $total) * 100 : 0, 1);
-                                    $color   = getMetricColorDetail($percent);
-                                    $level   = getMetricLevelDetail($percent);
+                                    $color   = getMetricColorDetail($percent, $disk_thresh);
+                                    $level   = getMetricLevelDetail($percent, $disk_thresh);
                                     $fstype  = $disk['fstype']    ?? '—';
                                     // Proportional width (% of physical disk total)
                                     $prop_pct = $partition_total > 0 ? round(($total / $partition_total) * 100, 1) : 0;
@@ -473,7 +519,7 @@ $core_count = !empty($additional_info['cpu_per_core']) && is_array($additional_i
                                 $total  = floatval($disk['total'] ?? 0);
                                 $free   = floatval($disk['free']  ?? max($total - $used, 0));
                                 $percent = round($total > 0 ? ($used / $total) * 100 : 0, 1);
-                                $level   = getMetricLevelDetail($percent);
+                                $level   = getMetricLevelDetail($percent, $disk_thresh);
                                 $fstype  = $disk['fstype']    ?? '—';
                                 $devpath = $disk['device']     ?? '—';
                             ?>
@@ -502,33 +548,6 @@ $core_count = !empty($additional_info['cpu_per_core']) && is_array($additional_i
             </section>
           </section>
 
-            <!-- Performance chart (collapsible) -->
-            <section class="dd-panel dd-panel-chart">
-                <button type="button" class="dd-panel-toggle" data-dd-toggle="chart" aria-expanded="false">
-                    <div class="dd-panel-head-inner">
-                        <h3><i class="material-icons">show_chart</i> Tren Performa</h3>
-                        <span class="dd-panel-count"><?php echo count($chart_labels); ?> sampel</span>
-                    </div>
-                    <div class="dd-chart-legend-inline">
-                        <span><i class="dd-chart-dot cpu"></i>CPU</span>
-                        <span><i class="dd-chart-dot mem"></i>Mem</span>
-                        <span><i class="dd-chart-dot disk"></i>Disk</span>
-                    </div>
-                    <i class="material-icons dd-chevron">expand_more</i>
-                </button>
-                <div class="dd-panel-collapse is-collapsed" id="dd-collapse-chart">
-                    <div class="dd-panel-body dd-chart-body">
-                        <?php if (count($chart_labels) > 0): ?>
-                        <canvas id="ddPerfChart" height="90"></canvas>
-                        <?php else: ?>
-                        <div class="dd-empty-sm">
-                            <i class="material-icons">insert_chart</i>
-                            <span>Belum ada data metrik</span>
-                        </div>
-                        <?php endif; ?>
-                    </div>
-                </div>
-            </section>
         </div>
 
         <!-- RIGHT COLUMN: Network + System + Alerts -->
@@ -601,6 +620,31 @@ $core_count = !empty($additional_info['cpu_per_core']) && is_array($additional_i
                                         <?php endforeach; ?>
                                     </div>
                                     <?php endif; ?>
+                                    
+                                    <?php 
+                                    $gateway = $additional_info['default_gateway'] ?? [];
+                                    $dns = $additional_info['dns_servers'] ?? [];
+                                    // Only show Gateway/DNS on active interfaces that aren't loopback
+                                    if ($is_up && stripos($iface_name, 'loopback') === false && (!empty($gateway) || !empty($dns))): 
+                                    ?>
+                                        <?php if (!empty($gateway)): ?>
+                                        <div class="dd-detail-pop-row dd-detail-pop-stack">
+                                            <span>Gateway</span>
+                                            <?php foreach((array)$gateway as $gw): ?>
+                                            <code><?php echo htmlspecialchars($gw); ?></code>
+                                            <?php endforeach; ?>
+                                        </div>
+                                        <?php endif; ?>
+                                        
+                                        <?php if (!empty($dns)): ?>
+                                        <div class="dd-detail-pop-row dd-detail-pop-stack">
+                                            <span>DNS</span>
+                                            <?php foreach((array)$dns as $d): ?>
+                                            <code><?php echo htmlspecialchars($d); ?></code>
+                                            <?php endforeach; ?>
+                                        </div>
+                                        <?php endif; ?>
+                                    <?php endif; ?>
                                 </div>
                                 <?php endif; ?>
                             </div>
@@ -616,76 +660,7 @@ $core_count = !empty($additional_info['cpu_per_core']) && is_array($additional_i
                 </div>
             </section>
 
-            <!-- System info -->
-            <section class="dd-panel">
-                <button type="button" class="dd-panel-toggle" data-dd-toggle="system" aria-expanded="false">
-                    <div class="dd-panel-head-inner">
-                        <h3><i class="material-icons">info</i> Sistem</h3>
-                        <?php if ($core_count > 0): ?>
-                        <span class="dd-panel-count"><?php echo $core_count; ?> cores</span>
-                        <?php endif; ?>
-                    </div>
-                    <i class="material-icons dd-chevron">expand_more</i>
-                </button>
-                <div class="dd-panel-collapse is-collapsed" id="dd-collapse-system">
-                    <div class="dd-panel-body">
-                        <div class="dd-sys-grid">
-                            <?php if (!empty($additional_info['system'])): ?>
-                            <div class="dd-sys-item">
-                                <span class="dd-sys-label">OS</span>
-                                <span class="dd-sys-value"><?php echo htmlspecialchars($additional_info['system']); ?></span>
-                            </div>
-                            <?php endif; ?>
-                            <?php if (!empty($additional_info['uptime_seconds'])): ?>
-                            <div class="dd-sys-item">
-                                <span class="dd-sys-label">Uptime</span>
-                                <span class="dd-sys-value"><?php echo formatUptimeDetail($additional_info['uptime_seconds']); ?></span>
-                            </div>
-                            <?php endif; ?>
-                            <?php if (!empty($additional_info['cpu_count_physical'])): ?>
-                            <div class="dd-sys-item">
-                                <span class="dd-sys-label">CPU</span>
-                                <span class="dd-sys-value"><?php echo (int)$additional_info['cpu_count_physical']; ?>P / <?php echo (int)($additional_info['cpu_count_logical'] ?? 0); ?>L</span>
-                            </div>
-                            <?php endif; ?>
-                            <?php if (!empty($device['memory_total'])): ?>
-                            <div class="dd-sys-item">
-                                <span class="dd-sys-label">RAM</span>
-                                <span class="dd-sys-value"><?php echo formatBytesDetail($device['memory_total']); ?></span>
-                            </div>
-                            <?php endif; ?>
-                            <div class="dd-sys-item">
-                                <span class="dd-sys-label">First seen</span>
-                                <span class="dd-sys-value"><?php echo date('d M Y H:i', strtotime($device['created_at'])); ?></span>
-                            </div>
-                            <div class="dd-sys-item">
-                                <span class="dd-sys-label">Last seen</span>
-                                <span class="dd-sys-value"><?php echo date('d M Y H:i:s', strtotime($device['last_seen'])); ?></span>
-                            </div>
-                        </div>
 
-                        <?php if (!empty($additional_info['cpu_per_core']) && is_array($additional_info['cpu_per_core'])): ?>
-                        <div class="dd-cores">
-                            <div class="dd-cores-title">CPU per Core</div>
-                            <div class="dd-cores-bars">
-                                <?php foreach ($additional_info['cpu_per_core'] as $index => $core_usage):
-                                    $core_usage = floatval($core_usage);
-                                    $color = getMetricColorDetail($core_usage);
-                                ?>
-                                <div class="dd-core-row" title="Core <?php echo (int)$index; ?>: <?php echo number_format($core_usage, 1); ?>%">
-                                    <span class="dd-core-id">C<?php echo (int)$index; ?></span>
-                                    <div class="dd-bar dd-bar-xs">
-                                        <div class="dd-bar-fill" style="width: <?php echo min(max($core_usage, 0), 100); ?>%; background: <?php echo $color; ?>;"></div>
-                                    </div>
-                                    <span class="dd-core-pct"><?php echo number_format($core_usage, 0); ?>%</span>
-                                </div>
-                                <?php endforeach; ?>
-                            </div>
-                        </div>
-                        <?php endif; ?>
-                    </div>
-                </div>
-            </section>
 
             <!-- Hardware Detail: CPU Model, GPU, Memory Slots -->
             <section class="dd-panel">
@@ -712,6 +687,28 @@ $core_count = !empty($additional_info['cpu_per_core']) && is_array($additional_i
                             <div class="dd-sys-item">
                                 <span class="dd-sys-label">Core Fisik</span>
                                 <span class="dd-sys-value"><?php echo (int)$additional_info['cpu_count_physical']; ?> Physical / <?php echo (int)($additional_info['cpu_count_logical'] ?? 0); ?> Logical</span>
+                            </div>
+                            <?php endif; ?>
+
+                            <?php if (!empty($additional_info['cpu_per_core']) && is_array($additional_info['cpu_per_core'])): ?>
+                            <div class="dd-sys-item dd-sys-item-wide">
+                                <div class="dd-cores">
+                                    <div class="dd-cores-title">CPU per Core</div>
+                                    <div class="dd-cores-bars">
+                                        <?php foreach ($additional_info['cpu_per_core'] as $index => $core_usage):
+                                            $core_usage = floatval($core_usage);
+                                            $color = getMetricColorDetail($core_usage, $cpu_thresh);
+                                        ?>
+                                        <div class="dd-core-row" title="Core <?php echo (int)$index; ?>: <?php echo number_format($core_usage, 1); ?>%">
+                                            <span class="dd-core-id">C<?php echo (int)$index; ?></span>
+                                            <div class="dd-bar dd-bar-xs">
+                                                <div class="dd-bar-fill" style="width: <?php echo min(max($core_usage, 0), 100); ?>%; background: <?php echo $color; ?>;"></div>
+                                            </div>
+                                            <span class="dd-core-pct"><?php echo number_format($core_usage, 0); ?>%</span>
+                                        </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
                             </div>
                             <?php endif; ?>
 
@@ -982,7 +979,7 @@ $core_count = !empty($additional_info['cpu_per_core']) && is_array($additional_i
                                 </div>
                                 <?php endif; ?>
                                 <?php if (isset($sd['read_errors_total']) && $sd['read_errors_total'] !== null): ?>
-                                <div class="dd-sys-item">
+                                <div class="dd-sys-item dd-item-full">
                                     <span class="dd-sys-label">Read Errors</span>
                                     <span class="dd-sys-value <?php echo intval($sd['read_errors_total']) > 0 ? 'dd-level-text-warning' : ''; ?>">
                                         <?php echo (int)$sd['read_errors_total']; ?>
@@ -990,9 +987,9 @@ $core_count = !empty($additional_info['cpu_per_core']) && is_array($additional_i
                                 </div>
                                 <?php endif; ?>
                                 <?php if (!empty($sd['operational_status'])): ?>
-                                <div class="dd-sys-item">
+                                <div class="dd-sys-item dd-item-full">
                                     <span class="dd-sys-label">Status Operasional</span>
-                                    <span class="dd-sys-value"><?php echo htmlspecialchars($sd['operational_status']); ?></span>
+                                    <span class="dd-sys-value"><?php echo htmlspecialchars(implode(', ', (array)$sd['operational_status'])); ?></span>
                                 </div>
                                 <?php endif; ?>
                             </div>
@@ -1004,7 +1001,7 @@ $core_count = !empty($additional_info['cpu_per_core']) && is_array($additional_i
             <?php endif; ?>
 
             <section class="dd-panel dd-panel-alerts">
-                <button type="button" class="dd-panel-toggle" data-dd-toggle="alerts" aria-expanded="true">
+                <button type="button" class="dd-panel-toggle" data-dd-toggle="alerts" aria-expanded="false">
                     <div class="dd-panel-head-inner">
                         <h3><i class="material-icons">notifications_active</i> Alert</h3>
                         <span class="dd-panel-count">
@@ -1014,9 +1011,9 @@ $core_count = !empty($additional_info['cpu_per_core']) && is_array($additional_i
                             <?php endif; ?>
                         </span>
                     </div>
-                    <i class="material-icons dd-chevron">expand_less</i>
+                    <i class="material-icons dd-chevron">expand_more</i>
                 </button>
-                <div class="dd-panel-collapse" id="dd-collapse-alerts">
+                <div class="dd-panel-collapse is-collapsed" id="dd-collapse-alerts">
                     <div class="dd-panel-body dd-panel-body-scroll dd-alerts-body">
                         <?php if (!empty($alerts)): ?>
                         <div class="dd-alert-list">
@@ -1106,6 +1103,53 @@ $core_count = !empty($additional_info['cpu_per_core']) && is_array($additional_i
                     </div>
                 </div>
             </section>
+            <!-- Device Logs -->
+            <section class="dd-panel">
+                <button type="button" class="dd-panel-toggle" data-dd-toggle="logs" aria-expanded="<?php echo isset($_GET['log_days']) ? 'true' : 'false'; ?>">
+                    <div class="dd-panel-head-inner">
+                        <h3><i class="material-icons">receipt_long</i> Log Perangkat</h3>
+                        <span class="dd-panel-count"><?php echo count($device_logs); ?> baris</span>
+                    </div>
+                    <i class="material-icons dd-chevron"><?php echo isset($_GET['log_days']) ? 'expand_less' : 'expand_more'; ?></i>
+                </button>
+                <div class="dd-panel-collapse <?php echo isset($_GET['log_days']) ? '' : 'is-collapsed'; ?>" id="dd-collapse-logs">
+                    <div class="dd-panel-body" style="padding-bottom: 10px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 12px; color: var(--text-secondary);">Filter rentang waktu:</span>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <select class="form-select" style="width: auto; padding: 2px 24px 2px 8px; font-size: 12px; height: 26px;" onchange="window.location.href='?page=devices&device_id=<?php echo urlencode($device_id); ?>&log_days=' + this.value;">
+                                    <option value="1" <?php if($log_days == '1') echo 'selected'; ?>>Hari ini</option>
+                                    <option value="7" <?php if($log_days == '7') echo 'selected'; ?>>7 Hari</option>
+                                    <option value="15" <?php if($log_days == '15') echo 'selected'; ?>>15 Hari</option>
+                                    <option value="30" <?php if($log_days == '30') echo 'selected'; ?>>30 Hari</option>
+                                    <option value="all" <?php if($log_days === 'all') echo 'selected'; ?>>Semua</option>
+                                </select>
+                                <select id="dd-log-format" class="form-select" style="width: auto; padding: 2px 24px 2px 8px; font-size: 12px; height: 26px;">
+                                    <option value="txt">TXT</option>
+                                    <option value="csv">CSV</option>
+                                    <option value="xls">XLS</option>
+                                </select>
+                                <a href="#" onclick="this.href='?page=devices&device_id=<?php echo urlencode($device_id); ?>&export=log&log_days=<?php echo urlencode($log_days); ?>&format=' + document.getElementById('dd-log-format').value" class="btn btn-tiny btn-outline" style="height: 26px; display: inline-flex; align-items: center; gap: 4px;" title="Export Log">
+                                    <i class="material-icons" style="font-size: 14px;">download</i>
+                                    Export
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dd-panel-body dd-panel-body-scroll" style="max-height: 400px; overflow-y: auto; background: var(--bg-surface); padding: 10px; font-family: monospace; font-size: 12px; color: var(--text-primary); border-top: 1px solid var(--border-color);">
+                        <?php if (!empty($device_logs)): ?>
+                            <?php foreach ($device_logs as $log): ?>
+                                <div style="margin-bottom: 4px; white-space: pre-wrap; word-break: break-all; border-bottom: 1px solid var(--border-color); padding-bottom: 4px;"><?php echo $log; ?></div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <div class="dd-empty-sm text-muted">
+                                <i class="material-icons" style="font-size: 20px; vertical-align: middle;">info</i>
+                                <span>Tidak ada log untuk rentang waktu yang dipilih.</span>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </section>
         </div>
     </div>
 </div>
@@ -1187,99 +1231,8 @@ $core_count = !empty($additional_info['cpu_per_core']) && is_array($additional_i
     });
 })();
 </script>
-
-<?php if (count($chart_labels) > 0): ?>
 <script>
 (function () {
-    const ctx = document.getElementById('ddPerfChart');
-    if (!ctx || typeof Chart === 'undefined') return;
-    const uiStyles = getComputedStyle(document.body);
-    const chartTextColor = uiStyles.getPropertyValue('--text-secondary').trim() || '#94a3b8';
-    const chartGridColor = document.body.getAttribute('data-theme') === 'dark' ? 'rgba(148, 163, 184, 0.14)' : 'rgba(0,0,0,0.04)';
-
-    const labels = <?php echo json_encode($chart_labels); ?>;
-    const cpu = <?php echo json_encode($chart_cpu); ?>;
-    const mem = <?php echo json_encode($chart_mem); ?>;
-    const disk = <?php echo json_encode($chart_disk); ?>;
-
-    window.ddPerfChartInstance = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [
-                {
-                    label: 'CPU %',
-                    data: cpu,
-                    borderColor: '#667eea',
-                    backgroundColor: 'rgba(102, 126, 234, 0.10)',
-                    borderWidth: 2,
-                    tension: 0.35,
-                    fill: true,
-                    pointRadius: labels.length > 24 ? 0 : 2,
-                    pointHoverRadius: 4
-                },
-                {
-                    label: 'Memory %',
-                    data: mem,
-                    borderColor: '#764ba2',
-                    backgroundColor: 'rgba(118, 75, 162, 0.06)',
-                    borderWidth: 2,
-                    tension: 0.35,
-                    fill: true,
-                    pointRadius: labels.length > 24 ? 0 : 2,
-                    pointHoverRadius: 4
-                },
-                {
-                    label: 'Disk %',
-                    data: disk,
-                    borderColor: '#22c55e',
-                    backgroundColor: 'rgba(34, 197, 94, 0.05)',
-                    borderWidth: 2,
-                    tension: 0.35,
-                    fill: true,
-                    pointRadius: labels.length > 24 ? 0 : 2,
-                    pointHoverRadius: 4
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            interaction: { mode: 'index', intersect: false },
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    backgroundColor: 'rgba(30, 30, 47, 0.92)',
-                    titleFont: { size: 11, weight: '600' },
-                    bodyFont: { size: 11 },
-                    padding: 10,
-                    cornerRadius: 8,
-                    callbacks: {
-                        label: function (c) {
-                            return ' ' + c.dataset.label + ': ' + c.parsed.y + '%';
-                        }
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    grid: { display: false },
-                    ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 8, color: chartTextColor, font: { size: 10 } }
-                },
-                y: {
-                    min: 0,
-                    max: 100,
-                    grid: { color: chartGridColor },
-                    ticks: {
-                        color: chartTextColor,
-                        font: { size: 10 },
-                        callback: function (v) { return v + '%'; }
-                    }
-                }
-            }
-        }
-    });
-})();
 
 // Refresh Device (Audit) Logic
 document.querySelectorAll('.btn-refresh-detail').forEach(btn => {
@@ -1345,4 +1298,3 @@ document.querySelectorAll('.btn-refresh-detail').forEach(btn => {
     });
 });
 </script>
-<?php endif; ?>

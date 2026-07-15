@@ -2,97 +2,140 @@
 /**
  * System Logs Content Page
  */
-$log_dir = __DIR__ . '/../../logs/';
-$log_files = [];
 
-if (is_dir($log_dir)) {
-    $files = scandir($log_dir);
-    foreach ($files as $file) {
-        if (pathinfo($file, PATHINFO_EXTENSION) === 'log') {
-            $log_files[] = [
-                'name' => $file,
-                'path' => $log_dir . $file,
-                'size' => filesize($log_dir . $file),
-                'modified' => filemtime($log_dir . $file)
-            ];
-        }
-    }
-}
-
-// Get recent log entries if available
-$recent_logs = [];
-$selected_log = $_GET['log'] ?? null;
-
-if ($selected_log && isset($log_files)) {
-    foreach ($log_files as $lf) {
-        if ($lf['name'] === $selected_log) {
-            $log_path = $lf['path'];
-            break;
-        }
-    }
-}
-
-if (isset($log_path) && file_exists($log_path)) {
-    $lines = file($log_path);
-    $recent_logs = array_slice($lines, -100); // Last 100 lines
+try {
+    $pdo = getDbConnection();
+    
+    // Pagination
+    $page_num = isset($_GET['p']) ? (int)$_GET['p'] : 1;
+    if ($page_num < 1) $page_num = 1;
+    $limit = 25;
+    $offset = ($page_num - 1) * $limit;
+    
+    // Total count
+    $stmt = $pdo->query("SELECT COUNT(*) FROM activity_logs");
+    $total_logs = $stmt->fetchColumn();
+    $total_pages = ceil($total_logs / $limit);
+    
+    // Fetch logs
+    $stmt = $pdo->prepare("SELECT * FROM activity_logs ORDER BY timestamp DESC LIMIT ? OFFSET ?");
+    $stmt->execute([$limit, $offset]);
+    $activity_logs = $stmt->fetchAll();
+    
+} catch (PDOException $e) {
+    $db_error = $e->getMessage();
+    $activity_logs = [];
 }
 ?>
 
-<div class="card">
-    <div class="card-content">
-        <h5 class="card-title">
-            <i class="material-icons">description</i>
-            System Logs
-        </h5>
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+    <div>
+        <h2 class="page-title" style="margin: 0; display: flex; align-items: center; gap: 8px;">
+            <i class="material-icons" style="font-size: 28px; color: var(--primary-color);">manage_history</i>
+            Activity Logs
+        </h2>
+        <p class="text-secondary" style="margin: 4px 0 0 0; font-size: 14px;">Catatan aktivitas sistem dan riwayat tindakan krusial.</p>
+    </div>
+    <div>
+        <button class="btn btn-outline" onclick="location.reload()" style="display: inline-flex; align-items: center; gap: 6px;">
+            <i class="material-icons" style="font-size: 16px;">refresh</i>
+            Refresh
+        </button>
+    </div>
+</div>
 
-        <?php if (empty($log_files)): ?>
-            <div class="empty-state">
-                <i class="material-icons">folder_open</i>
-                <p>Belum ada log file</p>
-                <small>Log files akan dibuat otomatis di direktori logs/</small>
-            </div>
-        <?php else: ?>
-            <div class="row">
-                <div class="col s12 m4">
-                    <h6>Log Files</h6>
-                    <div class="log-list" style="flex-direction: column;">
-                        <?php foreach ($log_files as $log): ?>
-                            <a href="?page=logs&log=<?php echo urlencode($log['name']); ?>"
-                               class="btn <?php echo $selected_log === $log['name'] ? 'btn-primary' : 'btn-secondary'; ?>"
-                               style="text-align: left; justify-content: space-between; width: 100%;">
-                                <span><?php echo htmlspecialchars($log['name']); ?></span>
-                                <small><?php echo number_format($log['size'] / 1024, 1); ?> KB</small>
-                            </a>
-                        <?php endforeach; ?>
-                    </div>
-                </div>
+<?php if (isset($db_error)): ?>
+    <div class="alert alert-danger">
+        <i class="material-icons tiny">error</i>
+        Gagal memuat log aktivitas: <?php echo htmlspecialchars($db_error); ?>
+    </div>
+<?php endif; ?>
 
-                <div class="col s12 m8">
-                    <?php if ($selected_log): ?>
-                        <div class="page-toolbar">
-                            <h6><?php echo htmlspecialchars($selected_log); ?></h6>
-                            <button class="btn btn-sm" onclick="location.reload()">
-                                <i class="material-icons tiny">refresh</i> Refresh
-                            </button>
-                        </div>
-
-                        <div class="log-viewer">
-                            <?php if (empty($recent_logs)): ?>
-                                <p class="log-line-empty">Log file kosong</p>
-                            <?php else: ?>
-                                <?php foreach ($recent_logs as $line): ?>
-                                    <div style="white-space: pre-wrap; word-break: break-all;"><?php echo htmlspecialchars($line); ?></div>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-                        </div>
-                    <?php else: ?>
-                        <div class="empty-state">
-                            <i class="material-icons">insert_drive_file</i>
-                            <p>Pilih log file untuk melihat isinya</p>
-                        </div>
+<div class="surface-panel" style="padding: 0; overflow: hidden;">
+    <?php if (empty($activity_logs)): ?>
+        <div style="padding: 60px 20px; text-align: center;">
+            <i class="material-icons" style="font-size: 48px; color: var(--text-muted); margin-bottom: 16px;">history</i>
+            <h3 style="margin: 0 0 8px 0; font-size: 16px; color: var(--text-primary);">Belum Ada Aktivitas</h3>
+            <p style="margin: 0; color: var(--text-secondary); font-size: 13px;">Belum ada log aktivitas yang tercatat di dalam database.</p>
+        </div>
+    <?php else: ?>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th style="width: 160px;">Waktu</th>
+                        <th style="width: 140px;">Pengguna / IP</th>
+                        <th style="width: 160px;">Aksi / Modul</th>
+                        <th style="width: 100px;">Level</th>
+                        <th>Keterangan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($activity_logs as $log): ?>
+                        <tr>
+                            <td class="text-secondary" style="font-size: 13px;">
+                                <?php echo date('Y-m-d H:i:s', strtotime($log['timestamp'])); ?>
+                            </td>
+                            <td>
+                                <div style="font-weight: 600; font-size: 13px; color: var(--text-primary);">
+                                    <i class="material-icons" style="font-size: 14px; vertical-align: middle; margin-right: 4px; color: var(--text-secondary);">person</i>
+                                    <?php echo htmlspecialchars($log['username'] ?? 'System'); ?>
+                                </div>
+                                <div style="font-family: monospace; font-size: 11px; color: var(--text-muted); margin-top: 4px;">
+                                    <?php echo htmlspecialchars($log['ip_address'] ?? '-'); ?>
+                                </div>
+                            </td>
+                            <td>
+                                <span style="font-weight: 500; font-size: 13px; color: var(--text-primary);">
+                                    <?php echo htmlspecialchars($log['action']); ?>
+                                </span>
+                            </td>
+                            <td>
+                                <?php
+                                $level = strtoupper($log['level']);
+                                $color = 'var(--text-secondary)';
+                                $bg = 'var(--bg-surface-3)';
+                                
+                                if ($level === 'CRITICAL' || $level === 'ERROR') {
+                                    $color = '#ef4444';
+                                    $bg = 'rgba(239, 68, 68, 0.1)';
+                                } elseif ($level === 'WARNING') {
+                                    $color = '#f59e0b';
+                                    $bg = 'rgba(245, 158, 11, 0.1)';
+                                } elseif ($level === 'INFO') {
+                                    $color = '#3b82f6';
+                                    $bg = 'rgba(59, 130, 246, 0.1)';
+                                }
+                                ?>
+                                <span style="font-size: 11px; padding: 3px 8px; border-radius: 12px; background: <?php echo $bg; ?>; color: <?php echo $color; ?>; font-weight: 600;">
+                                    <?php echo htmlspecialchars($level); ?>
+                                </span>
+                            </td>
+                            <td style="font-size: 13px; color: var(--text-secondary);">
+                                <?php echo htmlspecialchars($log['description']); ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+        
+        <?php if ($total_pages > 1): ?>
+            <div style="padding: 16px; border-top: 1px solid var(--border-color); display: flex; justify-content: center;">
+                <div style="display: flex; gap: 4px;">
+                    <?php if ($page_num > 1): ?>
+                        <a href="?page=logs&p=<?php echo $page_num - 1; ?>" class="btn btn-tiny btn-outline"><i class="material-icons tiny">chevron_left</i></a>
+                    <?php endif; ?>
+                    
+                    <span style="display: inline-flex; align-items: center; padding: 0 12px; font-size: 13px; color: var(--text-secondary);">
+                        Halaman <?php echo $page_num; ?> dari <?php echo $total_pages; ?>
+                    </span>
+                    
+                    <?php if ($page_num < $total_pages): ?>
+                        <a href="?page=logs&p=<?php echo $page_num + 1; ?>" class="btn btn-tiny btn-outline"><i class="material-icons tiny">chevron_right</i></a>
                     <?php endif; ?>
                 </div>
             </div>
         <?php endif; ?>
-    </div>
+    <?php endif; ?>
 </div>
