@@ -54,7 +54,8 @@ class APIClient:
         self.session.headers.update({
             'Content-Type': 'application/json',
             'X-API-Key': self.api_key,
-            'User-Agent': f'RAS-Agent/{self.device_id}'
+            'User-Agent': f'RAS-Agent/{self.device_id}',
+            'ngrok-skip-browser-warning': 'true'
         })
 
     def test_connection(self) -> Tuple[bool, str]:

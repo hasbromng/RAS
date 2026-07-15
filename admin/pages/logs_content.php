@@ -55,11 +55,11 @@ if (isset($log_path) && file_exists($log_path)) {
             <div class="row">
                 <div class="col s12 m4">
                     <h6>Log Files</h6>
-                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <div class="log-list" style="flex-direction: column;">
                         <?php foreach ($log_files as $log): ?>
                             <a href="?page=logs&log=<?php echo urlencode($log['name']); ?>"
-                               class="btn <?php echo $selected_log === $log['name'] ? 'btn-primary' : ''; ?>"
-                               style="text-align: left; justify-content: space-between; display: flex;">
+                               class="btn <?php echo $selected_log === $log['name'] ? 'btn-primary' : 'btn-secondary'; ?>"
+                               style="text-align: left; justify-content: space-between; width: 100%;">
                                 <span><?php echo htmlspecialchars($log['name']); ?></span>
                                 <small><?php echo number_format($log['size'] / 1024, 1); ?> KB</small>
                             </a>
@@ -69,16 +69,16 @@ if (isset($log_path) && file_exists($log_path)) {
 
                 <div class="col s12 m8">
                     <?php if ($selected_log): ?>
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <div class="page-toolbar">
                             <h6><?php echo htmlspecialchars($selected_log); ?></h6>
                             <button class="btn btn-sm" onclick="location.reload()">
                                 <i class="material-icons tiny">refresh</i> Refresh
                             </button>
                         </div>
 
-                        <div style="background: #1a1a2e; color: #00ff00; padding: 1rem; border-radius: 8px; max-height: 500px; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 0.875rem;">
+                        <div class="log-viewer">
                             <?php if (empty($recent_logs)): ?>
-                                <p style="color: #666;">Log file kosong</p>
+                                <p class="log-line-empty">Log file kosong</p>
                             <?php else: ?>
                                 <?php foreach ($recent_logs as $line): ?>
                                     <div style="white-space: pre-wrap; word-break: break-all;"><?php echo htmlspecialchars($line); ?></div>
@@ -96,10 +96,3 @@ if (isset($log_path) && file_exists($log_path)) {
         <?php endif; ?>
     </div>
 </div>
-
-<style>
-.btn {
-    display: flex !important;
-    align-items: center !important;
-}
-</style>

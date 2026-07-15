@@ -11,8 +11,8 @@ $users = [
 
 <div class="card">
     <div class="card-content">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-            <h5 class="card-title" style="margin: 0;">
+        <div class="page-toolbar">
+            <h5 class="card-title card-title-reset">
                 <i class="material-icons">people</i>
                 Manajemen Pengguna
             </h5>
@@ -43,14 +43,14 @@ $users = [
                     <?php foreach ($users as $user): ?>
                         <tr>
                             <td>
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <i class="material-icons" style="color: #667eea;">account_circle</i>
+                                <div class="metric-inline compact">
+                                    <i class="material-icons icon-accent">account_circle</i>
                                     <strong><?php echo htmlspecialchars($user['username']); ?></strong>
                                 </div>
                             </td>
                             <td><?php echo htmlspecialchars($user['email']); ?></td>
                             <td>
-                                <span class="status-badge" style="background: #e3f2fd; color: #0277bd;">
+                                <span class="status-badge offline">
                                     <?php echo htmlspecialchars($user['role']); ?>
                                 </span>
                             </td>
@@ -61,10 +61,10 @@ $users = [
                             </td>
                             <td><?php echo date('M j, H:i', strtotime($user['last_login'])); ?></td>
                             <td>
-                                <button class="btn btn-sm">
+                                <button class="btn btn-tiny btn-secondary">
                                     <i class="material-icons tiny">edit</i>
                                 </button>
-                                <button class="btn btn-sm" style="background: #ff5252;">
+                                <button class="btn btn-tiny btn-danger">
                                     <i class="material-icons tiny">delete</i>
                                 </button>
                             </td>

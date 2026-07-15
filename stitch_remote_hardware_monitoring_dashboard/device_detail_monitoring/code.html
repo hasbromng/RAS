@@ -1,0 +1,429 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Device Detail Screen - CoreMonitor</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@600;700;900&amp;family=Inter:wght@400&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-low": "#1a1c1f",
+                        "on-tertiary-fixed-variant": "#624000",
+                        "secondary-fixed": "#26fedc",
+                        "on-error": "#690005",
+                        "on-error-container": "#ffdad6",
+                        "surface-container": "#1e2023",
+                        "on-secondary-fixed-variant": "#005144",
+                        "on-tertiary": "#442b00",
+                        "on-secondary-container": "#006a5a",
+                        "primary-fixed": "#b7eaff",
+                        "error-container": "#93000a",
+                        "background": "#111316",
+                        "on-primary-fixed-variant": "#004e60",
+                        "on-primary-fixed": "#001f28",
+                        "tertiary": "#ffd59c",
+                        "on-surface": "#e2e2e6",
+                        "secondary-fixed-dim": "#00dfc1",
+                        "error": "#ffb4ab",
+                        "secondary-container": "#00f2d1",
+                        "tertiary-fixed": "#ffddb1",
+                        "surface-variant": "#333538",
+                        "tertiary-container": "#feb127",
+                        "inverse-on-surface": "#2f3034",
+                        "secondary": "#c7fff0",
+                        "surface-tint": "#4cd6ff",
+                        "on-tertiary-fixed": "#291800",
+                        "primary-fixed-dim": "#4cd6ff",
+                        "surface-container-high": "#282a2d",
+                        "inverse-surface": "#e2e2e6",
+                        "outline": "#859399",
+                        "on-primary": "#003543",
+                        "on-primary-container": "#00566a",
+                        "outline-variant": "#3c494e",
+                        "surface-bright": "#37393d",
+                        "surface-container-lowest": "#0c0e11",
+                        "primary": "#a4e6ff",
+                        "on-secondary-fixed": "#00201a",
+                        "primary-container": "#00d1ff",
+                        "surface-dim": "#111316",
+                        "on-surface-variant": "#bbc9cf",
+                        "surface-container-highest": "#333538",
+                        "inverse-primary": "#00677f",
+                        "on-secondary": "#00382f",
+                        "on-background": "#e2e2e6",
+                        "surface": "#111316",
+                        "on-tertiary-container": "#6b4700",
+                        "tertiary-fixed-dim": "#ffba49"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "margin-mobile": "16px",
+                        "container-max": "1440px",
+                        "margin-desktop": "32px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "data-sm": ["JetBrains Mono"],
+                        "data-lg": ["JetBrains Mono"],
+                        "body-md": ["Inter"],
+                        "label-sm": ["JetBrains Mono"],
+                        "display-lg": ["Hanken Grotesk"],
+                        "headline-md": ["Hanken Grotesk"]
+                    },
+                    "fontSize": {
+                        "data-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "data-lg": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "display-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: theme('colors.background');
+            color: theme('colors.on-background');
+        }
+        
+        /* Custom scrollbar for terminal/data feel */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: theme('colors.surface-container-low');
+        }
+        ::-webkit-scrollbar-thumb {
+            background: theme('colors.outline-variant');
+            border-radius: theme('borderRadius.DEFAULT');
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: theme('colors.outline');
+        }
+
+        .sparkline {
+            stroke: theme('colors.primary');
+            stroke-width: 1px;
+            fill: none;
+        }
+        .sparkline-secondary {
+            stroke: theme('colors.secondary-fixed');
+            stroke-width: 1px;
+            fill: none;
+        }
+        .grid-bg {
+            background-image: 
+                linear-gradient(to right, theme('colors.outline-variant') 1px, transparent 1px),
+                linear-gradient(to bottom, theme('colors.outline-variant') 1px, transparent 1px);
+            background-size: 20px 20px;
+            opacity: 0.1;
+        }
+    </style>
+</head>
+<body class="flex bg-background h-screen overflow-hidden font-body-md text-body-md">
+<!-- SideNavBar (Shared Component) -->
+<nav class="h-screen w-64 fixed left-0 top-0 backdrop-blur-md border-r border-outline-variant bg-surface-container-low/80 dark:bg-surface-container-low/80 flex flex-col py-unit px-margin-desktop z-50">
+<!-- Brand / Header -->
+<div class="mb-8 mt-4">
+<h1 class="font-headline-md text-headline-md font-bold text-primary tracking-tighter">CoreMonitor</h1>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-1">V2.4.8-Stable</p>
+</div>
+<!-- Main Tabs -->
+<ul class="flex flex-col gap-2 flex-grow">
+<!-- Active Tab Logic: Device Details falls under Devices -->
+<li class="">
+<a class="flex items-center gap-3 px-3 py-2 rounded text-on-surface-variant font-medium hover:bg-surface-variant/50 transition-colors duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">dashboard</span>
+<span class="font-label-sm text-label-sm">Overview</span>
+</a>
+</li>
+<li class="">
+<a class="flex items-center gap-3 px-3 py-2 rounded text-secondary-fixed font-bold border-r-2 border-secondary-fixed bg-surface-container-high opacity-80 duration-100" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">memory</span>
+<span class="font-label-sm text-label-sm">Devices</span>
+</a>
+</li>
+
+<li class="">
+<a class="flex items-center gap-3 px-3 py-2 rounded text-on-surface-variant font-medium hover:bg-surface-variant/50 transition-colors duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">warning</span>
+<span class="font-label-sm text-label-sm">Alerts</span>
+</a>
+</li>
+</ul>
+<!-- Footer Tabs -->
+<ul class="flex flex-col gap-2 mt-auto mb-4 border-t border-outline-variant pt-4">
+<li class="">
+<a class="flex items-center gap-3 px-3 py-2 rounded text-on-surface-variant font-medium hover:bg-surface-variant/50 transition-colors duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">settings</span>
+<span class="font-label-sm text-label-sm">Settings</span>
+</a>
+</li>
+<li class="">
+<a class="flex items-center gap-3 px-3 py-2 rounded text-on-surface-variant font-medium hover:bg-surface-variant/50 transition-colors duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">help</span>
+<span class="font-label-sm text-label-sm">Support</span>
+</a>
+</li>
+</ul>
+</nav>
+<!-- Main Content Area -->
+<main class="ml-64 w-[calc(100%-16rem)] flex flex-col h-screen relative">
+<!-- TopAppBar (Shared Component) -->
+<header class="docked full-width top-0 h-16 border-b border-outline-variant bg-surface-container flex items-center justify-between px-margin-desktop z-40">
+<div class="flex items-center gap-4">
+<!-- Back button since it's a detail screen -->
+<button class="text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h2 class="font-headline-md text-headline-md text-on-surface font-black">Hardware Monitoring System</h2>
+</div>
+<div class="flex items-center gap-6">
+<!-- Search Icon (Right aligned per JSON) -->
+<button class="text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined">search</span>
+</button>
+<!-- Trailing Actions -->
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant hover:text-on-surface transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-0 right-0 w-2 h-2 bg-error rounded-full"></span>
+</button>
+<button class="text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined">settings_remote</span>
+</button>
+</div>
+<!-- Primary Action -->
+<button class="bg-primary text-on-primary font-label-sm text-label-sm px-4 py-2 rounded hover:bg-primary-container transition-colors font-bold uppercase tracking-wide">
+                    Deploy Agent
+                </button>
+</div>
+</header>
+<!-- Scrollable Canvas -->
+<div class="flex-1 overflow-y-auto p-margin-desktop bg-surface relative">
+<div class="absolute inset-0 grid-bg pointer-events-none z-0"></div>
+<div class="max-w-container-max mx-auto relative z-10 flex flex-col gap-gutter">
+<!-- Device Header & System Info -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-gutter">
+<!-- Title Card -->
+<div class="md:col-span-4 bg-surface-container-low border border-outline-variant rounded-lg p-4 flex flex-col justify-between">
+<div>
+<div class="flex items-center gap-2 mb-2">
+<span class="w-3 h-3 rounded-full bg-secondary-fixed shadow-[0_0_8px_rgba(38,254,220,0.5)]"></span>
+<span class="font-label-sm text-label-sm text-secondary-fixed">ONLINE</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-1">SRV-PROD-019</h3>
+<p class="font-data-sm text-data-sm text-on-surface-variant">192.168.1.105</p>
+</div>
+<div class="mt-4 flex gap-4">
+<button class="flex-1 border border-outline-variant text-on-surface font-label-sm text-label-sm py-2 rounded hover:bg-surface-variant transition-colors">
+                                RESTART
+                            </button>
+<button class="flex-1 border border-outline-variant text-on-surface font-label-sm text-label-sm py-2 rounded hover:bg-surface-variant transition-colors">
+                                CONSOLE
+                            </button>
+</div>
+</div>
+<!-- System Info Bento -->
+<div class="md:col-span-8 grid grid-cols-2 lg:grid-cols-4 gap-gutter">
+<div class="bg-surface-container-low border border-outline-variant rounded-lg p-4 flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase mb-2">CPU Model</span>
+<span class="font-data-lg text-data-lg text-on-surface mt-auto">Ryzen 7 5800X</span>
+</div>
+<div class="bg-surface-container-low border border-outline-variant rounded-lg p-4 flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase mb-2">OS Version</span>
+<span class="font-data-lg text-data-lg text-on-surface mt-auto">Ubuntu 22.04 LTS</span>
+</div>
+<div class="bg-surface-container-low border border-outline-variant rounded-lg p-4 flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase mb-2">Uptime</span>
+<span class="font-data-lg text-data-lg text-on-surface mt-auto">45d 12h 33m</span>
+</div>
+<div class="bg-surface-container-low border border-outline-variant rounded-lg p-4 flex flex-col relative overflow-hidden">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase mb-2">Network Load</span>
+<div class="mt-auto">
+<div class="flex justify-between font-data-sm text-data-sm">
+<span class="text-secondary-fixed">↓ 12 MB/s</span>
+<span class="text-primary">↑ 4.5 MB/s</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Live Charts Section -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-gutter">
+<!-- CPU Chart -->
+<div class="bg-surface-container border border-outline-variant rounded-lg p-4 h-64 flex flex-col">
+<div class="flex justify-between items-center mb-4">
+<h4 class="font-label-sm text-label-sm text-on-surface uppercase">CPU Load (60s)</h4>
+<span class="font-data-lg text-data-lg text-error">84%</span>
+</div>
+<div class="flex-1 relative w-full h-full border-b border-l border-outline-variant/50">
+<svg class="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 100">
+<!-- Simulated graph line -->
+<polyline class="sparkline" points="0,80 10,75 20,85 30,60 40,90 50,85 60,95 70,80 80,88 90,82 100,84" style="stroke: theme('colors.error');"></polyline>
+</svg>
+</div>
+</div>
+<!-- RAM Chart -->
+<div class="bg-surface-container border border-outline-variant rounded-lg p-4 h-64 flex flex-col">
+<div class="flex justify-between items-center mb-4">
+<h4 class="font-label-sm text-label-sm text-on-surface uppercase">Memory Load (60s)</h4>
+<span class="font-data-lg text-data-lg text-secondary-fixed">42%</span>
+</div>
+<div class="flex-1 relative w-full h-full border-b border-l border-outline-variant/50">
+<svg class="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 100">
+<!-- Simulated graph line -->
+<polyline class="sparkline-secondary" points="0,50 10,48 20,52 30,45 40,49 50,42 60,44 70,41 80,43 90,40 100,42"></polyline>
+</svg>
+</div>
+</div>
+</div>
+<!-- Hardware & Storage Details -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+<!-- RAM Details -->
+<div class="bg-surface-container-low border border-outline-variant rounded-lg p-4">
+<h4 class="font-label-sm text-label-sm text-on-surface-variant uppercase mb-4 border-b border-outline-variant pb-2">Physical Memory</h4>
+<div class="grid grid-cols-2 gap-4 mb-6">
+<div>
+<span class="block font-label-sm text-label-sm text-on-surface-variant">Type</span>
+<span class="font-data-sm text-data-sm text-on-surface">DDR4 ECC</span>
+</div>
+<div>
+<span class="block font-label-sm text-label-sm text-on-surface-variant">Speed</span>
+<span class="font-data-sm text-data-sm text-on-surface">3200 MHz</span>
+</div>
+<div>
+<span class="block font-label-sm text-label-sm text-on-surface-variant">Total Size</span>
+<span class="font-data-sm text-data-sm text-on-surface">64 GB</span>
+</div>
+<div>
+<span class="block font-label-sm text-label-sm text-on-surface-variant">Slots Used</span>
+<span class="font-data-sm text-data-sm text-on-surface">4 / 8</span>
+</div>
+</div>
+<!-- Progress Ring equivalent as a linear bar for density -->
+<div>
+<div class="flex justify-between font-label-sm text-label-sm mb-1">
+<span class="text-on-surface">Usage</span>
+<span class="text-secondary-fixed">26.8 GB / 64.0 GB</span>
+</div>
+<div class="w-full bg-surface-variant h-1 rounded-full overflow-hidden">
+<div class="bg-secondary-fixed h-full" style="width: 42%;"></div>
+</div>
+</div>
+</div>
+<!-- Disk Details -->
+<div class="bg-surface-container-low border border-outline-variant rounded-lg p-4">
+<h4 class="font-label-sm text-label-sm text-on-surface-variant uppercase mb-4 border-b border-outline-variant pb-2">Storage Array</h4>
+<!-- Drive 1 -->
+<div class="mb-4">
+<div class="flex justify-between items-center mb-1">
+<span class="font-data-sm text-data-sm text-on-surface">/dev/nvme0n1 (Samsung 980)</span>
+<span class="font-data-sm text-data-sm text-on-surface-variant">500GB</span>
+</div>
+<div class="flex justify-between font-label-sm text-label-sm mb-1 text-on-surface-variant">
+<span class="">Used: 320GB</span>
+<span class="">Free: 180GB</span>
+</div>
+<div class="w-full bg-surface-variant h-1 rounded-full overflow-hidden">
+<div class="bg-primary h-full" style="width: 64%;"></div>
+</div>
+</div>
+<!-- Drive 2 -->
+<div>
+<div class="flex justify-between items-center mb-1">
+<span class="font-data-sm text-data-sm text-on-surface">/dev/sda1 (WD Red Pro)</span>
+<span class="font-data-sm text-data-sm text-on-surface-variant">4TB</span>
+</div>
+<div class="flex justify-between font-label-sm text-label-sm mb-1 text-on-surface-variant">
+<span class="">Used: 3.8TB</span>
+<span class="">Free: 0.2TB</span>
+</div>
+<div class="w-full bg-surface-variant h-1 rounded-full overflow-hidden">
+<div class="bg-error h-full" style="width: 95%;"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Real-time Task Manager -->
+<div class="bg-surface-container border border-outline-variant rounded-lg overflow-hidden flex flex-col">
+<div class="p-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-high">
+<h4 class="font-label-sm text-label-sm text-on-surface uppercase tracking-widest">Active Processes</h4>
+<div class="flex gap-2">
+<input class="bg-surface-container-low border border-outline-variant text-data-sm font-data-sm text-on-surface px-3 py-1 rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none" placeholder="Filter PID or Name..." type="text">
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low border-b border-outline-variant font-label-sm text-label-sm text-on-surface-variant uppercase">
+<th class="p-3 font-medium">PID</th>
+<th class="p-3 font-medium">Name</th>
+<th class="p-3 font-medium">User</th>
+<th class="p-3 font-medium text-right">CPU %</th>
+<th class="p-3 font-medium text-right">Memory (MB)</th>
+</tr>
+</thead>
+<tbody class="font-data-sm text-data-sm text-on-surface">
+<!-- Zebra striping -->
+<tr class="border-b border-outline-variant/50 hover:bg-surface-variant/30 transition-colors">
+<td class="p-3 text-on-surface-variant">4092</td>
+<td class="p-3 text-primary">node-server</td>
+<td class="p-3 text-on-surface-variant">sysadmin</td>
+<td class="p-3 text-right text-error font-semibold">45.2</td>
+<td class="p-3 text-right">1024.5</td>
+</tr>
+<tr class="border-b border-outline-variant/50 bg-surface-container-low/30 hover:bg-surface-variant/30 transition-colors">
+<td class="p-3 text-on-surface-variant">891</td>
+<td class="p-3">docker-daemon</td>
+<td class="p-3 text-on-surface-variant">root</td>
+<td class="p-3 text-right">12.4</td>
+<td class="p-3 text-right">512.0</td>
+</tr>
+<tr class="border-b border-outline-variant/50 hover:bg-surface-variant/30 transition-colors">
+<td class="p-3 text-on-surface-variant">1024</td>
+<td class="p-3">postgres</td>
+<td class="p-3 text-on-surface-variant">postgres</td>
+<td class="p-3 text-right">8.1</td>
+<td class="p-3 text-right">4096.2</td>
+</tr>
+<tr class="border-b border-outline-variant/50 bg-surface-container-low/30 hover:bg-surface-variant/30 transition-colors">
+<td class="p-3 text-on-surface-variant">1</td>
+<td class="p-3">systemd</td>
+<td class="p-3 text-on-surface-variant">root</td>
+<td class="p-3 text-right">0.1</td>
+<td class="p-3 text-right">12.8</td>
+</tr>
+<tr class="border-b border-outline-variant/50 hover:bg-surface-variant/30 transition-colors">
+<td class="p-3 text-on-surface-variant">5521</td>
+<td class="p-3">python3</td>
+<td class="p-3 text-on-surface-variant">sysadmin</td>
+<td class="p-3 text-right">3.4</td>
+<td class="p-3 text-right">128.0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</main>
+
+
+</body></html>

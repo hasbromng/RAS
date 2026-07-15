@@ -1,0 +1,408 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>CoreMonitor - Main Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@600;700&amp;family=Inter:wght@400&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-container-low": "#1a1c1f",
+                      "on-tertiary-fixed-variant": "#624000",
+                      "secondary-fixed": "#26fedc",
+                      "on-error": "#690005",
+                      "on-error-container": "#ffdad6",
+                      "surface-container": "#1e2023",
+                      "on-secondary-fixed-variant": "#005144",
+                      "on-tertiary": "#442b00",
+                      "on-secondary-container": "#006a5a",
+                      "primary-fixed": "#b7eaff",
+                      "error-container": "#93000a",
+                      "background": "#111316",
+                      "on-primary-fixed-variant": "#004e60",
+                      "on-primary-fixed": "#001f28",
+                      "tertiary": "#ffd59c",
+                      "on-surface": "#e2e2e6",
+                      "secondary-fixed-dim": "#00dfc1",
+                      "error": "#ffb4ab",
+                      "secondary-container": "#00f2d1",
+                      "tertiary-fixed": "#ffddb1",
+                      "surface-variant": "#333538",
+                      "tertiary-container": "#feb127",
+                      "inverse-on-surface": "#2f3034",
+                      "secondary": "#c7fff0",
+                      "surface-tint": "#4cd6ff",
+                      "on-tertiary-fixed": "#291800",
+                      "primary-fixed-dim": "#4cd6ff",
+                      "surface-container-high": "#282a2d",
+                      "inverse-surface": "#e2e2e6",
+                      "outline": "#859399",
+                      "on-primary": "#003543",
+                      "on-primary-container": "#00566a",
+                      "outline-variant": "#3c494e",
+                      "surface-bright": "#37393d",
+                      "surface-container-lowest": "#0c0e11",
+                      "primary": "#a4e6ff",
+                      "on-secondary-fixed": "#00201a",
+                      "primary-container": "#00d1ff",
+                      "surface-dim": "#111316",
+                      "on-surface-variant": "#bbc9cf",
+                      "surface-container-highest": "#333538",
+                      "inverse-primary": "#00677f",
+                      "on-secondary": "#00382f",
+                      "on-background": "#e2e2e6",
+                      "surface": "#111316",
+                      "on-tertiary-container": "#6b4700",
+                      "tertiary-fixed-dim": "#ffba49"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "unit": "4px",
+                      "margin-mobile": "16px",
+                      "container-max": "1440px",
+                      "margin-desktop": "32px",
+                      "gutter": "16px"
+              },
+              "fontFamily": {
+                      "data-sm": [
+                              "JetBrains Mono"
+                      ],
+                      "data-lg": [
+                              "JetBrains Mono"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "label-sm": [
+                              "JetBrains Mono"
+                      ],
+                      "display-lg": [
+                              "Hanken Grotesk"
+                      ],
+                      "headline-md": [
+                              "Hanken Grotesk"
+                      ]
+              },
+              "fontSize": {
+                      "data-sm": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "data-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-sm": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "display-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body-md text-body-md antialiased overflow-x-hidden min-h-screen">
+<!-- SideNavBar -->
+<nav class="hidden md:flex bg-surface-container-low/80 backdrop-blur-md border-r border-outline-variant h-screen w-64 fixed left-0 top-0 flex-col py-unit px-margin-desktop z-50">
+<div class="mb-8 mt-4"><a class="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors mb-4 group" href="#">
+<span class="material-symbols-outlined text-[18px]">arrow_back</span>
+<span class="font-label-sm text-label-sm">All Organizations</span>
+</a>
+<h1 class="font-headline-md text-headline-md font-bold text-primary tracking-tighter">CoreMonitor <span class="text-on-surface-variant font-medium">| TechCorp</span></h1>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-1">V2.4.8-Stable</p>
+</div>
+<div class="flex-1 flex flex-col gap-2">
+<!-- Active: Overview -->
+<a class="flex items-center gap-3 py-2 px-3 text-secondary-fixed font-bold border-r-2 border-secondary-fixed bg-surface-container-high opacity-80 duration-100 rounded-sm" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="font-label-sm text-label-sm">Overview</span>
+</a>
+<a class="flex items-center gap-3 py-2 px-3 text-on-surface-variant font-medium hover:bg-surface-variant/50 transition-colors duration-150 rounded-sm" href="#">
+<span class="material-symbols-outlined">memory</span>
+<span class="font-label-sm text-label-sm">Devices</span>
+</a>
+
+<a class="flex items-center gap-3 py-2 px-3 text-on-surface-variant font-medium hover:bg-surface-variant/50 transition-colors duration-150 rounded-sm" href="#">
+<span class="material-symbols-outlined">warning</span>
+<span class="font-label-sm text-label-sm">Alerts</span>
+</a>
+</div>
+<div class="mt-auto border-t border-outline-variant/50 pt-4 pb-4 flex flex-col gap-2">
+<a class="flex items-center gap-3 py-2 px-3 text-on-surface-variant font-medium hover:bg-surface-variant/50 transition-colors duration-150 rounded-sm" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-sm text-label-sm">Settings</span>
+</a>
+<a class="flex items-center gap-3 py-2 px-3 text-on-surface-variant font-medium hover:bg-surface-variant/50 transition-colors duration-150 rounded-sm" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="font-label-sm text-label-sm">Support</span>
+</a>
+</div>
+<div class="mt-4 flex items-center gap-3 pt-4 border-t border-outline-variant/50">
+<img alt="System Administrator Avatar" class="w-8 h-8 rounded-full border border-outline-variant object-cover" data-alt="A small, stylized profile avatar of a system administrator in a high-tech monitoring environment, glowing screens reflecting on glasses, digital art style, stark lighting, dark background, primary blue accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAABZJLTDe15s6urspATIk8xO8PIRoiAQN77mGwGdTM9Qq6H_WaM55SoFHSP-np0m9BoMTj-5cVCOzLydciF9BoaIUv1qDVF6Y_VBmKQ-BsMBAr4W7dDI3OCA7qE8D4NCFGnTtvrXARxnyGy4Xz1tmhUUxFR2e8jT4Lo7-rit4dKoe6_r99HxEgQ9aMjUgCkUokWSW26ROA4pnhk56sOgp67Kp1bVJkI_Vj_0QPbQAx5-wH4OfO95m16w">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface">SYSADMIN</span>
+</div>
+</div>
+</nav>
+<!-- Main Content Wrapper -->
+<div class="md:ml-64 min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="hidden md:flex bg-surface-container border-b border-outline-variant docked full-width top-0 h-16 items-center justify-between px-margin-desktop sticky z-40">
+<div class="flex items-center">
+<h2 class="font-headline-md text-headline-md text-on-surface font-black">Hardware Monitoring System</h2><div class="ml-6 pl-6 border-l border-outline-variant/50 flex items-center gap-2 cursor-pointer group">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Organization</span>
+<div class="flex items-center gap-1">
+<span class="font-data-lg text-data-lg text-primary">TechCorp Global</span>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">expand_more</span>
+</div>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<!-- Search -->
+<div class="relative hidden lg:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">search</span>
+<input class="bg-surface-container-high border border-outline-variant rounded-sm py-1 pl-9 pr-3 text-on-surface font-data-sm text-data-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary w-64" placeholder="Search systems..." type="text">
+</div>
+<div class="flex items-center gap-3">
+<button class="text-on-surface-variant hover:text-on-surface transition-colors p-1 rounded hover:bg-surface-variant/50">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-on-surface transition-colors p-1 rounded hover:bg-surface-variant/50">
+<span class="material-symbols-outlined">settings_remote</span>
+</button>
+<button class="bg-primary text-on-primary font-label-sm text-label-sm px-4 py-1.5 rounded-sm hover:bg-primary-container transition-colors ml-2 font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">rocket_launch</span>
+                        Deploy Agent
+                    </button>
+</div>
+</div>
+</header>
+<!-- Canvas -->
+<main class="flex-1 p-margin-desktop space-y-gutter">
+<!-- Bento Grid Structure -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter auto-rows-min">
+<!-- Global Status Cards (Top Row) -->
+<div class="lg:col-span-4 bg-surface-container p-4 rounded-sm border border-outline-variant/30 flex flex-col gap-2 hover:bg-surface-container-high transition-colors">
+<div class="flex justify-between items-start">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Active Clients</span>
+<div class="w-2 h-2 rounded-full bg-secondary-fixed shadow-[0_0_8px_rgba(38,254,220,0.5)]"></div>
+</div>
+<div class="flex items-end gap-3">
+<span class="font-display-lg text-display-lg text-on-surface">1,042</span>
+<span class="font-data-sm text-data-sm text-secondary-fixed mb-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">arrow_upward</span> +12
+                        </span>
+</div>
+</div>
+<div class="lg:col-span-4 bg-surface-container p-4 rounded-sm border border-outline-variant/30 flex flex-col gap-2 hover:bg-surface-container-high transition-colors">
+<div class="flex justify-between items-start">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Total Alerts (24h)</span>
+<div class="w-2 h-2 rounded-full bg-tertiary-container shadow-[0_0_8px_rgba(254,177,39,0.5)]"></div>
+</div>
+<div class="flex items-end gap-3">
+<span class="font-display-lg text-display-lg text-on-surface">87</span>
+<span class="font-data-sm text-data-sm text-tertiary-container mb-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">warning</span> Action Req
+                        </span>
+</div>
+</div>
+<div class="lg:col-span-4 bg-surface-container p-4 rounded-sm border border-outline-variant/30 flex flex-col gap-2 hover:bg-surface-container-high transition-colors">
+<div class="flex justify-between items-start">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">System Health Avg</span>
+<div class="w-2 h-2 rounded-full bg-primary-fixed shadow-[0_0_8px_rgba(183,234,255,0.5)]"></div>
+</div>
+<div class="flex items-end gap-3">
+<span class="font-display-lg text-display-lg text-on-surface">99.8%</span>
+<span class="font-data-sm text-data-sm text-on-surface-variant mb-2">Stable</span>
+</div>
+</div>
+<!-- Network Load Chart (Main Span) -->
+<div class="lg:col-span-8 bg-surface-container rounded-sm border border-outline-variant/30 flex flex-col overflow-hidden h-[300px]">
+<div class="p-4 border-b border-outline-variant/30 flex justify-between items-center">
+<span class="font-label-sm text-label-sm text-on-surface uppercase">Live Network Load (Gbps)</span>
+<div class="flex gap-2">
+<button class="font-label-sm text-label-sm text-secondary-fixed bg-surface-variant px-2 py-1 rounded-sm">1H</button>
+<button class="font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface px-2 py-1 rounded-sm">24H</button>
+</div>
+</div>
+<div class="flex-1 relative bg-surface-container-low/50 p-4">
+<!-- Simulated Chart Grid -->
+<div class="absolute inset-0 grid grid-cols-6 grid-rows-4 opacity-10 pointer-events-none">
+<div class="border-b border-r border-primary"></div><div class="border-b border-r border-primary"></div><div class="border-b border-r border-primary"></div><div class="border-b border-r border-primary"></div><div class="border-b border-r border-primary"></div><div class="border-b border-primary"></div>
+<div class="border-b border-r border-primary"></div><div class="border-b border-r border-primary"></div><div class="border-b border-r border-primary"></div><div class="border-b border-r border-primary"></div><div class="border-b border-r border-primary"></div><div class="border-b border-primary"></div>
+<div class="border-b border-r border-primary"></div><div class="border-b border-r border-primary"></div><div class="border-b border-r border-primary"></div><div class="border-b border-r border-primary"></div><div class="border-b border-r border-primary"></div><div class="border-b border-primary"></div>
+<div class="border-r border-primary"></div><div class="border-r border-primary"></div><div class="border-r border-primary"></div><div class="border-r border-primary"></div><div class="border-r border-primary"></div><div></div>
+</div>
+<!-- Simulated SVG Sparkline -->
+<svg class="w-full h-full absolute bottom-0 left-0" preserveAspectRatio="none" viewBox="0 0 100 100">
+<polyline fill="none" points="0,80 10,75 20,85 30,60 40,70 50,40 60,50 70,20 80,45 90,30 100,50" stroke="#a4e6ff" stroke-width="1.5"></polyline>
+<polyline fill="none" points="0,90 10,85 20,95 30,70 40,80 50,50 60,60 70,30 80,55 90,40 100,60" stroke="#26fedc" stroke-dasharray="2 2" stroke-width="0.5"></polyline>
+</svg>
+</div>
+</div>
+<!-- Recent Alerts List (Side) -->
+<div class="lg:col-span-4 bg-surface-container rounded-sm border border-outline-variant/30 flex flex-col h-[300px]">
+<div class="p-4 border-b border-outline-variant/30 flex justify-between items-center">
+<span class="font-label-sm text-label-sm text-on-surface uppercase">Critical Events</span>
+<span class="material-symbols-outlined text-tertiary-container text-sm">priority_high</span>
+</div>
+<div class="flex-1 overflow-y-auto p-2 flex flex-col gap-1">
+<!-- Alert Item -->
+<div class="flex items-center gap-3 p-2 hover:bg-surface-variant/30 rounded-sm cursor-pointer">
+<div class="w-1.5 h-full self-stretch bg-error rounded-full"></div>
+<div class="flex-1 min-w-0">
+<div class="font-data-sm text-data-sm text-error truncate">db-cluster-01 CPU Spoke</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">2 mins ago • Node 4</div>
+</div>
+</div>
+<div class="flex items-center gap-3 p-2 hover:bg-surface-variant/30 rounded-sm cursor-pointer">
+<div class="w-1.5 h-full self-stretch bg-tertiary-container rounded-full"></div>
+<div class="flex-1 min-w-0">
+<div class="font-data-sm text-data-sm text-tertiary-container truncate">Storage near capacity</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">15 mins ago • fs-main</div>
+</div>
+</div>
+<div class="flex items-center gap-3 p-2 hover:bg-surface-variant/30 rounded-sm cursor-pointer">
+<div class="w-1.5 h-full self-stretch bg-tertiary-container rounded-full"></div>
+<div class="flex-1 min-w-0">
+<div class="font-data-sm text-data-sm text-tertiary-container truncate">High Mem Usage</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">42 mins ago • web-srv-09</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Client List Table (Full Width) -->
+<div class="lg:col-span-12 bg-surface-container rounded-sm border border-outline-variant/30 overflow-hidden">
+<div class="p-4 border-b border-outline-variant/30 flex justify-between items-center bg-surface-container-high">
+<span class="font-label-sm text-label-sm text-on-surface uppercase">Recent Clients Status</span>
+<button class="font-label-sm text-label-sm text-primary flex items-center gap-1 hover:underline">
+                            View All <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-outline-variant/50 bg-surface-container-low/50">
+<th class="p-3 font-label-sm text-label-sm text-on-surface-variant uppercase font-medium">Hostname</th>
+<th class="p-3 font-label-sm text-label-sm text-on-surface-variant uppercase font-medium">OS</th>
+<th class="p-3 font-label-sm text-label-sm text-on-surface-variant uppercase font-medium">CPU</th>
+<th class="p-3 font-label-sm text-label-sm text-on-surface-variant uppercase font-medium">Memory</th>
+<th class="p-3 font-label-sm text-label-sm text-on-surface-variant uppercase font-medium text-right">Status</th>
+</tr>
+</thead>
+<tbody class="font-data-sm text-data-sm text-on-surface">
+<!-- Row 1 -->
+<tr class="border-b border-outline-variant/30 hover:bg-surface-variant/20 transition-colors h-[40px]">
+<td class="p-3 font-bold text-primary">srv-prod-eu-1</td>
+<td class="p-3">Linux (Ubuntu 22.04)</td>
+<td class="p-3">
+<div class="flex items-center gap-2">
+<span class="w-8">24%</span>
+<div class="flex-1 h-1 bg-surface-variant rounded-full overflow-hidden max-w-[60px]"><div class="h-full bg-secondary-fixed w-[24%]"></div></div>
+</div>
+</td>
+<td class="p-3">
+<div class="flex items-center gap-2">
+<span class="w-8">12GB</span>
+<div class="flex-1 h-1 bg-surface-variant rounded-full overflow-hidden max-w-[60px]"><div class="h-full bg-secondary-fixed w-[35%]"></div></div>
+</div>
+</td>
+<td class="p-3 text-right">
+<span class="material-symbols-outlined text-secondary-fixed text-[18px]">check_circle</span>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="border-b border-outline-variant/30 hover:bg-surface-variant/20 transition-colors h-[40px] bg-surface-container-low/20">
+<td class="p-3 font-bold text-primary">db-cluster-01</td>
+<td class="p-3">Linux (RHEL 9)</td>
+<td class="p-3">
+<div class="flex items-center gap-2">
+<span class="w-8 text-error">92%</span>
+<div class="flex-1 h-1 bg-surface-variant rounded-full overflow-hidden max-w-[60px]"><div class="h-full bg-error w-[92%]"></div></div>
+</div>
+</td>
+<td class="p-3">
+<div class="flex items-center gap-2">
+<span class="w-8">64GB</span>
+<div class="flex-1 h-1 bg-surface-variant rounded-full overflow-hidden max-w-[60px]"><div class="h-full bg-tertiary-container w-[75%]"></div></div>
+</div>
+</td>
+<td class="p-3 text-right">
+<span class="material-symbols-outlined text-error text-[18px]">error</span>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-variant/20 transition-colors h-[40px]">
+<td class="p-3 font-bold text-primary">win-auth-02</td>
+<td class="p-3">Windows Server 2022</td>
+<td class="p-3">
+<div class="flex items-center gap-2">
+<span class="w-8">15%</span>
+<div class="flex-1 h-1 bg-surface-variant rounded-full overflow-hidden max-w-[60px]"><div class="h-full bg-secondary-fixed w-[15%]"></div></div>
+</div>
+</td>
+<td class="p-3">
+<div class="flex items-center gap-2">
+<span class="w-8">8GB</span>
+<div class="flex-1 h-1 bg-surface-variant rounded-full overflow-hidden max-w-[60px]"><div class="h-full bg-secondary-fixed w-[45%]"></div></div>
+</div>
+</td>
+<td class="p-3 text-right">
+<span class="material-symbols-outlined text-secondary-fixed text-[18px]">check_circle</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</main>
+</div>
+
+
+</body></html>

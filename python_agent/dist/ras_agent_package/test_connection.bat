@@ -1,3 +1,4 @@
 @echo off
 echo Testing RAS Agent connection...
 ras_agent.exe test
+ECHO is off.

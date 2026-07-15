@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Nexus MSP | Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800&amp;family=JetBrains+Mono:wght@400;500;600&amp;family=Inter:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-surface-variant": "#bbc9cf",
+                    "on-tertiary-fixed-variant": "#624000",
+                    "on-background": "#e2e2e6",
+                    "primary-fixed-dim": "#4cd6ff",
+                    "surface-container-highest": "#333538",
+                    "primary": "#a4e6ff",
+                    "background": "#111316",
+                    "secondary-fixed": "#26fedc",
+                    "outline-variant": "#3c494e",
+                    "on-secondary-fixed-variant": "#005144",
+                    "tertiary": "#ffd59c",
+                    "on-primary": "#003543",
+                    "surface-dim": "#111316",
+                    "secondary-container": "#00f2d1",
+                    "on-tertiary-fixed": "#291800",
+                    "error-container": "#93000a",
+                    "on-primary-fixed": "#001f28",
+                    "inverse-surface": "#e2e2e6",
+                    "inverse-on-surface": "#2f3034",
+                    "surface-container-lowest": "#0c0e11",
+                    "outline": "#859399",
+                    "surface-variant": "#333538",
+                    "tertiary-container": "#feb127",
+                    "on-primary-container": "#00566a",
+                    "on-error": "#690005",
+                    "inverse-primary": "#00677f",
+                    "on-secondary-container": "#006a5a",
+                    "tertiary-fixed": "#ffddb1",
+                    "on-primary-fixed-variant": "#004e60",
+                    "surface-tint": "#4cd6ff",
+                    "on-error-container": "#ffdad6",
+                    "secondary-fixed-dim": "#00dfc1",
+                    "surface": "#111316",
+                    "secondary": "#c7fff0",
+                    "primary-fixed": "#b7eaff",
+                    "surface-bright": "#37393d",
+                    "on-tertiary-container": "#6b4700",
+                    "surface-container-high": "#282a2d",
+                    "on-tertiary": "#442b00",
+                    "on-secondary": "#00382f",
+                    "surface-container": "#1e2023",
+                    "error": "#ffb4ab",
+                    "on-surface": "#e2e2e6",
+                    "tertiary-fixed-dim": "#ffba49"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "unit": "4px",
+                    "margin-mobile": "16px",
+                    "margin-desktop": "32px",
+                    "container-max": "1440px",
+                    "gutter": "16px"
+            },
+            "fontFamily": {
+                    "headline-md": ["Hanken Grotesk"],
+                    "label-sm": ["JetBrains Mono"],
+                    "data-lg": ["JetBrains Mono"],
+                    "body-md": ["Inter"],
+                    "data-sm": ["JetBrains Mono"],
+                    "display-lg": ["Hanken Grotesk"]
+            },
+            "fontSize": {
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "data-lg": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "data-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+      body {
+        background-color: #111316;
+        color: #e2e2e6;
+        -webkit-font-smoothing: antialiased;
+      }
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 4px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #3c494e;
+      }
+      .glass-sidebar {
+        backdrop-filter: blur(8px);
+        background: rgba(30, 32, 35, 0.85);
+      }
+      input[type="checkbox"]:checked {
+        background-image: none;
+        background-color: #a4e6ff;
+      }
+    </style>
+</head>
+<body class="font-body-md text-body-md overflow-hidden">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface-dim border-b border-outline-variant flex justify-between items-center px-margin-desktop h-16 w-full">
+<div class="flex items-center gap-4">
+<span class="font-headline-md text-headline-md font-bold text-primary">Nexus MSP</span>
+<div class="h-6 w-[1px] bg-outline-variant mx-2"></div>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">Settings</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center bg-surface-container-high px-4 py-2 rounded border border-outline-variant">
+<span class="material-symbols-outlined text-on-surface-variant mr-2" style="font-size: 18px;">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-data-sm font-data-sm w-48 placeholder:text-outline" placeholder="Search system configs..." type="text"/>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-on-surface-variant hover:bg-surface-container-high p-2 transition-colors">notifications</button>
+<button class="material-symbols-outlined text-primary hover:bg-surface-container-high p-2 transition-colors">settings</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:bg-surface-container-high p-2 transition-colors">help</button>
+</div>
+<div class="flex items-center gap-3 pl-4 border-l border-outline-variant">
+<div class="w-8 h-8 bg-primary rounded-full overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of a technical system administrator, close-up, neutral expression, high-contrast professional lighting, dark tech-themed background, sharp focus, cinematic corporate aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDXJL9pM1hj_--TkwLfZxj2WyhBK5r1ESNdUR3IbJ4REz9KnfVoUD11ph6dlCO6tBTts9aZhJkZipJrnY93k3VPJNL_4cXU7BxA-BPb1jTosi-KG80z_6duqb6RagL1BUGpPSDt-COmr1Lk2hYasEugaL9U12i9YIdYPpanbPvdJS4nXygXov2DHyk_8-me0__wevgXZd9_ww4tijNwIqEkSfTDNcskkOwkYogLbqNitJN23lefrtK0cg"/>
+</div>
+</div>
+</div>
+</header>
+<div class="flex h-screen pt-16">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-16 h-[calc(100%-64px)] w-64 z-40 bg-surface-container border-r border-outline-variant flex flex-col py-4 glass-sidebar">
+<div class="px-6 mb-8">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-surface-container-highest flex items-center justify-center rounded border border-outline-variant">
+<span class="material-symbols-outlined text-primary">hub</span>
+</div>
+<div>
+<h3 class="font-label-sm text-label-sm font-bold text-on-background">Global Admin</h3>
+<p class="text-[10px] text-on-surface-variant">MSP Tier 1</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 space-y-1 px-3">
+<a class="flex items-center gap-3 px-3 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-sm text-label-sm">Overview</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined">memory</span>
+<span class="font-label-sm text-label-sm">Hardware</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined">router</span>
+<span class="font-label-sm text-label-sm">Networks</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined">terminal</span>
+<span class="font-label-sm text-label-sm">Logs</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined">shield</span>
+<span class="font-label-sm text-label-sm">Security</span>
+</a>
+<!-- Active Settings tab highlighted -->
+<a class="flex items-center gap-3 px-3 py-3 text-primary bg-primary-container/10 border-r-2 border-primary transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">settings</span>
+<span class="font-label-sm text-label-sm">Settings</span>
+</a>
+</nav>
+<div class="px-3 mt-auto border-t border-outline-variant pt-4">
+<a class="flex items-center gap-3 px-3 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-sm text-label-sm">System Health</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 text-error/80 hover:bg-error-container/10 transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-label-sm text-label-sm">Logout</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-64 flex-1 overflow-y-auto custom-scrollbar bg-background">
+<div class="p-margin-desktop max-w-container-max mx-auto">
+<div class="mb-10 flex justify-between items-end">
+<div>
+<h1 class="font-display-lg text-display-lg text-on-background mb-2">System Configuration</h1>
+<p class="text-on-surface-variant font-body-md">Manage infrastructure parameters, security protocols, and user access levels.</p>
+</div>
+<div class="flex gap-4">
+<button class="px-6 py-2 border border-outline text-on-background font-label-sm text-label-sm hover:bg-surface-container-high transition-colors">DISCARD CHANGES</button>
+<button class="px-6 py-2 bg-primary text-on-primary font-label-sm text-label-sm font-bold hover:brightness-110 transition-all">APPLY CONFIGURATION</button>
+</div>
+</div>
+<!-- Settings Grid -->
+<div class="grid grid-cols-12 gap-gutter">
+<!-- Sidebar Navigation (Internal) -->
+<div class="col-span-12 md:col-span-3">
+<div class="sticky top-4 flex flex-col gap-1">
+<button class="w-full text-left px-4 py-3 bg-surface-container-high border-l-4 border-primary text-primary font-label-sm text-label-sm" onclick="scrollToSection('general')">GENERAL</button>
+<button class="w-full text-left px-4 py-3 hover:bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm transition-colors" onclick="scrollToSection('security')">SECURITY &amp; AUTH</button>
+<button class="w-full text-left px-4 py-3 hover:bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm transition-colors" onclick="scrollToSection('notifications')">NOTIFICATIONS</button>
+<button class="w-full text-left px-4 py-3 hover:bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm transition-colors" onclick="scrollToSection('users')">USER MANAGEMENT</button>
+</div>
+</div>
+<!-- Sections Content -->
+<div class="col-span-12 md:col-span-9 space-y-gutter pb-margin-desktop">
+<!-- 1. General Section -->
+<section class="bg-surface-container p-6 border border-outline-variant" id="general">
+<div class="flex items-center gap-3 mb-8 border-b border-outline-variant pb-4">
+<span class="material-symbols-outlined text-primary">settings_applications</span>
+<h2 class="font-headline-md text-headline-md text-on-background uppercase tracking-tight">General Parameters</h2>
+</div>
+<div class="space-y-8">
+<div class="grid grid-cols-4 items-center">
+<label class="col-span-1 font-label-sm text-label-sm text-on-surface-variant">PRODUCT_IDENTITY</label>
+<div class="col-span-3">
+<input class="w-full bg-surface-container-highest border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary text-on-background font-data-sm text-data-sm px-4 py-3 rounded" type="text" value="Nexus MSP Kinetic v4.2"/>
+</div>
+</div>
+<div class="grid grid-cols-4 items-center">
+<label class="col-span-1 font-label-sm text-label-sm text-on-surface-variant">THEME_PROFILE</label>
+<div class="col-span-3 flex gap-4">
+<button class="flex-1 py-3 bg-surface-container-low border border-primary text-primary font-label-sm text-label-sm flex items-center justify-center gap-2">
+<span class="material-symbols-outlined" style="font-size: 18px;">dark_mode</span> DARK_INDUSTRIAL
+                                        </button>
+<button class="flex-1 py-3 bg-surface-container-highest border border-outline-variant text-on-surface-variant font-label-sm text-label-sm flex items-center justify-center gap-2 hover:bg-surface-container-high">
+<span class="material-symbols-outlined" style="font-size: 18px;">light_mode</span> LIGHT_CLINICAL
+                                        </button>
+<button class="flex-1 py-3 bg-surface-container-highest border border-outline-variant text-on-surface-variant font-label-sm text-label-sm flex items-center justify-center gap-2 hover:bg-surface-container-high">
+<span class="material-symbols-outlined" style="font-size: 18px;">settings_brightness</span> SYSTEM_SYNC
+                                        </button>
+</div>
+</div>
+<div class="grid grid-cols-4 items-center">
+<label class="col-span-1 font-label-sm text-label-sm text-on-surface-variant">SYSTEM_TIMEZONE</label>
+<div class="col-span-3">
+<select class="w-full bg-surface-container-highest border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary text-on-background font-data-sm text-data-sm px-4 py-3 rounded">
+<option>(UTC -05:00) Eastern Time (US &amp; Canada)</option>
+<option>(UTC +00:00) Greenwich Mean Time</option>
+<option>(UTC +01:00) Central European Time</option>
+<option>(UTC +08:00) Singapore Standard Time</option>
+</select>
+</div>
+</div>
+</div>
+</section>
+<!-- 2. Security Section -->
+<section class="bg-surface-container p-6 border border-outline-variant" id="security">
+<div class="flex items-center gap-3 mb-8 border-b border-outline-variant pb-4">
+<span class="material-symbols-outlined text-primary">security</span>
+<h2 class="font-headline-md text-headline-md text-on-background uppercase tracking-tight">Security &amp; Encryption</h2>
+</div>
+<div class="space-y-8">
+<div>
+<div class="flex justify-between items-center mb-4">
+<label class="font-label-sm text-label-sm text-on-surface-variant">API_ACCESS_KEYS</label>
+<button class="text-primary font-label-sm text-label-sm hover:underline">+ GENERATE NEW KEY</button>
+</div>
+<div class="bg-surface-container-lowest p-4 border border-outline-variant flex items-center justify-between">
+<span class="font-data-sm text-data-sm text-on-background opacity-60">••••••••••••••••••••••••••••••••••••••••3A9F</span>
+<div class="flex gap-4">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-on-background">visibility</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-on-background">content_copy</button>
+<button class="material-symbols-outlined text-error hover:opacity-80">delete</button>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
+<div class="flex items-start gap-4">
+<div class="pt-1">
+<input checked="" class="w-6 h-6 rounded bg-surface-container-highest border-outline-variant checked:bg-primary" type="checkbox"/>
+</div>
+<div>
+<p class="font-label-sm text-label-sm text-on-background mb-1">TWO_FACTOR_MANDATORY</p>
+<p class="text-[12px] text-on-surface-variant">Require 2FA for all admin-level access across the organization.</p>
+</div>
+</div>
+<div class="flex items-start gap-4">
+<div class="pt-1">
+<input class="w-6 h-6 rounded bg-surface-container-highest border-outline-variant checked:bg-primary" type="checkbox"/>
+</div>
+<div>
+<p class="font-label-sm text-label-sm text-on-background mb-1">AUTO_ROTATE_KEYS</p>
+<p class="text-[12px] text-on-surface-variant">Automatically rotate API keys every 90 days for enhanced security.</p>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-4 items-center pt-4">
+<label class="col-span-1 font-label-sm text-label-sm text-on-surface-variant">SESSION_TIMEOUT</label>
+<div class="col-span-3 flex items-center gap-4">
+<input class="flex-1 accent-primary" max="240" min="15" step="15" type="range" value="60"/>
+<span class="font-data-sm text-data-sm text-primary bg-primary/10 px-3 py-1 border border-primary/20">60_MINS</span>
+</div>
+</div>
+</div>
+</section>
+<!-- 3. Notifications Section -->
+<section class="bg-surface-container p-6 border border-outline-variant" id="notifications">
+<div class="flex items-center gap-3 mb-8 border-b border-outline-variant pb-4">
+<span class="material-symbols-outlined text-primary">notifications_active</span>
+<h2 class="font-headline-md text-headline-md text-on-background uppercase tracking-tight">Notification Channels</h2>
+</div>
+<div class="space-y-6">
+<div class="bg-surface-container-high p-4 border border-outline-variant flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 bg-[#5865F2]/20 text-[#5865F2] flex items-center justify-center rounded">
+<span class="material-symbols-outlined">webhook</span>
+</div>
+<div>
+<p class="font-label-sm text-label-sm text-on-background">DISCORD_WEBHOOK_STAGING</p>
+<p class="text-[12px] text-on-surface-variant">Status: ACTIVE • Events: CRITICAL_ONLY</p>
+</div>
+</div>
+<button class="material-symbols-outlined text-on-surface-variant">more_vert</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="p-4 border border-outline-variant rounded flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant">mail</span>
+<span class="font-label-sm text-label-sm text-on-background">EMAIL_ALERTS</span>
+</div>
+<div class="relative inline-block w-10 h-6 transition duration-200 ease-in-out bg-secondary-container rounded-full cursor-pointer">
+<div class="absolute right-1 top-1 w-4 h-4 bg-on-secondary-container rounded-full"></div>
+</div>
+</div>
+<div class="p-4 border border-outline-variant rounded flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant">sms</span>
+<span class="font-label-sm text-label-sm text-on-background">SMS_NOTIFICATIONS</span>
+</div>
+<div class="relative inline-block w-10 h-6 transition duration-200 ease-in-out bg-surface-container-highest rounded-full cursor-pointer">
+<div class="absolute left-1 top-1 w-4 h-4 bg-on-surface-variant rounded-full"></div>
+</div>
+</div>
+</div>
+<div class="pt-4">
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-3">CUSTOM_WEBHOOK_URL</label>
+<div class="flex gap-2">
+<input class="flex-1 bg-surface-container-highest border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary text-on-background font-data-sm text-data-sm px-4 py-3 rounded" placeholder="https://api.yourdomain.com/v1/ingest" type="text"/>
+<button class="px-6 py-3 bg-surface-container-highest border border-outline-variant text-on-background font-label-sm text-label-sm hover:bg-surface-container-high">TEST</button>
+</div>
+</div>
+</div>
+</section>
+<!-- 4. User Management Section -->
+<section class="bg-surface-container p-6 border border-outline-variant" id="users">
+<div class="flex items-center justify-between mb-8 border-b border-outline-variant pb-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">group</span>
+<h2 class="font-headline-md text-headline-md text-on-background uppercase tracking-tight">User Management</h2>
+</div>
+<button class="bg-primary text-on-primary px-4 py-2 font-label-sm text-label-sm font-bold flex items-center gap-2">
+<span class="material-symbols-outlined" style="font-size: 18px;">person_add</span> ADD_OPERATOR
+                                </button>
+</div>
+<div class="overflow-hidden border border-outline-variant">
+<table class="w-full text-left border-collapse">
+<thead class="bg-surface-container-high font-label-sm text-label-sm text-on-surface-variant border-b border-outline-variant">
+<tr>
+<th class="px-6 py-4">OPERATOR_IDENTITY</th>
+<th class="px-6 py-4">ROLE_ASSIGNMENT</th>
+<th class="px-6 py-4">LAST_AUTHENTICATION</th>
+<th class="px-6 py-4">STATUS</th>
+<th class="px-6 py-4 text-right">ACTIONS</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<tr class="hover:bg-surface-container-high/50 transition-colors">
+<td class="px-6 py-4 flex items-center gap-3">
+<div class="w-8 h-8 bg-surface-container-highest rounded flex items-center justify-center font-bold text-primary border border-outline-variant">SD</div>
+<div>
+<p class="font-label-sm text-label-sm text-on-background">S_DRAKE</p>
+<p class="text-[10px] text-on-surface-variant font-data-sm">s.drake@nexus.io</p>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-[10px] bg-secondary-container/20 text-secondary-fixed border border-secondary-fixed/30 px-2 py-0.5 rounded uppercase">SYSTEM_OWNER</span>
+</td>
+<td class="px-6 py-4 font-data-sm text-data-sm text-on-surface-variant">2023-11-24 14:22:01</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-secondary-fixed animate-pulse"></div>
+<span class="text-data-sm font-data-sm text-secondary-fixed">ACTIVE</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary">edit</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-high/50 transition-colors">
+<td class="px-6 py-4 flex items-center gap-3">
+<div class="w-8 h-8 bg-surface-container-highest rounded flex items-center justify-center font-bold text-tertiary border border-outline-variant">KL</div>
+<div>
+<p class="font-label-sm text-label-sm text-on-background">K_LEO</p>
+<p class="text-[10px] text-on-surface-variant font-data-sm">k.leo@nexus.io</p>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-[10px] bg-surface-container-highest text-on-surface-variant border border-outline-variant px-2 py-0.5 rounded uppercase">MAINTENANCE_OP</span>
+</td>
+<td class="px-6 py-4 font-data-sm text-data-sm text-on-surface-variant">2023-11-23 09:45:12</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-secondary-fixed"></div>
+<span class="text-data-sm font-data-sm text-on-surface-variant">IDLE</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary">edit</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-high/50 transition-colors">
+<td class="px-6 py-4 flex items-center gap-3">
+<div class="w-8 h-8 bg-surface-container-highest rounded flex items-center justify-center font-bold text-on-surface-variant border border-outline-variant">RM</div>
+<div>
+<p class="font-label-sm text-label-sm text-on-background">R_MILLER</p>
+<p class="text-[10px] text-on-surface-variant font-data-sm">r.miller@nexus.io</p>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-[10px] bg-surface-container-highest text-on-surface-variant border border-outline-variant px-2 py-0.5 rounded uppercase">VIEWER</span>
+</td>
+<td class="px-6 py-4 font-data-sm text-data-sm text-on-surface-variant">2023-10-12 18:30:44</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-error"></div>
+<span class="text-data-sm font-data-sm text-error">SUSPENDED</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary">edit</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Micro-interaction script -->
+<script>
+        function scrollToSection(id) {
+            const element = document.getElementById(id);
+            element.scrollIntoView({ behavior: 'smooth' });
+            
+            // Update active state in internal sidebar
+            const navButtons = document.querySelectorAll('#general, #security, #notifications, #users');
+            const sidebarButtons = document.querySelectorAll('[onclick^="scrollToSection"]');
+            
+            sidebarButtons.forEach(btn => {
+                btn.classList.remove('bg-surface-container-high', 'border-l-4', 'border-primary', 'text-primary');
+                btn.classList.add('hover:bg-surface-container-low', 'text-on-surface-variant');
+            });
+            
+            const activeBtn = Array.from(sidebarButtons).find(btn => btn.getAttribute('onclick').includes(id));
+            if (activeBtn) {
+                activeBtn.classList.add('bg-surface-container-high', 'border-l-4', 'border-primary', 'text-primary');
+                activeBtn.classList.remove('hover:bg-surface-container-low', 'text-on-surface-variant');
+            }
+        }
+
+        // Handle page scroll to update sidebar highlighting
+        document.querySelector('main').addEventListener('scroll', () => {
+            const sections = ['general', 'security', 'notifications', 'users'];
+            const mainContent = document.querySelector('main');
+            
+            let current = '';
+            sections.forEach(section => {
+                const element = document.getElementById(section);
+                if (element.offsetTop - 150 <= mainContent.scrollTop) {
+                    current = section;
+                }
+            });
+
+            if (current) {
+                const sidebarButtons = document.querySelectorAll('[onclick^="scrollToSection"]');
+                sidebarButtons.forEach(btn => {
+                    if (btn.getAttribute('onclick').includes(current)) {
+                        btn.classList.add('bg-surface-container-high', 'border-l-4', 'border-primary', 'text-primary');
+                        btn.classList.remove('hover:bg-surface-container-low', 'text-on-surface-variant');
+                    } else {
+                        btn.classList.remove('bg-surface-container-high', 'border-l-4', 'border-primary', 'text-primary');
+                        btn.classList.add('hover:bg-surface-container-low', 'text-on-surface-variant');
+                    }
+                });
+            }
+        });
+    </script>
+</body></html>

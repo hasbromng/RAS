@@ -20,7 +20,7 @@ class AgentLogger:
 
     # Log format
     LOG_FORMAT = '%(asctime)s [%(levelname)s] %(name)s - %(message)s'
-    DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
+    DATE_FORMAT = '%Y-%m-%d %H:%M:%S %z'
 
     # Singleton instance
     _instance: Optional['AgentLogger'] = None

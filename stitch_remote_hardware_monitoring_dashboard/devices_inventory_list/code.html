@@ -1,0 +1,391 @@
+<!DOCTYPE html><html lang="en" class="dark" style=""><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""><link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800;900&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">try{
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-tertiary-fixed": "#291800",
+                      "on-primary": "#003543",
+                      "on-tertiary-container": "#6b4700",
+                      "inverse-surface": "#e2e2e6",
+                      "primary-container": "#00d1ff",
+                      "surface-bright": "#37393d",
+                      "surface-tint": "#4cd6ff",
+                      "surface-container-high": "#282a2d",
+                      "inverse-primary": "#00677f",
+                      "background": "#111316",
+                      "secondary-container": "#00f2d1",
+                      "on-secondary-container": "#006a5a",
+                      "on-tertiary-fixed-variant": "#624000",
+                      "on-error": "#690005",
+                      "inverse-on-surface": "#2f3034",
+                      "secondary": "#c7fff0",
+                      "tertiary-fixed-dim": "#ffba49",
+                      "on-tertiary": "#442b00",
+                      "on-primary-fixed-variant": "#004e60",
+                      "secondary-fixed": "#26fedc",
+                      "on-primary-fixed": "#001f28",
+                      "on-background": "#e2e2e6",
+                      "surface-container-low": "#1a1c1f",
+                      "primary": "#a4e6ff",
+                      "on-surface-variant": "#bbc9cf",
+                      "on-primary-container": "#00566a",
+                      "on-secondary-fixed": "#00201a",
+                      "surface-container": "#1e2023",
+                      "primary-fixed-dim": "#4cd6ff",
+                      "on-error-container": "#ffdad6",
+                      "error": "#ffb4ab",
+                      "surface-dim": "#111316",
+                      "primary-fixed": "#b7eaff",
+                      "on-surface": "#e2e2e6",
+                      "tertiary-container": "#feb127",
+                      "secondary-fixed-dim": "#00dfc1",
+                      "tertiary": "#ffd59c",
+                      "outline-variant": "#3c494e",
+                      "error-container": "#93000a",
+                      "surface-variant": "#333538",
+                      "on-secondary-fixed-variant": "#005144",
+                      "tertiary-fixed": "#ffddb1",
+                      "surface-container-lowest": "#0c0e11",
+                      "surface-container-highest": "#333538",
+                      "surface": "#111316",
+                      "outline": "#859399",
+                      "on-secondary": "#00382f"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "unit": "4px",
+                      "gutter": "16px",
+                      "container-max": "1440px",
+                      "margin-desktop": "32px",
+                      "margin-mobile": "16px"
+              },
+              "fontFamily": {
+                      "label-sm": [
+                              "JetBrains Mono"
+                      ],
+                      "headline-md": [
+                              "Hanken Grotesk"
+                      ],
+                      "data-sm": [
+                              "JetBrains Mono"
+                      ],
+                      "display-lg": [
+                              "Hanken Grotesk"
+                      ],
+                      "data-lg": [
+                              "JetBrains Mono"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "label-sm": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "data-sm": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "display-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "data-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      }catch(_e){}</script><meta charset="utf-8"></head><body class="bg-background text-on-surface font-body-md text-body-md antialiased overflow-hidden">
+<!-- SideNavBar -->
+<nav class="h-screen w-64 fixed left-0 top-0 backdrop-blur-md border-r border-outline-variant bg-surface-container-low/80 dark:bg-surface-container-low/80 flex flex-col h-full py-unit px-margin-desktop z-50">
+<div class="mb-12 mt-4">
+<h1 class="font-headline-md text-headline-md font-bold text-primary tracking-tighter">CoreMonitor</h1>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-1">V2.4.8-Stable</p>
+</div>
+<div class="flex-1 space-y-2">
+<a href="#" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-on-surface-variant font-medium hover:bg-surface-variant/50 transition-colors duration-150">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;" data-original-icon="dashboard">dashboard</span>
+<span class="font-label-sm text-label-sm">Overview</span>
+</a>
+<a href="#" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-secondary-fixed font-bold border-r-2 border-secondary-fixed bg-surface-container-high opacity-80 duration-100">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">memory</span>
+<span class="font-label-sm text-label-sm text-secondary-fixed">Devices</span>
+</a>
+
+<a href="#" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-on-surface-variant font-medium hover:bg-surface-variant/50 transition-colors duration-150">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">warning</span>
+<span class="font-label-sm text-label-sm">Alerts</span>
+</a>
+</div>
+<div class="mt-auto space-y-2 border-t border-outline-variant pt-4">
+<a href="#" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-on-surface-variant font-medium hover:bg-surface-variant/50 transition-colors duration-150">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">settings</span>
+<span class="font-label-sm text-label-sm">Settings</span>
+</a>
+<a href="#" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-on-surface-variant font-medium hover:bg-surface-variant/50 transition-colors duration-150">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">help</span>
+<span class="font-label-sm text-label-sm">Support</span>
+</a>
+<div class="flex items-center space-x-3 px-3 py-2 mt-4">
+<img alt="System Administrator Avatar" class="w-8 h-8 rounded-full border border-outline-variant" data-alt="A small, stylized circular avatar image representing a system administrator profile picture in a sleek, modern, low-light digital aesthetic, featuring subtle blue and cyan technical accents. High contrast." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA8HUN4i69xi06CVAHFjvSPBYovCQBl-CaF6e5WDiTNP7x7UOvZjDNZ75p6CkASsovSoIag-7PcBM3wdSIYpGBd8Qkbu5U0FbULLedT1WIHtzD1QOV9iPDT2cI17LfFUs5wsWozH8y9CqWaDTt5yJktz7MrUctbyiyEEoBGL2Vkr_VbLDB1OqIfYPb87bVkq3Kb1t2DsS_LSqN2iXadWrx7KXxPSgUVdrEPobwVFLqWljJQErSkRpPW8Q">
+</div>
+</div>
+</nav>
+<!-- TopAppBar -->
+<header class="docked full-width top-0 h-16 border-b border-outline-variant bg-surface-container dark:bg-surface-container flex items-center justify-between px-margin-desktop ml-64 w-[calc(100%-16rem)] z-40 fixed">
+<div class="flex items-center">
+<h2 class="font-headline-md text-headline-md text-on-surface font-black">Hardware Monitoring System</h2>
+</div>
+<div class="flex items-center space-x-6">
+<div class="relative group hidden lg:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">search</span>
+<input class="bg-surface-variant border border-outline-variant rounded-md py-1.5 pl-9 pr-4 text-data-sm font-data-sm text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary w-64 transition-all placeholder:text-on-surface-variant/50" placeholder="Search devices, IP..." type="text">
+</div>
+<div class="flex items-center space-x-3">
+<button class="text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined">settings_remote</span>
+</button>
+<button class="bg-primary text-on-primary px-4 py-1.5 rounded-md font-label-sm text-label-sm hover:bg-primary-fixed-dim transition-colors ml-2 font-semibold">
+                    Deploy Agent
+                </button>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-64 mt-16 p-margin-desktop h-[calc(100vh-4rem)] overflow-y-auto">
+<div class="max-w-container-max mx-auto">
+<!-- Filters and Actions Bar -->
+<div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4 bg-surface-container-lowest p-4 rounded-lg border border-outline-variant">
+<div class="flex flex-wrap items-center gap-3">
+<div class="flex items-center space-x-2 border-r border-outline-variant pr-4">
+<span class="material-symbols-outlined text-on-surface-variant text-sm">filter_list</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Filters:</span>
+</div>
+<select class="bg-surface-variant border border-outline-variant rounded-md py-1 px-3 text-data-sm font-data-sm text-on-surface focus:border-primary appearance-none pr-8">
+<option>Status: All</option>
+<option>Online</option>
+<option>Offline</option>
+<option>Warning</option>
+</select>
+<select class="bg-surface-variant border border-outline-variant rounded-md py-1 px-3 text-data-sm font-data-sm text-on-surface focus:border-primary appearance-none pr-8">
+<option>OS: All</option>
+<option>Linux</option>
+<option>Windows</option>
+</select>
+</div>
+<div class="flex items-center gap-3">
+<button class="flex items-center space-x-2 border border-outline-variant px-3 py-1.5 rounded-md hover:bg-surface-variant transition-colors text-on-surface font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-sm">download</span>
+<span class="">Export CSV</span>
+</button>
+<div class="text-data-sm font-data-sm text-on-surface-variant bg-surface-variant px-3 py-1.5 rounded-md">
+                        Total: 1,248
+                    </div>
+</div>
+</div>
+<!-- Data Table -->
+<div class="bg-surface-container rounded-xl border border-outline-variant overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-high border-b border-outline-variant">
+<th class="py-3 px-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider w-16">Status</th>
+<th class="py-3 px-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Hostname</th>
+<th class="py-3 px-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">IP Address</th>
+<th class="py-3 px-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider w-12 text-center">OS</th>
+<th class="py-3 px-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider w-48">CPU</th>
+<th class="py-3 px-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider w-48">RAM</th>
+<th class="py-3 px-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider w-32">Last Seen</th>
+<th class="py-3 px-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider w-24 text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="font-data-sm text-data-sm text-on-surface divide-y divide-outline-variant/50">
+<!-- Row 1:-->
+<tr class="hover:bg-surface-variant/30 transition-colors group">
+<td class="py-2.5 px-4 text-center">
+<div class="w-2.5 h-2.5 rounded-full bg-secondary-fixed mx-auto shadow-[0_0_8px_rgba(38,254,220,0.5)]"></div>
+</td>
+<td class="py-2.5 px-4 font-semibold text-primary">core-db-prod-01</td>
+<td class="py-2.5 px-4 text-on-surface-variant">10.0.45.212</td>
+<td class="py-2.5 px-4 text-center">
+<span class="material-symbols-outlined text-on-surface-variant text-[18px]">terminal</span>
+</td>
+<td class="py-2.5 px-4">
+<div class="flex items-center justify-between mb-1">
+<span class="text-[10px] text-on-surface-variant">24%</span>
+</div>
+<div class="w-full h-1 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-secondary-fixed" style="width: 24%"></div>
+</div>
+</td>
+<td class="py-2.5 px-4">
+<div class="flex items-center justify-between mb-1">
+<span class="text-[10px] text-on-surface-variant">45%</span>
+</div>
+<div class="w-full h-1 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-secondary-fixed" style="width: 45%"></div>
+</div>
+</td>
+<td class="py-2.5 px-4 text-on-surface-variant text-xs">Just now</td>
+<td class="py-2.5 px-4 text-right opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-1 text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-sm">visibility</span></button>
+<button class="p-1 text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-sm">terminal</span></button>
+</td>
+</tr>
+<!-- Row 2: Warning -->
+<tr class="hover:bg-surface-variant/30 transition-colors bg-tertiary-container/5 group border-l-2 border-l-tertiary-container">
+<td class="py-2.5 px-4 text-center">
+<div class="w-2.5 h-2.5 rounded-full bg-tertiary-container mx-auto shadow-[0_0_8px_rgba(254,177,39,0.5)]"></div>
+</td>
+<td class="py-2.5 px-4 font-semibold text-tertiary-container">cache-redis-04</td>
+<td class="py-2.5 px-4 text-on-surface-variant">10.0.45.215</td>
+<td class="py-2.5 px-4 text-center">
+<span class="material-symbols-outlined text-on-surface-variant text-[18px]">terminal</span>
+</td>
+<td class="py-2.5 px-4">
+<div class="flex items-center justify-between mb-1">
+<span class="text-[10px] text-tertiary-container">88%</span>
+</div>
+<div class="w-full h-1 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-tertiary-container" style="width: 88%"></div>
+</div>
+</td>
+<td class="py-2.5 px-4">
+<div class="flex items-center justify-between mb-1">
+<span class="text-[10px] text-on-surface-variant">62%</span>
+</div>
+<div class="w-full h-1 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-secondary-fixed" style="width: 62%"></div>
+</div>
+</td>
+<td class="py-2.5 px-4 text-on-surface-variant text-xs">2 min ago</td>
+<td class="py-2.5 px-4 text-right opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-1 text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-sm">visibility</span></button>
+<button class="p-1 text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-sm">terminal</span></button>
+</td>
+</tr>
+<!-- Row 3: Offline -->
+<tr class="hover:bg-surface-variant/30 transition-colors opacity-60 group border-l-2 border-l-error">
+<td class="py-2.5 px-4 text-center">
+<div class="w-2.5 h-2.5 rounded-full bg-error mx-auto"></div>
+</td>
+<td class="py-2.5 px-4 font-semibold text-error">worker-node-12</td>
+<td class="py-2.5 px-4 text-on-surface-variant line-through">10.0.50.11</td>
+<td class="py-2.5 px-4 text-center">
+<span class="material-symbols-outlined text-on-surface-variant text-[18px]">dns</span>
+</td>
+<td class="py-2.5 px-4">
+<div class="flex items-center justify-between mb-1">
+<span class="text-[10px] text-error">N/A</span>
+</div>
+<div class="w-full h-1 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-surface-variant" style="width: 0%"></div>
+</div>
+</td>
+<td class="py-2.5 px-4">
+<div class="flex items-center justify-between mb-1">
+<span class="text-[10px] text-error">N/A</span>
+</div>
+<div class="w-full h-1 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-surface-variant" style="width: 0%"></div>
+</div>
+</td>
+<td class="py-2.5 px-4 text-error text-xs">14 hours ago</td>
+<td class="py-2.5 px-4 text-right opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-1 text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-sm">visibility</span></button>
+<button class="p-1 text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-sm">power_settings_new</span></button>
+</td>
+</tr>
+<!-- Row 4: Online / Normal -->
+<tr class="hover:bg-surface-variant/30 transition-colors group">
+<td class="py-2.5 px-4 text-center">
+<div class="w-2.5 h-2.5 rounded-full bg-secondary-fixed mx-auto shadow-[0_0_8px_rgba(38,254,220,0.5)]"></div>
+</td>
+<td class="py-2.5 px-4 font-semibold text-primary">api-gateway-us-east</td>
+<td class="py-2.5 px-4 text-on-surface-variant">10.1.12.55</td>
+<td class="py-2.5 px-4 text-center">
+<span class="material-symbols-outlined text-on-surface-variant text-[18px]">terminal</span>
+</td>
+<td class="py-2.5 px-4">
+<div class="flex items-center justify-between mb-1">
+<span class="text-[10px] text-on-surface-variant">12%</span>
+</div>
+<div class="w-full h-1 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-secondary-fixed" style="width: 12%"></div>
+</div>
+</td>
+<td class="py-2.5 px-4">
+<div class="flex items-center justify-between mb-1">
+<span class="text-[10px] text-on-surface-variant">28%</span>
+</div>
+<div class="w-full h-1 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-secondary-fixed" style="width: 28%"></div>
+</div>
+</td>
+<td class="py-2.5 px-4 text-on-surface-variant text-xs">Just now</td>
+<td class="py-2.5 px-4 text-right opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-1 text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-sm">visibility</span></button>
+<button class="p-1 text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-sm">terminal</span></button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Pagination -->
+<div class="flex items-center justify-between mt-4">
+<span class="text-data-sm font-data-sm text-on-surface-variant">Showing 1 to 4 of 1,248</span>
+<div class="flex items-center space-x-1">
+<button class="p-1.5 rounded-md border border-outline-variant text-on-surface-variant hover:bg-surface-variant disabled:opacity-50"><span class="material-symbols-outlined text-sm">chevron_left</span></button>
+<button class="px-3 py-1 rounded-md bg-primary text-on-primary font-data-sm text-data-sm">1</button>
+<button class="px-3 py-1 rounded-md border border-outline-variant text-on-surface font-data-sm text-data-sm hover:bg-surface-variant">2</button>
+<button class="px-3 py-1 rounded-md border border-outline-variant text-on-surface font-data-sm text-data-sm hover:bg-surface-variant">3</button>
+<span class="text-on-surface-variant px-2">...</span>
+<button class="p-1.5 rounded-md border border-outline-variant text-on-surface-variant hover:bg-surface-variant"><span class="material-symbols-outlined text-sm">chevron_right</span></button>
+</div>
+</div>
+</div>
+</main>
+</body></html>

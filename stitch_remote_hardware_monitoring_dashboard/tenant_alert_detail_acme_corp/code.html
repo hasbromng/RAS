@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Tenant Alert Detail - Acme Corp | Nexus Monitor</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary": "#c7fff0",
+                    "on-tertiary": "#442b00",
+                    "primary-fixed-dim": "#4cd6ff",
+                    "on-secondary": "#00382f",
+                    "tertiary-fixed-dim": "#ffba49",
+                    "on-tertiary-container": "#6b4700",
+                    "primary-container": "#00d1ff",
+                    "on-secondary-fixed-variant": "#005144",
+                    "on-error": "#690005",
+                    "error": "#ffb4ab",
+                    "secondary-fixed-dim": "#00dfc1",
+                    "on-background": "#e2e2e6",
+                    "outline": "#859399",
+                    "tertiary-fixed": "#ffddb1",
+                    "on-secondary-container": "#006a5a",
+                    "on-primary": "#003543",
+                    "surface-container": "#1e2023",
+                    "on-primary-fixed-variant": "#004e60",
+                    "inverse-on-surface": "#2f3034",
+                    "surface-container-high": "#282a2d",
+                    "on-tertiary-fixed": "#291800",
+                    "on-surface-variant": "#bbc9cf",
+                    "on-primary-container": "#00566a",
+                    "on-error-container": "#ffdad6",
+                    "surface-variant": "#333538",
+                    "surface-container-low": "#1a1c1f",
+                    "surface-container-highest": "#333538",
+                    "primary": "#a4e6ff",
+                    "on-secondary-fixed": "#00201a",
+                    "surface": "#111316",
+                    "surface-dim": "#111316",
+                    "inverse-surface": "#e2e2e6",
+                    "surface-container-lowest": "#0c0e11",
+                    "primary-fixed": "#b7eaff",
+                    "secondary-container": "#00f2d1",
+                    "outline-variant": "#3c494e",
+                    "inverse-primary": "#00677f",
+                    "secondary-fixed": "#26fedc",
+                    "surface-tint": "#4cd6ff",
+                    "error-container": "#93000a",
+                    "on-primary-fixed": "#001f28",
+                    "background": "#111316",
+                    "tertiary-container": "#feb127",
+                    "surface-bright": "#37393d",
+                    "on-tertiary-fixed-variant": "#624000",
+                    "tertiary": "#ffd59c",
+                    "on-surface": "#e2e2e6"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "margin-desktop": "32px",
+                    "unit": "4px",
+                    "margin-mobile": "16px",
+                    "gutter": "16px",
+                    "container-max": "1440px"
+            },
+            "fontFamily": {
+                    "data-lg": [
+                            "JetBrains Mono"
+                    ],
+                    "data-sm": [
+                            "JetBrains Mono"
+                    ],
+                    "headline-md": [
+                            "Hanken Grotesk"
+                    ],
+                    "display-lg": [
+                            "Hanken Grotesk"
+                    ],
+                    "label-sm": [
+                            "JetBrains Mono"
+                    ],
+                    "body-md": [
+                            "Inter"
+                    ]
+            },
+            "fontSize": {
+                    "data-lg": [
+                            "18px",
+                            {
+                                    "lineHeight": "24px",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "data-sm": [
+                            "14px",
+                            {
+                                    "lineHeight": "20px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "headline-md": [
+                            "24px",
+                            {
+                                    "lineHeight": "32px",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "display-lg": [
+                            "32px",
+                            {
+                                    "lineHeight": "40px",
+                                    "letterSpacing": "-0.02em",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "label-sm": [
+                            "12px",
+                            {
+                                    "lineHeight": "16px",
+                                    "letterSpacing": "0.05em",
+                                    "fontWeight": "500"
+                            }
+                    ],
+                    "body-md": [
+                            "16px",
+                            {
+                                    "lineHeight": "24px",
+                                    "fontWeight": "400"
+                            }
+                    ]
+            }
+    },
+        },
+      }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body-md text-body-md h-screen w-screen overflow-hidden flex">
+<!-- TopAppBar (Hidden on desktop, shown on mobile if SideNav was converted, but requirements say fluid grid for desktop monitoring. Assuming desktop primary) -->
+<header class="fixed top-0 w-full z-50 bg-surface-container border-b border-outline-variant flex justify-between items-center h-16 px-margin-desktop md:hidden">
+<div class="font-headline-md text-headline-md font-bold text-primary">
+            Nexus Monitor
+        </div>
+<div class="flex items-center gap-4 text-on-surface-variant">
+<span class="material-symbols-outlined hover:bg-surface-bright transition-colors rounded-full p-2 cursor-pointer active:opacity-80 transition-opacity">notifications</span>
+<span class="material-symbols-outlined hover:bg-surface-bright transition-colors rounded-full p-2 cursor-pointer active:opacity-80 transition-opacity">settings</span>
+<img alt="User profile" class="w-8 h-8 rounded-full object-cover border border-outline-variant" data-alt="A small circular profile picture of a system administrator in a dark server room setting. Cool blue lighting highlights their focused expression. Modern corporate style, highly detailed." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPSml_Vh1ysslfciYJtCJNVl_7XoWTLY2T8vSssp18rMdP3soIVH5ju30SjuO_pbF66RYpYG5Y71b4Y5hl8XaiEBrBfBUC8UK8oxdxG43-D712_4yQ9J8W21p0ocE5BqthYitvfNHEkd5h9YWf-ZXeKTn3DXp1okUpI1_ybX5BDLG1-0B32xML8rDsn8Wi1A7Tkh2sEgQP__RTrSflDvTT96g_REXy1VrSLYMjNg3yzoJwtjzEMYc5IA"/>
+</div>
+</header>
+<!-- SideNavBar (Desktop) -->
+<nav class="hidden md:flex bg-surface-container-low/80 backdrop-blur-md border-r border-outline-variant fixed left-0 top-0 h-full w-64 z-40 flex-col py-margin-desktop px-4 gap-2">
+<div class="mb-8 px-4 flex items-center gap-3">
+<img alt="Tenant Logo" class="w-10 h-10 rounded-DEFAULT object-cover" data-alt="A minimalist tech logo for Tenant Alpha, featuring sharp geometric shapes in vibrant blue and white against a deep charcoal background. High contrast, precise, corporate identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCTRAMk3F0cn9qbuZRK_JFqmpAYvpBuRQQgcQ_SPsABAIcoKeg_F0GjgOMJI_M-ZolNcJH88fPOw-7IU6LsDiQhG2UU3Z2_k2FDVe7gZmmWtBChCEPt3LoiwtOzwWar9dK0lIhge8B4V67OqE33dNPeGp3bIrTMVbdEcADxTYruI4xwA9Nn3nq3-xfQG1ymF6MeUbdnvmX22BukE4WvZLs5ukr21We6OkTr_mXOJx7pdETN14p7P4kjkg"/>
+<div>
+<h1 class="font-headline-md text-headline-md text-primary leading-tight">Tenant Alpha</h1>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Hardware Node: 08</span>
+</div>
+</div>
+<div class="flex flex-col gap-1 flex-grow">
+<!-- Inactive -->
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high scale-95 transition-transform duration-100 rounded-lg" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+<span class="font-label-sm text-label-sm">Overview</span>
+</a>
+<!-- Inactive -->
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high scale-95 transition-transform duration-100 rounded-lg" href="#">
+<span class="material-symbols-outlined text-[20px]">memory</span>
+<span class="font-label-sm text-label-sm">Devices</span>
+</a>
+<!-- Active -->
+<a class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container font-bold rounded-lg scale-95 transition-transform duration-100" href="#">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">warning</span>
+<span class="font-label-sm text-label-sm">Alerts</span>
+</a>
+</div>
+<div class="flex flex-col gap-1 mt-auto pt-4 border-t border-outline-variant">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high scale-95 transition-transform duration-100 rounded-lg" href="#">
+<span class="material-symbols-outlined text-[20px]">help</span>
+<span class="font-label-sm text-label-sm">Support</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high scale-95 transition-transform duration-100 rounded-lg" href="#">
+<span class="material-symbols-outlined text-[20px]">terminal</span>
+<span class="font-label-sm text-label-sm">Logs</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-1 md:ml-64 mt-16 md:mt-0 p-margin-mobile md:p-margin-desktop overflow-y-auto h-full bg-surface">
+<div class="max-w-container-max mx-auto flex flex-col gap-gutter">
+<!-- Breadcrumbs & Header -->
+<div class="flex flex-col gap-2 mb-4">
+<div class="flex items-center gap-2 font-label-sm text-label-sm text-on-surface-variant">
+<a class="hover:text-primary transition-colors" href="#">Alerts</a>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="text-on-surface">Acme Corp</span>
+</div>
+<div class="flex justify-between items-end">
+<h2 class="font-display-lg text-display-lg text-primary">Acme Corp Incidents</h2>
+<div class="flex gap-4">
+<button class="bg-surface-container-high border border-outline-variant text-on-surface px-4 py-2 rounded-DEFAULT font-label-sm text-label-sm hover:bg-surface-bright transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">filter_list</span> Filter
+                        </button>
+<button class="bg-primary text-on-primary px-4 py-2 rounded-DEFAULT font-label-sm text-label-sm font-bold hover:bg-primary-fixed transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">done_all</span> Ack All
+                        </button>
+</div>
+</div>
+</div>
+<!-- Summary Bento -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-unit">
+<!-- Critical -->
+<div class="bg-surface-container p-4 rounded-DEFAULT border-l-4 border-error flex flex-col gap-2">
+<div class="flex items-center gap-2 text-error">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">error</span>
+<span class="font-label-sm text-label-sm uppercase">Critical Alerts</span>
+</div>
+<div class="font-display-lg text-display-lg text-on-background">12</div>
+</div>
+<!-- Warning -->
+<div class="bg-surface-container p-4 rounded-DEFAULT border-l-4 border-tertiary-container flex flex-col gap-2">
+<div class="flex items-center gap-2 text-tertiary-container">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">warning</span>
+<span class="font-label-sm text-label-sm uppercase">Warning Alerts</span>
+</div>
+<div class="font-display-lg text-display-lg text-on-background">5</div>
+</div>
+<!-- Info -->
+<div class="bg-surface-container p-4 rounded-DEFAULT border-l-4 border-primary-container flex flex-col gap-2">
+<div class="flex items-center gap-2 text-primary-container">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">info</span>
+<span class="font-label-sm text-label-sm uppercase">Info Alerts</span>
+</div>
+<div class="font-display-lg text-display-lg text-on-background">24</div>
+</div>
+</div>
+<!-- Device List -->
+<div class="flex flex-col gap-4 mt-4">
+<!-- Device Card 1 -->
+<div class="bg-surface-container rounded-DEFAULT border border-outline-variant overflow-hidden">
+<!-- Header -->
+<div class="bg-surface-container-high px-4 py-3 flex justify-between items-center border-b border-outline-variant">
+<div class="flex items-center gap-4">
+<div class="w-3 h-3 rounded-full bg-error animate-pulse"></div>
+<div class="font-data-lg text-data-lg text-on-background">fw-edge-01.acme.local</div>
+<span class="bg-surface-variant px-2 py-1 rounded-DEFAULT font-label-sm text-label-sm text-on-surface-variant border border-outline-variant">Firewall</span>
+</div>
+<div class="flex gap-6 font-data-sm text-data-sm text-on-surface-variant">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase text-outline">Uptime</span>
+<span>45d 12h</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase text-outline">Last Seen</span>
+<span>12s ago</span>
+</div>
+</div>
+</div>
+<!-- Alerts Table -->
+<div class="w-full">
+<div class="grid grid-cols-[100px_150px_1fr_200px] gap-4 px-4 py-2 border-b border-surface-variant bg-surface-container-low font-label-sm text-label-sm text-on-surface-variant uppercase">
+<div>Severity</div>
+<div>Timestamp</div>
+<div>Message</div>
+<div class="text-right">Actions</div>
+</div>
+<!-- Row 1 -->
+<div class="grid grid-cols-[100px_150px_1fr_200px] gap-4 px-4 py-3 items-center border-b border-surface-variant hover:bg-surface-container-highest transition-colors">
+<div class="flex items-center gap-2 text-error font-label-sm text-label-sm bg-error-container/20 px-2 py-1 rounded-DEFAULT w-fit">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">error</span>
+                                CRITICAL
+                            </div>
+<div class="font-data-sm text-data-sm text-on-surface">14:22:05 UTC</div>
+<div class="font-data-sm text-data-sm text-on-background">BGP Session Down (Peer 192.168.1.1)</div>
+<div class="flex gap-2 justify-end">
+<button class="px-3 py-1 border border-outline-variant text-on-surface rounded-DEFAULT font-label-sm text-label-sm hover:bg-surface-bright transition-colors">Ack</button>
+<button class="px-3 py-1 bg-primary text-on-primary rounded-DEFAULT font-label-sm text-label-sm hover:bg-primary-fixed transition-colors">Resolve</button>
+</div>
+</div>
+<!-- Row 2 -->
+<div class="grid grid-cols-[100px_150px_1fr_200px] gap-4 px-4 py-3 items-center hover:bg-surface-container-highest transition-colors">
+<div class="flex items-center gap-2 text-tertiary-container font-label-sm text-label-sm bg-tertiary-container/20 px-2 py-1 rounded-DEFAULT w-fit">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">warning</span>
+                                WARNING
+                            </div>
+<div class="font-data-sm text-data-sm text-on-surface">14:15:33 UTC</div>
+<div class="font-data-sm text-data-sm text-on-background">High CPU Utilization (&gt;85%)</div>
+<div class="flex gap-2 justify-end">
+<button class="px-3 py-1 border border-outline-variant text-on-surface rounded-DEFAULT font-label-sm text-label-sm hover:bg-surface-bright transition-colors">Ack</button>
+<button class="px-3 py-1 bg-primary text-on-primary rounded-DEFAULT font-label-sm text-label-sm hover:bg-primary-fixed transition-colors">Resolve</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Device Card 2 -->
+<div class="bg-surface-container rounded-DEFAULT border border-outline-variant overflow-hidden mt-4">
+<!-- Header -->
+<div class="bg-surface-container-high px-4 py-3 flex justify-between items-center border-b border-outline-variant">
+<div class="flex items-center gap-4">
+<div class="w-3 h-3 rounded-full bg-tertiary-container"></div>
+<div class="font-data-lg text-data-lg text-on-background">app-srv-02.acme.prod</div>
+<span class="bg-surface-variant px-2 py-1 rounded-DEFAULT font-label-sm text-label-sm text-on-surface-variant border border-outline-variant">App Server</span>
+</div>
+<div class="flex gap-6 font-data-sm text-data-sm text-on-surface-variant">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase text-outline">Uptime</span>
+<span>120d 04h</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase text-outline">Last Seen</span>
+<span>4s ago</span>
+</div>
+</div>
+</div>
+<!-- Alerts Table -->
+<div class="w-full">
+<div class="grid grid-cols-[100px_150px_1fr_200px] gap-4 px-4 py-2 border-b border-surface-variant bg-surface-container-low font-label-sm text-label-sm text-on-surface-variant uppercase">
+<div>Severity</div>
+<div>Timestamp</div>
+<div>Message</div>
+<div class="text-right">Actions</div>
+</div>
+<!-- Row 1 -->
+<div class="grid grid-cols-[100px_150px_1fr_200px] gap-4 px-4 py-3 items-center hover:bg-surface-container-highest transition-colors">
+<div class="flex items-center gap-2 text-tertiary-container font-label-sm text-label-sm bg-tertiary-container/20 px-2 py-1 rounded-DEFAULT w-fit">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">warning</span>
+                                WARNING
+                            </div>
+<div class="font-data-sm text-data-sm text-on-surface">11:05:12 UTC</div>
+<div class="font-data-sm text-data-sm text-on-background">Memory usage critical (92%)</div>
+<div class="flex gap-2 justify-end">
+<button class="px-3 py-1 border border-outline-variant text-on-surface rounded-DEFAULT font-label-sm text-label-sm hover:bg-surface-bright transition-colors">Ack</button>
+<button class="px-3 py-1 bg-primary text-on-primary rounded-DEFAULT font-label-sm text-label-sm hover:bg-primary-fixed transition-colors">Resolve</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

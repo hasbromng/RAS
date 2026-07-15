@@ -23,12 +23,19 @@ if "%errorlevel%"=="0" (
     sc delete "%SERVICE_NAME%" >nul 2>&1
     timeout /t 2 /nobreak >nul
 )
+:KillLoop
 taskkill /f /im ras_agent.exe >nul 2>&1
+timeout /t 2 /nobreak >nul
+tasklist | find /i "ras_agent.exe" >nul
+if "%errorlevel%"=="0" (
+    echo Menunggu proses ras_agent.exe untuk berhenti sepenuhnya...
+    goto KillLoop
+)
 
 if not exist "%INSTALL_DIR%" mkdir "%INSTALL_DIR%"
 if exist "%INSTALL_DIR%\config.json" (
     copy /y "%INSTALL_DIR%\config.json" "%TEMP%\ras_agent_config_backup.json" >nul
-    if not "%errorlevel%"=="0" (
+    if errorlevel 1 (
         echo [ERROR] Gagal membuat cadangan config.json.
         pause
         exit /b 1
@@ -49,7 +56,7 @@ if not exist "%INSTALL_DIR%\ras_agent.exe" (
 
 if exist "%TEMP%\ras_agent_config_backup.json" (
     copy /y "%TEMP%\ras_agent_config_backup.json" "%INSTALL_DIR%\config.json" >nul
-    if not "%errorlevel%"=="0" (
+    if errorlevel 1 (
         echo [ERROR] Gagal memulihkan config.json.
         pause
         exit /b 1

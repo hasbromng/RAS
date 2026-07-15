@@ -249,7 +249,7 @@ $core_count = !empty($additional_info['cpu_per_core']) && is_array($additional_i
                 <span class="dd-chip-label">Network</span>
                 <span class="dd-chip-value dd-level-text-<?php echo $network_class; ?>"><?php echo ucfirst(htmlspecialchars($device['network_status'] ?? '—')); ?></span>
             </div>
-            <button class="dd-export-btn btn-refresh-detail" data-id="<?php echo htmlspecialchars($device['device_id']); ?>" style="margin-right: 8px; background: #e0f2f1; color: #00897b; border: 1px solid #b2dfdb; cursor: pointer;" title="Audit Seketika">
+            <button class="dd-export-btn dd-export-btn-refresh btn-refresh-detail" data-id="<?php echo htmlspecialchars($device['device_id']); ?>" title="Audit Seketika">
                 <i class="material-icons">sync</i>
                 <span>Refresh</span>
             </button>
@@ -350,6 +350,8 @@ $core_count = !empty($additional_info['cpu_per_core']) && is_array($additional_i
                                         'model'       => $pd['model'] ?? '',
                                         'serial'      => trim($pd['serial_number'] ?? ''),
                                         'total_size'  => 0,
+                                        'bustype'     => $pd['bustype'] ?? '',
+                                        'is_removable'=> $pd['is_removable'] ?? false,
                                     ];
                                 }
                                 // accumulate total from partitions
@@ -362,6 +364,8 @@ $core_count = !empty($additional_info['cpu_per_core']) && is_array($additional_i
                                         'model'       => '',
                                         'serial'      => '',
                                         'total_size'  => 0,
+                                        'bustype'     => '',
+                                        'is_removable'=> false,
                                     ];
                                 }
                                 $phys_meta[$gkey]['total_size'] += floatval($disk['total'] ?? 0);
@@ -393,17 +397,20 @@ $core_count = !empty($additional_info['cpu_per_core']) && is_array($additional_i
                                 $partition_total += floatval($p['total'] ?? 0);
                             }
                             if ($partition_total <= 0) $partition_total = 1;
+
+                            $is_ext = (isset($meta['bustype']) && $meta['bustype'] === 'USB') || (isset($meta['is_removable']) && $meta['is_removable']);
+                            $card_style = $is_ext ? '--dd-disk-accent: #3b82f6;' : '';
                         ?>
-                        <div class="dd-phys-disk-card">
+                        <div class="dd-phys-disk-card <?php echo $is_ext ? 'is-external' : ''; ?>" style="<?php echo $card_style; ?>">
                             <!-- Physical disk header -->
                             <div class="dd-phys-disk-header">
                                 <div class="dd-phys-disk-header-left">
-                                    <i class="material-icons">storage</i>
+                                    <i class="material-icons"><?php echo $is_ext ? 'usb' : 'storage'; ?></i>
                                     <div class="dd-phys-disk-title">
                                         <?php if ($disk_num !== null): ?>
-                                        <span class="dd-phys-disk-num">Disk <?php echo (int)$disk_num; ?></span>
+                                        <span class="dd-phys-disk-num">Disk <?php echo (int)$disk_num; ?> <?php if($is_ext) echo '<span class="dd-inline-badge">External</span>'; ?></span>
                                         <?php else: ?>
-                                        <span class="dd-phys-disk-num">Disk</span>
+                                        <span class="dd-phys-disk-num">Disk <?php if($is_ext) echo '<span class="dd-inline-badge">External</span>'; ?></span>
                                         <?php endif; ?>
                                         <?php if ($disk_model): ?>
                                         <span class="dd-phys-disk-model"><?php echo htmlspecialchars($disk_model); ?></span>
@@ -413,7 +420,12 @@ $core_count = !empty($additional_info['cpu_per_core']) && is_array($additional_i
                                         <?php endif; ?>
                                     </div>
                                 </div>
-                                <span class="dd-phys-disk-size"><?php echo formatBytesDetail($disk_total); ?></span>
+                                <div class="dd-inline-stack">
+                                    <span class="dd-chip-value dd-chip-value-tight dd-level-text-<?php echo $storage_class; ?>">
+                                        <?php echo ucfirst(htmlspecialchars($device['storage_health'] ?? 'Unknown')); ?>
+                                    </span>
+                                    <span class="dd-phys-disk-size"><?php echo formatBytesDetail($disk_total); ?></span>
+                                </div>
                             </div>
 
                             <!-- Partitions — horizontal proportional blocks -->
@@ -498,9 +510,9 @@ $core_count = !empty($additional_info['cpu_per_core']) && is_array($additional_i
                         <span class="dd-panel-count"><?php echo count($chart_labels); ?> sampel</span>
                     </div>
                     <div class="dd-chart-legend-inline">
-                        <span><i style="background:#667eea"></i>CPU</span>
-                        <span><i style="background:#764ba2"></i>Mem</span>
-                        <span><i style="background:#22c55e"></i>Disk</span>
+                        <span><i class="dd-chart-dot cpu"></i>CPU</span>
+                        <span><i class="dd-chart-dot mem"></i>Mem</span>
+                        <span><i class="dd-chart-dot disk"></i>Disk</span>
                     </div>
                     <i class="material-icons dd-chevron">expand_more</i>
                 </button>
@@ -1042,20 +1054,20 @@ $core_count = !empty($additional_info['cpu_per_core']) && is_array($additional_i
                                     }
                                     if ($snapshot && (empty($snapshot['top_cpu']) === false || empty($snapshot['top_memory']) === false)): 
                                     ?>
-                                        <div style="margin-top: 8px;">
-                                            <button type="button" class="btn btn-tiny btn-outline" style="background: white; border: 1px solid #cbd5e1; color: #475569; padding: 2px 8px; font-size: 0.75rem; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 4px;" onclick="document.getElementById('snapshot-<?php echo $alert['id']; ?>').style.display = document.getElementById('snapshot-<?php echo $alert['id']; ?>').style.display === 'none' ? 'block' : 'none';">
-                                                <i class="material-icons" style="font-size: 14px;">camera_alt</i> Snapshot Proses
+                                        <div class="dd-snapshot-wrap">
+                                            <button type="button" class="btn btn-tiny btn-outline dd-snapshot-btn" onclick="document.getElementById('snapshot-<?php echo $alert['id']; ?>').style.display = document.getElementById('snapshot-<?php echo $alert['id']; ?>').style.display === 'none' ? 'block' : 'none';">
+                                                <i class="material-icons">camera_alt</i> Snapshot Proses
                                             </button>
-                                            <div id="snapshot-<?php echo $alert['id']; ?>" style="display: none; margin-top: 8px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px;">
-                                                <div style="display: flex; gap: 16px;">
+                                            <div id="snapshot-<?php echo $alert['id']; ?>" class="dd-snapshot-panel" style="display: none;">
+                                                <div class="dd-snapshot-grid">
                                                     <?php if (!empty($snapshot['top_cpu'])): ?>
-                                                    <div style="flex: 1;">
-                                                        <strong style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Top CPU</strong>
-                                                        <table style="width: 100%; font-size: 0.8rem; margin-top: 4px; border-collapse: collapse;">
+                                                    <div>
+                                                        <strong class="dd-snapshot-title">Top CPU</strong>
+                                                        <table class="dd-snapshot-table">
                                                             <?php foreach($snapshot['top_cpu'] as $proc): ?>
                                                                 <tr>
-                                                                    <td style="padding: 3px 0; color: #334155; border-bottom: 1px solid #f1f5f9;"><?php echo htmlspecialchars($proc['name']); ?></td>
-                                                                    <td style="padding: 3px 0; color: #ef4444; border-bottom: 1px solid #f1f5f9; text-align: right; font-family: monospace; font-weight: 600;"><?php echo $proc['cpu_percent']; ?>%</td>
+                                                                    <td><?php echo htmlspecialchars($proc['name']); ?></td>
+                                                                    <td class="dd-snapshot-value danger"><?php echo $proc['cpu_percent']; ?>%</td>
                                                                 </tr>
                                                             <?php endforeach; ?>
                                                         </table>
@@ -1063,13 +1075,15 @@ $core_count = !empty($additional_info['cpu_per_core']) && is_array($additional_i
                                                     <?php endif; ?>
                                                     
                                                     <?php if (!empty($snapshot['top_memory'])): ?>
-                                                    <div style="flex: 1;">
-                                                        <strong style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Top Memory</strong>
-                                                        <table style="width: 100%; font-size: 0.8rem; margin-top: 4px; border-collapse: collapse;">
+                                                    <div>
+                                                        <strong class="dd-snapshot-title">Top Memory</strong>
+                                                        <table class="dd-snapshot-table">
                                                             <?php foreach($snapshot['top_memory'] as $proc): ?>
                                                                 <tr>
-                                                                    <td style="padding: 3px 0; color: #334155; border-bottom: 1px solid #f1f5f9;"><?php echo htmlspecialchars($proc['name']); ?></td>
-                                                                    <td style="padding: 3px 0; color: #3b82f6; border-bottom: 1px solid #f1f5f9; text-align: right; font-family: monospace; font-weight: 600;"><?php echo $proc['memory_percent']; ?>%</td>
+                                                                    <td><?php echo htmlspecialchars($proc['name']); ?></td>
+                                                                    <td class="dd-snapshot-value info">
+                                                                        <?php echo isset($proc['memory_mb']) ? $proc['memory_mb'] . ' MB' : $proc['memory_percent'] . '%'; ?>
+                                                                    </td>
                                                                 </tr>
                                                             <?php endforeach; ?>
                                                         </table>
@@ -1179,6 +1193,9 @@ $core_count = !empty($additional_info['cpu_per_core']) && is_array($additional_i
 (function () {
     const ctx = document.getElementById('ddPerfChart');
     if (!ctx || typeof Chart === 'undefined') return;
+    const uiStyles = getComputedStyle(document.body);
+    const chartTextColor = uiStyles.getPropertyValue('--text-secondary').trim() || '#94a3b8';
+    const chartGridColor = document.body.getAttribute('data-theme') === 'dark' ? 'rgba(148, 163, 184, 0.14)' : 'rgba(0,0,0,0.04)';
 
     const labels = <?php echo json_encode($chart_labels); ?>;
     const cpu = <?php echo json_encode($chart_cpu); ?>;
@@ -1247,14 +1264,14 @@ $core_count = !empty($additional_info['cpu_per_core']) && is_array($additional_i
             scales: {
                 x: {
                     grid: { display: false },
-                    ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 8, color: '#94a3b8', font: { size: 10 } }
+                    ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 8, color: chartTextColor, font: { size: 10 } }
                 },
                 y: {
                     min: 0,
                     max: 100,
-                    grid: { color: 'rgba(0,0,0,0.04)' },
+                    grid: { color: chartGridColor },
                     ticks: {
-                        color: '#94a3b8',
+                        color: chartTextColor,
                         font: { size: 10 },
                         callback: function (v) { return v + '%'; }
                     }

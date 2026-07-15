@@ -10,6 +10,9 @@ require_once __DIR__ . '/../config/config.php';
 // Simple session check for authentication (for MVP)
 session_start();
 
+$theme = $_COOKIE['ras_admin_theme'] ?? 'light';
+$theme = in_array($theme, ['light', 'dark'], true) ? $theme : 'light';
+
 // Check if logged in
 if (!isset($_SESSION['admin_logged_in']) && !isset($_GET['login'])) {
     // For MVP, allow direct access with simple login form
@@ -51,18 +54,28 @@ if (!isset($_SESSION['admin_logged_in']) && !isset($_GET['skip_auth'])) {
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+    <script>
+        (function () {
+            var theme = localStorage.getItem('ras_theme') || '<?php echo $theme; ?>';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
     <style>
         body {
             font-family: 'Inter', 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background:
+                radial-gradient(circle at top left, rgba(102, 126, 234, 0.18), transparent 30%),
+                radial-gradient(circle at bottom right, rgba(118, 75, 162, 0.18), transparent 28%),
+                linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0;
+            color: #1f2937;
         }
         .login-container {
-            background: white;
+            background: rgba(255,255,255,0.96);
             border-radius: 16px;
             box-shadow: 0 24px 80px rgba(0,0,0,0.3);
             max-width: 420px;
@@ -149,9 +162,67 @@ if (!isset($_SESSION['admin_logged_in']) && !isset($_GET['skip_auth'])) {
         .note strong {
             color: #2d3436;
         }
+        .theme-switch {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            z-index: 10;
+        }
+        .theme-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.18);
+            background: rgba(255,255,255,0.92);
+            color: #1f2937;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.16);
+        }
+        .theme-toggle .theme-label {
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .theme-toggle .theme-icon {
+            font-size: 18px;
+        }
+        html[data-theme="dark"] body {
+            color: #e5eefb;
+        }
+        html[data-theme="dark"] .login-container {
+            background: rgba(15, 23, 42, 0.94);
+            color: #e5eefb;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        html[data-theme="dark"] .login-header h2,
+        html[data-theme="dark"] .note strong,
+        html[data-theme="dark"] .input-group label {
+            color: #e5eefb;
+        }
+        html[data-theme="dark"] .login-header p,
+        html[data-theme="dark"] .note,
+        html[data-theme="dark"] .center-align a {
+            color: #9fb0c7 !important;
+        }
+        html[data-theme="dark"] .input-group input {
+            background: #0f172a;
+            color: #e5eefb;
+            border-color: #243244;
+        }
+        html[data-theme="dark"] .note {
+            background: #111827;
+            border-color: #243244;
+        }
     </style>
 </head>
 <body>
+    <div class="theme-switch">
+        <button class="theme-toggle" id="themeToggle" type="button">
+            <i class="material-icons theme-icon" id="themeIcon">light_mode</i>
+            <span class="theme-label" id="themeLabel">Light</span>
+        </button>
+    </div>
     <div class="login-container">
         <div class="login-header">
             <i class="material-icons">admin_panel_settings</i>
@@ -194,6 +265,24 @@ if (!isset($_SESSION['admin_logged_in']) && !isset($_GET['skip_auth'])) {
             </a>
         </div>
     </div>
+    <script>
+        (function () {
+            var btn = document.getElementById('themeToggle');
+            var icon = document.getElementById('themeIcon');
+            var label = document.getElementById('themeLabel');
+            function setTheme(theme) {
+                document.documentElement.setAttribute('data-theme', theme);
+                localStorage.setItem('ras_theme', theme);
+                document.cookie = 'ras_admin_theme=' + theme + '; path=/; max-age=31536000';
+                icon.textContent = theme === 'dark' ? 'dark_mode' : 'light_mode';
+                label.textContent = theme === 'dark' ? 'Dark' : 'Light';
+            }
+            setTheme(document.documentElement.getAttribute('data-theme') || 'light');
+            btn.addEventListener('click', function () {
+                setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+            });
+        })();
+    </script>
 </body>
 </html>
     <?php
@@ -232,6 +321,114 @@ try {
 } catch (PDOException $e) {
     $db_error = $e->getMessage();
 }
+
+if ($current_page === 'reports' && ($_GET['export'] ?? '') === 'csv' && isset($pdo) && $pdo instanceof PDO) {
+    $report_type = $_GET['type'] ?? 'daily';
+    $device_id = $_GET['device'] ?? 'all';
+    $date_from = $_GET['from'] ?? date('Y-m-d', strtotime('-7 days'));
+    $date_to = $_GET['to'] ?? date('Y-m-d');
+
+    $where = ["1=1"];
+    $params = [];
+
+    if ($device_id !== 'all') {
+        $where[] = "device_id = ?";
+        $params[] = $device_id;
+    }
+
+    $where[] = "timestamp >= ? AND timestamp <= ?";
+    $params[] = $date_from . ' 00:00:00';
+    $params[] = $date_to . ' 23:59:59';
+
+    $where_clause = implode(' AND ', $where);
+
+    $stmt = $pdo->prepare("
+        SELECT * FROM metrics
+        WHERE {$where_clause}
+        ORDER BY timestamp ASC
+    ");
+    $stmt->execute($params);
+    $metrics = $stmt->fetchAll();
+
+    $device_filter = $device_id !== 'all' ? "AND a.device_id = ?" : "";
+    $stmt = $pdo->prepare("
+        SELECT a.*, d.hostname
+        FROM alerts a
+        INNER JOIN devices d ON d.device_id = a.device_id
+        WHERE a.timestamp >= ? AND a.timestamp <= ? $device_filter
+        ORDER BY a.timestamp ASC
+    ");
+    $alert_params = [$date_from . ' 00:00:00', $date_to . ' 23:59:59'];
+    if ($device_id !== 'all') {
+        $alert_params[] = $device_id;
+    }
+    $stmt->execute($alert_params);
+    $alerts = $stmt->fetchAll();
+
+    $stats = [
+        'metrics_count' => count($metrics),
+        'alerts_count' => count($alerts),
+        'critical_alerts' => 0,
+        'avg_cpu' => 0,
+        'avg_memory' => 0,
+        'avg_disk' => 0
+    ];
+
+    if (!empty($metrics)) {
+        $cpu_values = array_column($metrics, 'cpu_usage');
+        $disk_values = array_column($metrics, 'disk_usage');
+        $mem_values = [];
+
+        foreach ($metrics as $m) {
+            if ($m['memory_total'] > 0) {
+                $mem_values[] = ($m['memory_used'] / $m['memory_total']) * 100;
+            }
+        }
+
+        $stats['avg_cpu'] = array_sum($cpu_values) / count($cpu_values);
+        $stats['avg_memory'] = !empty($mem_values) ? array_sum($mem_values) / count($mem_values) : 0;
+        $stats['avg_disk'] = array_sum($disk_values) / count($disk_values);
+    }
+
+    foreach ($alerts as $a) {
+        if ($a['severity'] === 'critical') {
+            $stats['critical_alerts']++;
+        }
+    }
+
+    header('Content-Type: text/csv');
+    header('Content-Disposition: attachment; filename="ras_report_' . date('Y-m-d') . '.csv"');
+
+    $output = fopen('php://output', 'w');
+    fputcsv($output, ['Report Type', 'Device', 'Date From', 'Date To']);
+    fputcsv($output, [$report_type, $device_id, $date_from, $date_to]);
+    fputcsv($output, []);
+
+    fputcsv($output, ['Summary Statistics']);
+    fputcsv($output, ['Total Metrics', $stats['metrics_count']]);
+    fputcsv($output, ['Total Alerts', $stats['alerts_count']]);
+    fputcsv($output, ['Critical Alerts', $stats['critical_alerts']]);
+    fputcsv($output, ['Average CPU', number_format($stats['avg_cpu'], 2) . '%']);
+    fputcsv($output, ['Average Memory', number_format($stats['avg_memory'], 2) . '%']);
+    fputcsv($output, ['Average Disk', number_format($stats['avg_disk'], 2) . '%']);
+    fputcsv($output, []);
+
+    fputcsv($output, ['Alerts']);
+    fputcsv($output, ['Time', 'Hostname', 'Type', 'Severity', 'Message', 'Status']);
+    foreach ($alerts as $alert) {
+        fputcsv($output, [
+            $alert['timestamp'],
+            $alert['hostname'],
+            $alert['alert_type'],
+            $alert['severity'],
+            $alert['message'],
+            $alert['status']
+        ]);
+    }
+
+    fclose($output);
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -246,8 +443,14 @@ try {
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="assets/css/admin.css">
+    <script>
+        (function () {
+            var theme = localStorage.getItem('ras_theme') || '<?php echo $theme; ?>';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
 </head>
-<body>
+<body data-theme="<?php echo htmlspecialchars($theme); ?>">
     <div class="admin-wrapper">
         <!-- Sidebar -->
         <aside id="sidebar" class="sidebar">
@@ -273,9 +476,6 @@ try {
                             <a href="?page=devices">
                                 <i class="material-icons">devices</i>
                                 <span>Perangkat</span>
-                                <?php if ($device_stats['total'] > 0): ?>
-                                <span class="badge"><?php echo $device_stats['total']; ?></span>
-                                <?php endif; ?>
                             </a>
                         </li>
                         <li class="<?php echo $current_page === 'alerts' ? 'active' : ''; ?>">
@@ -361,6 +561,10 @@ try {
                     <h1 class="page-title"><?php echo getPageTitle($current_page); ?></h1>
                 </div>
                 <div class="top-bar-right">
+                    <button class="theme-toggle" id="themeToggle" type="button" title="Toggle theme">
+                        <i class="material-icons theme-icon" id="themeIcon">light_mode</i>
+                        <span class="theme-label" id="themeLabel">Light</span>
+                    </button>
                     <?php if ($current_page === 'devices' && empty($_GET['device_id'])): ?>
                     <a href="?page=help" class="btn btn-sm btn-primary" style="border-radius: 8px; font-size: 13px; padding: 6px 12px; height: 32px; box-shadow: none; display: inline-flex; align-items: center; gap: 6px; text-decoration: none;">
                         <i class="material-icons" style="font-size: 16px;">add</i>
@@ -439,6 +643,26 @@ try {
 
     <!-- Custom JS -->
     <script src="assets/js/admin.js"></script>
+    <script>
+        (function () {
+            var btn = document.getElementById('themeToggle');
+            if (!btn) return;
+            var icon = document.getElementById('themeIcon');
+            var label = document.getElementById('themeLabel');
+            function setTheme(theme) {
+                document.documentElement.setAttribute('data-theme', theme);
+                document.body.setAttribute('data-theme', theme);
+                localStorage.setItem('ras_theme', theme);
+                document.cookie = 'ras_admin_theme=' + theme + '; path=/; max-age=31536000';
+                icon.textContent = theme === 'dark' ? 'dark_mode' : 'light_mode';
+                label.textContent = theme === 'dark' ? 'Dark' : 'Light';
+            }
+            setTheme(document.documentElement.getAttribute('data-theme') || 'light');
+            btn.addEventListener('click', function () {
+                setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+            });
+        })();
+    </script>
 
     <?php
     function getPageTitle($page) {

@@ -6,6 +6,8 @@
 
 // Simple router based on URL parameter
 $page = $_GET['p'] ?? 'home';
+$theme = $_COOKIE['ras_theme'] ?? 'light';
+$theme = in_array($theme, ['light', 'dark'], true) ? $theme : 'light';
 
 // Page routing
 switch ($page) {
@@ -39,20 +41,48 @@ switch ($page) {
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+    <script>
+        (function () {
+            var theme = localStorage.getItem('ras_theme') || '<?php echo $theme; ?>';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
     <style>
+        :root {
+            --bg: #f5f7ff;
+            --surface: rgba(255,255,255,0.92);
+            --surface-2: #ffffff;
+            --text: #182230;
+            --text-muted: #5f6b7a;
+            --border: rgba(24, 34, 48, 0.10);
+        }
+        html[data-theme="dark"] {
+            --bg: #07111f;
+            --surface: rgba(15,23,42,0.92);
+            --surface-2: #111827;
+            --text: #eef4ff;
+            --text-muted: #a3b2c9;
+            --border: rgba(255,255,255,0.08);
+        }
         body {
             font-family: 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background:
+                radial-gradient(circle at top left, rgba(102,126,234,0.18), transparent 32%),
+                radial-gradient(circle at bottom right, rgba(118,75,162,0.20), transparent 30%),
+                linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0;
+            color: var(--text);
         }
         .landing-container {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            background: var(--surface);
+            backdrop-filter: blur(18px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            box-shadow: 0 24px 80px rgba(0,0,0,0.24);
             max-width: 900px;
             width: 90%;
             padding: 3rem;
@@ -72,10 +102,10 @@ switch ($page) {
             font-size: 2.5rem;
             font-weight: 300;
             margin: 1rem 0;
-            color: #333;
+            color: var(--text);
         }
         .header p {
-            color: #666;
+            color: var(--text-muted);
             font-size: 1.1rem;
         }
         .cards-container {
@@ -85,13 +115,15 @@ switch ($page) {
             margin-bottom: 2rem;
         }
         .card {
-            border-radius: 8px;
+            border-radius: 16px;
             transition: all 0.3s ease;
             cursor: pointer;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
         }
         .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            transform: translateY(-6px);
+            box-shadow: 0 18px 32px rgba(0,0,0,0.16);
         }
         .card-content {
             text-align: center;
@@ -110,14 +142,15 @@ switch ($page) {
             margin-bottom: 0.5rem !important;
         }
         .card-desc {
-            color: #666;
+            color: var(--text-muted);
             font-size: 0.9rem;
         }
         .status-section {
-            background: #f5f5f5;
-            border-radius: 8px;
+            background: var(--surface-2);
+            border-radius: 16px;
             padding: 1.5rem;
             margin-top: 2rem;
+            border: 1px solid var(--border);
         }
         .status-item {
             display: flex;
@@ -132,7 +165,7 @@ switch ($page) {
         .footer {
             text-align: center;
             margin-top: 2rem;
-            color: #666;
+            color: var(--text-muted);
             font-size: 0.9rem;
         }
         .btn-start {
@@ -156,9 +189,42 @@ switch ($page) {
             text-align: center;
             margin: 2rem 0;
         }
+        .theme-switch {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            z-index: 20;
+        }
+        .theme-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-radius: 10px;
+            background: var(--surface);
+            color: var(--text);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+            transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+        }
+        .theme-toggle:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 16px 34px rgba(0,0,0,0.16);
+        }
+        html[data-theme="dark"] .material-icons.card-icon,
+        html[data-theme="dark"] .header i {
+            filter: drop-shadow(0 8px 18px rgba(0,0,0,0.25));
+        }
     </style>
 </head>
 <body>
+    <div class="theme-switch">
+        <button class="theme-toggle" id="themeToggle" type="button">
+            <i class="material-icons theme-icon" id="themeIcon">light_mode</i>
+            <span class="theme-label" id="themeLabel">Light</span>
+        </button>
+    </div>
     <div class="landing-container">
         <div class="header">
             <i class="material-icons">support_agent</i>
@@ -238,6 +304,24 @@ switch ($page) {
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+        (function () {
+            var btn = document.getElementById('themeToggle');
+            var icon = document.getElementById('themeIcon');
+            var label = document.getElementById('themeLabel');
+            function setTheme(theme) {
+                document.documentElement.setAttribute('data-theme', theme);
+                localStorage.setItem('ras_theme', theme);
+                document.cookie = 'ras_admin_theme=' + theme + '; path=/; max-age=31536000';
+                icon.textContent = theme === 'dark' ? 'dark_mode' : 'light_mode';
+                label.textContent = theme === 'dark' ? 'Dark' : 'Light';
+            }
+            setTheme(document.documentElement.getAttribute('data-theme') || 'light');
+            btn.addEventListener('click', function () {
+                setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+            });
+        })();
+    </script>
 </body>
 </html>
         <?php

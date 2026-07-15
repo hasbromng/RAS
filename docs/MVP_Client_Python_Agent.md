@@ -1,82 +1,59 @@
-# MVP Client: Python Monitoring Agent
+# MVP Client: Python Monitoring Agent (Updated)
 
 ## Tujuan
-Membangun agen monitoring ringan yang berjalan di background pada perangkat target untuk mengumpulkan metrik sistem dan mengirimkannya ke server monitoring.
+Membangun agen monitoring yang efisien, handal, dan aman yang berjalan di perangkat klien (*background process*) untuk mengumpulkan metrik sistem secara komprehensif dan mentransmisikannya ke server melalui API yang terautentikasi.
 
-## Scope MVP
-- Agen harus berjalan sebagai proses/service ringan
-- Mengumpulkan metrik penting secara berkala
-- Mengirim data ke server PHP melalui API
-- Menyimpan sementara data lokal saat server tidak tersedia
-- Menggunakan sumber daya minimal agar tidak mengganggu pengguna
+## Scope MVP (Diperbarui)
+- Agen berjalan sebagai *Windows Service* atau *Linux Daemon* yang *silent*.
+- Pengumpulan metrik terperinci mencakup CPU, RAM, Disk, dan konektivitas.
+- Komunikasi dengan server menggunakan *API Key Authentication* di *header* HTTP.
+- Mekanisme *retry*, *backoff*, dan *local buffering* jika server tidak dapat diakses.
 
 ## Teknologi
-- Bahasa: Python 3.x
-- Library inti: `psutil`, `requests`, `schedule` atau `APScheduler`
-- Deployment: sebagai service Windows (Task Scheduler/Windows Service) atau daemon Linux
+- **Bahasa:** Python 3.x
+- **Library Inti:** `psutil` (untuk metrik sistem), `requests` (komunikasi HTTP), `schedule` (penjadwalan tugas).
+- **Deployment:** *Windows Service* (menggunakan `pywin32`) atau setara untuk sistem lain.
 
 ## Fitur Utama
-1. Pengumpulan Metrik Sistem
-   - Penggunaan CPU per core dan rata-rata
-   - Penggunaan memori fisik dan swap
-   - Penggunaan disk, ruang bebas, I/O dasar
-   - Kesehatan storage: status disk, SMART (opsional jika tersedia)
-   - Status jaringan: pengukuran konektivitas dan alamat IP
-   - Ketersediaan perangkat (heartbeat)
+1. **Pengumpulan Metrik Sistem Lanjutan**
+   - Penggunaan CPU (%) secara keseluruhan dan per-*core*.
+   - Analisis Memori: Total RAM, penggunaan (angka dan persentase), *swap*.
+   - Analisis Storage: Kapasitas disk total, penggunaan disk (dalam Bytes dan %), status IO dasar.
+   - Jaringan: Alamat IP aktual dan status konektivitas internet.
 
-2. Pengiriman Data
-   - Mengirim paket JSON ke endpoint PHP
-   - Interval pengiriman konfigurabel (misalnya setiap 60 detik)
-   - Retry dan backoff jika koneksi gagal
-   - Buffer lokal sementara saat server tidak tersedia
+2. **Pengiriman Data Terautentikasi**
+   - Format payload JSON yang terstruktur.
+   - Menyertakan header `X-API-Key` pada setiap *request*.
+   - Interval pengiriman dapat dikonfigurasi secara lokal (misal: setiap 1-5 menit).
 
-3. Monitoring Background
-   - Low CPU dan memori
-   - Tidak mengganggu aktivitas pengguna
-   - Ukuran proses kecil
-   - Mode silent dan tanpa UI
+3. **Ketahanan & Failover (Resiliency)**
+   - Jika koneksi API gagal, agen akan menyimpan sementara (buffer) payload di penyimpanan lokal.
+   - Menggunakan algoritma pengiriman ulang otomatis (*retry*) ketika koneksi kembali normal.
 
-4. Deteksi Masalah Kritis
-   - Threshold awal untuk CPU tinggi, memori rendah, disk penuh
-   - Log sederhana di file lokal
-   - Prioritas: kirim notifikasi ke server ketika kondisi kritis terdeteksi
+4. **Operasi Mode *Silent***
+   - Beban penggunaan CPU agen kurang dari 2% dan penggunaan memori kurang dari 50MB.
+   - *Log rotation* untuk pencatatan *error* lokal agar tidak menghabiskan *storage*.
 
-## Struktur Arsitektur
-- Agent Python
-  - Modul pengumpulan metrik
-  - Modul pengiriman ke API
-  - Modul penyimpanan sementara
-  - Konfigurasi threshold dan endpoint
-- Endpoint PHP/MySQL
-  - Menerima data dari agent
-  - Menyimpan metrik dan status perangkat
+## Format Payload JSON (Contoh)
+```json
+{
+    "device_id": "UUID-1234-5678",
+    "hostname": "LAPTOP-MARKETING",
+    "ip_address": "192.168.1.55",
+    "cpu_usage": 45.5,
+    "memory_used": 4294967296,
+    "memory_total": 8589934592,
+    "disk_used": 120000000000,
+    "disk_total": 500000000000,
+    "disk_usage": 24.0,
+    "storage_health": "healthy",
+    "network_status": "good"
+}
+```
 
-## Rincian Data yang Dikirim
-- `device_id`
-- `hostname`
-- `timestamp`
-- `cpu_usage`
-- `memory_total`, `memory_used`, `memory_free`
-- `disk_total`, `disk_used`, `disk_free`, `disk_usage`
-- `storage_health` (jika tersedia)
-- `network_status`
-- `online_status`
-
-## Definisi MVP Minimal
-- Agent Python capable collecting CPU, memory, disk, network, and heartbeat
-- Data sent to PHP endpoint reliably
-- Configurable send interval
-- Local queueing when offline
-
-## Langkah Pengembangan
-1. Buat script Python untuk membaca metrik dasar dengan `psutil`
-2. Tambahkan fungsi pengiriman data ke API PHP
-3. Tambahkan mekanisme retry dan buffer lokal
-4. Siapkan agent sebagai service/daemon
-5. Uji di Windows dan Linux dengan pekerjaan latar belakang
-
-## Catatan Khusus
-- Fokus pada stabilitas background dan efisiensi
-- Hindari polling terlalu sering; gunakan interval 30-60 detik
-- Simpan log kecil agar tidak memenuhi storage
-- Versi awal tidak perlu SMART kompleks kecuali sistem mendukung
+## Langkah Pengembangan (Status: Tahap Berikutnya)
+1. Penyusunan modul ekstraktor data menggunakan `psutil`.
+2. Implementasi modul HTTP Client dengan otorisasi `X-API-Key`.
+3. Pembangunan fitur antrian lokal (*queueing*) untuk *offline state*.
+4. Pembungkusan *script* menjadi *executable* atau *Windows Service*.
+5. Pengujian beban (*stress test*) untuk memastikan efisiensi *resource*.

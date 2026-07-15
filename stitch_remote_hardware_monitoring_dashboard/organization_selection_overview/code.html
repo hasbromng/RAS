@@ -1,0 +1,339 @@
+<!DOCTYPE html><html lang="en" class="dark" style=""><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&amp;family=Hanken+Grotesk:wght@600;700&amp;family=Inter:wght@400;500&amp;display=swap" rel="stylesheet"><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">try{
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "outline-variant": "#3c494e",
+                        "error": "#ffb4ab",
+                        "primary": "#a4e6ff",
+                        "tertiary-fixed-dim": "#ffba49",
+                        "on-secondary-container": "#006a5a",
+                        "inverse-on-surface": "#2f3034",
+                        "surface-bright": "#37393d",
+                        "surface-container": "#1e2023",
+                        "on-tertiary-fixed": "#291800",
+                        "inverse-surface": "#e2e2e6",
+                        "on-primary-fixed-variant": "#004e60",
+                        "surface-dim": "#111316",
+                        "error-container": "#93000a",
+                        "on-primary-fixed": "#001f28",
+                        "on-tertiary-container": "#6b4700",
+                        "on-primary": "#003543",
+                        "surface-variant": "#333538",
+                        "on-secondary-fixed": "#00201a",
+                        "tertiary-fixed": "#ffddb1",
+                        "on-surface": "#e2e2e6",
+                        "surface": "#111316",
+                        "on-tertiary-fixed-variant": "#624000",
+                        "on-secondary-fixed-variant": "#005144",
+                        "surface-container-high": "#282a2d",
+                        "primary-container": "#00d1ff",
+                        "on-error-container": "#ffdad6",
+                        "on-primary-container": "#00566a",
+                        "on-background": "#e2e2e6",
+                        "tertiary-container": "#feb127",
+                        "secondary-fixed-dim": "#00dfc1",
+                        "background": "#111316",
+                        "on-secondary": "#00382f",
+                        "primary-fixed": "#b7eaff",
+                        "secondary-container": "#00f2d1",
+                        "outline": "#859399",
+                        "secondary": "#c7fff0",
+                        "surface-tint": "#4cd6ff",
+                        "surface-container-highest": "#333538",
+                        "on-surface-variant": "#bbc9cf",
+                        "tertiary": "#ffd59c",
+                        "primary-fixed-dim": "#4cd6ff",
+                        "on-tertiary": "#442b00",
+                        "surface-container-lowest": "#0c0e11",
+                        "secondary-fixed": "#26fedc",
+                        "inverse-primary": "#00677f",
+                        "surface-container-low": "#1a1c1f",
+                        "on-error": "#690005"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin-desktop": "32px",
+                        "gutter": "16px",
+                        "unit": "4px",
+                        "margin-mobile": "16px",
+                        "container-max": "1440px"
+                    },
+                    "fontFamily": {
+                        "label-sm": ["JetBrains Mono"],
+                        "data-sm": ["JetBrains Mono"],
+                        "headline-md": ["Hanken Grotesk"],
+                        "display-lg": ["Hanken Grotesk"],
+                        "data-lg": ["JetBrains Mono"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "data-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "display-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "data-lg": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    }catch(_e){}</script><meta charset="utf-8"></head><body class="font-body-md text-body-md antialiased min-h-screen flex flex-col md:flex-row">
+<!-- Ambient Background -->
+<div class="fixed inset-0 grid-bg z-[-1]"></div>
+<!-- SideNavBar -->
+<nav class="hidden md:flex bg-surface-container dark:bg-surface-container text-primary font-label-sm text-label-sm fixed left-0 top-0 h-full w-64 z-40 border-r border-outline-variant flex-col h-full py-4 transition-all duration-150 ease-in-out backdrop-blur-sm bg-opacity-95">
+<div class="px-gutter mb-8 flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-primary/20 flex items-center justify-center border border-primary/30">
+<span class="material-symbols-outlined text-primary text-xl" data-original-icon="admin_panel_settings">admin_panel_settings</span>
+</div>
+<div>
+<div class="font-headline-md text-headline-md text-primary leading-tight text-lg">Nexus MSP</div>
+<div class="text-on-surface-variant opacity-70 mt-1">Global Admin • MSP Tier 1</div>
+</div>
+</div>
+<div class="flex-1 flex flex-col gap-unit px-unit"><a class="flex items-center gap-3 px-3 py-2 rounded text-primary bg-primary-container/10 border-r-2 border-primary hover:bg-surface-container-highest transition-colors" href="#"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>Overview</a><a class="flex items-center gap-3 px-3 py-2 rounded text-on-surface-variant hover:bg-surface-container-highest transition-colors" href="#"><span class="material-symbols-outlined">memory</span>Devices</a><a class="flex items-center gap-3 px-3 py-2 rounded text-on-surface-variant hover:bg-surface-container-highest transition-colors" href="#"><span class="material-symbols-outlined">warning</span>Alerts</a></div>
+<div class="mt-auto flex flex-col gap-unit px-unit border-t border-outline-variant pt-4"><a class="flex items-center gap-3 px-3 py-2 rounded text-on-surface-variant hover:bg-surface-container-highest transition-colors" href="#"><span class="material-symbols-outlined">settings</span>Settings</a><a class="flex items-center gap-3 px-3 py-2 rounded text-on-surface-variant hover:bg-surface-container-highest transition-colors" href="#"><span class="material-symbols-outlined">help</span>Support</a></div>
+</nav>
+<!-- TopAppBar (Mobile & Global Actions) -->
+<header class="bg-surface-dim dark:bg-surface-dim text-primary font-headline-md text-headline-md fixed top-0 w-full z-50 border-b border-outline-variant flex justify-between items-center px-margin-mobile md:px-margin-desktop h-16 w-full md:pl-[calc(16rem+32px)] backdrop-blur-md bg-opacity-90">
+<div class="flex items-center md:hidden gap-3">
+<span class="material-symbols-outlined text-primary">menu</span>
+<span class="font-bold text-primary text-xl">Nexus MSP</span>
+</div>
+<div class="hidden md:flex items-center text-on-surface">
+<span class="text-lg font-semibold tracking-wide">Multi-Tenant Organization Overview</span>
+</div>
+<div class="flex items-center gap-4">
+<!-- Search Bar -->
+<div class="relative hidden sm:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">search</span>
+<input type="text" placeholder="Filter organizations..." class="bg-surface-container-high border border-outline-variant rounded pl-9 pr-4 py-1.5 text-data-sm text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none w-64 transition-all placeholder:text-on-surface-variant/50">
+</div>
+<div class="flex items-center gap-2">
+<button class="w-8 h-8 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors active:opacity-80">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+</button>
+<button class="w-8 h-8 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors active:opacity-80">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+</button>
+<button class="w-8 h-8 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors active:opacity-80">
+<span class="material-symbols-outlined text-[20px]">help</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 mt-16 md:ml-64 p-margin-mobile md:p-margin-desktop overflow-x-hidden">
+<!-- Global Stats Summary -->
+<section class="grid grid-cols-2 md:grid-cols-4 gap-gutter mb-8">
+<div class="bg-surface-container p-4 rounded border border-outline-variant/50 flex flex-col gap-2">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Total Tenants</span>
+<span class="font-data-lg text-data-lg text-on-surface text-2xl">142</span>
+</div>
+<div class="bg-surface-container p-4 rounded border border-outline-variant/50 flex flex-col gap-2">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Managed Devices</span>
+<span class="font-data-lg text-data-lg text-primary text-2xl">8,492</span>
+</div>
+<div class="bg-surface-container p-4 rounded border border-outline-variant/50 flex flex-col gap-2">
+<span class="font-label-sm text-label-sm text-error uppercase tracking-wider">Active Alerts</span>
+<span class="font-data-lg text-data-lg text-error text-2xl">17</span>
+</div>
+<div class="bg-surface-container p-4 rounded border border-outline-variant/50 flex flex-col gap-2">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Global SLA</span>
+<span class="font-data-lg text-data-lg text-secondary text-2xl">99.98%</span>
+</div>
+</section>
+<!-- Bento Grid / Org Cards -->
+<section class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+<!-- Card 1: TechCorp Global (Healthy) -->
+<div class="bg-surface-container rounded-lg border border-outline-variant p-5 hover:bg-surface-container-high transition-colors group relative overflow-hidden">
+<div class="absolute top-0 left-0 w-full h-1 bg-secondary opacity-50 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex justify-between items-start mb-6">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded bg-surface-dim border border-outline-variant flex items-center justify-center p-2">
+<img class="w-full h-full object-contain mix-blend-screen opacity-80" data-alt="A minimalist tech corporate logo featuring geometric blue lines converging into a central node, set against a dark charcoal background. The style is sharp, clean, and highly technical." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDnWpImIzyU8DzusEW83Dq1qYwM5012I8d9gZ3FiSu5RYHoyPVjmw31UM5e-iyKy9OQONxpqzo9GG6c1cQDZfcadXfP2rivJFsjUZgEZ2DvNXwDk2o3OiVw_0zc12HxqSvSeJhKG84i_YJN_TwlzY99eVEjqPN35TWSqmrCq9TBnsvIZGQFHmWNKG7Vb0GngmiVEonEHv8Q1Vw473yuXNSm3gcQ0soK0OCIeufdQtzw0_vCwXSJzoMZfg">
+</div>
+<div>
+<h3 class="font-data-lg text-data-lg text-on-surface m-0">TechCorp Global</h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-1">ID: TCG-8921</p>
+</div>
+</div>
+<div class="flex items-center gap-1 bg-secondary/10 px-2 py-1 rounded border border-secondary/20">
+<div class="w-2 h-2 rounded-full bg-secondary animate-pulse"></div>
+<span class="font-label-sm text-label-sm text-secondary">99.9%</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4 mb-6">
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Devices</span>
+<span class="font-data-sm text-data-sm text-on-surface">3,240 <span class="text-outline text-xs">ON</span></span>
+</div>
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Alerts</span>
+<span class="font-data-sm text-data-sm text-on-surface">2 <span class="text-tertiary text-xs">WARN</span></span>
+</div>
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Bandwidth</span>
+<span class="font-data-sm text-data-sm text-on-surface">4.2 TB/s</span>
+</div>
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Last Sync</span>
+<span class="font-data-sm text-data-sm text-on-surface">12s ago</span>
+</div>
+</div>
+<!-- Mini Sparkline -->
+<div class="h-8 w-full flex items-end gap-[2px] opacity-70">
+<div class="w-full h-[60%] bg-secondary/20 rounded-t-sm"></div>
+<div class="w-full h-[80%] bg-secondary/30 rounded-t-sm"></div>
+<div class="w-full h-[40%] bg-secondary/20 rounded-t-sm"></div>
+<div class="w-full h-[90%] bg-secondary/40 rounded-t-sm"></div>
+<div class="w-full h-[70%] bg-secondary/30 rounded-t-sm"></div>
+<div class="w-full h-[50%] bg-secondary/20 rounded-t-sm"></div>
+<div class="w-full h-[85%] bg-secondary/40 rounded-t-sm"></div>
+<div class="w-full h-[100%] bg-secondary/60 rounded-t-sm"></div>
+</div>
+</div>
+<!-- Card 2: FinEdge Systems (Warning) -->
+<div class="bg-surface-container rounded-lg border border-outline-variant p-5 hover:bg-surface-container-high transition-colors group relative overflow-hidden">
+<div class="absolute top-0 left-0 w-full h-1 bg-tertiary-fixed-dim opacity-50 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex justify-between items-start mb-6">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded bg-surface-dim border border-outline-variant flex items-center justify-center p-2">
+<img class="w-full h-full object-contain mix-blend-screen opacity-80" data-alt="A sleek financial technology logo depicting abstract interlocking gold and silver chevrons on a deep black canvas. The design is modern, precise, and implies data security." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBcYXhvc_IZFeAvvhdAcH9o_Ewmufx9M6rHLeroF-KXXTJOK6RtFOCrzlaSNbkT3KdhC4yQkiRwk4g1k0aK-vICzAEf01iHkiRL1Vm5FxCn7v7eHoVTBboGKvFQICOtvX8GTCjOJgtnZ19PJnLynjIOBDUkCcStskAB5WieBjz8FKGj5etdJ33XxQRX8Ry-orolWQIZqEjCgWrMvkyrZfjovU5dKwd-RdT8MG2qNhSvqTr79GLvEWlalw">
+</div>
+<div>
+<h3 class="font-data-lg text-data-lg text-on-surface m-0">FinEdge Systems</h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-1">ID: FES-4410</p>
+</div>
+</div>
+<div class="flex items-center gap-1 bg-tertiary-fixed-dim/10 px-2 py-1 rounded border border-tertiary-fixed-dim/20">
+<div class="w-2 h-2 rounded-full bg-tertiary-fixed-dim"></div>
+<span class="font-label-sm text-label-sm text-tertiary-fixed-dim">94.2%</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4 mb-6">
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Devices</span>
+<span class="font-data-sm text-data-sm text-on-surface">1,850 <span class="text-outline text-xs">ON</span></span>
+</div>
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Alerts</span>
+<span class="font-data-sm text-data-sm text-tertiary-fixed-dim">12 <span class="text-xs">WARN</span></span>
+</div>
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Storage Latency</span>
+<span class="font-data-sm text-data-sm text-on-surface">45ms</span>
+</div>
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Last Sync</span>
+<span class="font-data-sm text-data-sm text-on-surface">4m ago</span>
+</div>
+</div>
+<!-- Mini Sparkline (Warning Color) -->
+<div class="h-8 w-full flex items-end gap-[2px] opacity-70">
+<div class="w-full h-[20%] bg-tertiary-fixed-dim/20 rounded-t-sm"></div>
+<div class="w-full h-[30%] bg-tertiary-fixed-dim/30 rounded-t-sm"></div>
+<div class="w-full h-[25%] bg-tertiary-fixed-dim/20 rounded-t-sm"></div>
+<div class="w-full h-[80%] bg-tertiary-fixed-dim/60 rounded-t-sm"></div>
+<div class="w-full h-[95%] bg-tertiary-fixed-dim/80 rounded-t-sm"></div>
+<div class="w-full h-[60%] bg-tertiary-fixed-dim/40 rounded-t-sm"></div>
+<div class="w-full h-[40%] bg-tertiary-fixed-dim/30 rounded-t-sm"></div>
+<div class="w-full h-[35%] bg-tertiary-fixed-dim/20 rounded-t-sm"></div>
+</div>
+</div>
+<!-- Card 3: BioHealth Research (Critical) -->
+<div class="bg-surface-container rounded-lg border border-error/30 p-5 hover:bg-surface-container-high transition-colors group relative overflow-hidden">
+<div class="absolute top-0 left-0 w-full h-1 bg-error opacity-80 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex justify-between items-start mb-6">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded bg-surface-dim border border-error/20 flex items-center justify-center p-2">
+<img class="w-full h-full object-contain mix-blend-screen opacity-80" data-alt="A biotech logo showing a stylized DNA double helix in muted teal and stark white, integrated into a shield icon, against a dark background. Technical and clinical aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBrgQRRd4SLw7Ugt38zBlbDxqFJ7Irk0IKTchVaAQvWq5aR6PzDflfFkyLEe4-KWtBXbfc_KQeXOdiJRAi2mjqhlPbhQjMg7UI3xtiu4L1dZS_XLP-5TvOlSlgCYbQCml-hEuaCs5-0-EdcldI6ENdaHG4U2VMQqTerTbzOV35lpblMHYMeZ6R53jM3NuPyjbZ05rJTTYvxhK9wjpgUcm3UjcXHKt_3l9O9qvIiPaRNEmqCKRnJHP5gmA">
+</div>
+<div>
+<h3 class="font-data-lg text-data-lg text-on-surface m-0">BioHealth Research</h3>
+<p class="font-label-sm text-label-sm text-error/80 mt-1">ID: BHR-1029</p>
+</div>
+</div>
+<div class="flex items-center gap-1 bg-error/10 px-2 py-1 rounded border border-error/30">
+<div class="w-2 h-2 rounded-full bg-error animate-ping"></div>
+<span class="font-label-sm text-label-sm text-error">78.4%</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4 mb-6">
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Devices</span>
+<span class="font-data-sm text-data-sm text-on-surface">542 <span class="text-error text-xs">3 DOWN</span></span>
+</div>
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Alerts</span>
+<span class="font-data-sm text-data-sm text-error font-bold">3 <span class="text-xs">CRIT</span></span>
+</div>
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Cluster Load</span>
+<span class="font-data-sm text-data-sm text-error">98%</span>
+</div>
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Last Sync</span>
+<span class="font-data-sm text-data-sm text-error">12m ago (STALL)</span>
+</div>
+</div>
+<!-- Mini Sparkline (Error Color) -->
+<div class="h-8 w-full flex items-end gap-[2px] opacity-70">
+<div class="w-full h-[40%] bg-error/30 rounded-t-sm"></div>
+<div class="w-full h-[50%] bg-error/40 rounded-t-sm"></div>
+<div class="w-full h-[60%] bg-error/50 rounded-t-sm"></div>
+<div class="w-full h-[80%] bg-error/60 rounded-t-sm"></div>
+<div class="w-full h-[90%] bg-error/70 rounded-t-sm"></div>
+<div class="w-full h-[100%] bg-error rounded-t-sm"></div>
+<div class="w-full h-[10%] bg-error/20 rounded-t-sm"></div>
+<div class="w-full h-[5%] bg-error/10 rounded-t-sm"></div>
+</div>
+</div>
+<!-- Card 4: Nexus Internal-->
+<div class="bg-surface-container rounded-lg border border-outline-variant p-5 hover:bg-surface-container-high transition-colors group relative overflow-hidden">
+<div class="absolute top-0 left-0 w-full h-1 bg-secondary opacity-50 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex justify-between items-start mb-6">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded bg-surface-dim border border-outline-variant flex items-center justify-center p-2">
+<img class="w-full h-full object-contain mix-blend-screen opacity-80" data-alt="A minimalist tech logo representing cloud infrastructure. Abstract interconnected white nodes on a charcoal background, conveying speed and reliability." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBEKzpnDi-m4BaubS4fesWJFPPtq-pRzYbkya0blJ_atGBSLDIakUCJghLuO6EY4bNM8i-V9Iz1o5pmSyBY7bxJrMGYWCZDMlwf4go0CyXC91E-nxqp4oIfYSsbGyi_1EyPuTPqQYZibHSyPtHhxS6qKC8d_37wW4pKLZsK0-HlLmt1RWcLdNrlEERZYXQNh3dtWtPrTfN9Tivn0vYOdNWn1qasq6nsfHPLEgXozcCwA7KSsdC6sPr3OQ">
+</div>
+<div>
+<h3 class="font-data-lg text-data-lg text-on-surface m-0">Nexus Internal Ops</h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-1">ID: NEX-0001</p>
+</div>
+</div>
+<div class="flex items-center gap-1 bg-secondary/10 px-2 py-1 rounded border border-secondary/20">
+<div class="w-2 h-2 rounded-full bg-secondary"></div>
+<span class="font-label-sm text-label-sm text-secondary">100%</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4 mb-6">
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Devices</span>
+<span class="font-data-sm text-data-sm text-on-surface">128 <span class="text-outline text-xs">ON</span></span>
+</div>
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Alerts</span>
+<span class="font-data-sm text-data-sm text-on-surface">0</span>
+</div>
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">API Requests</span>
+<span class="font-data-sm text-data-sm text-on-surface">12.4k/s</span>
+</div>
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Last Sync</span>
+<span class="font-data-sm text-data-sm text-on-surface">1s ago</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+
+</body></html>

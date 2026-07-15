@@ -4,6 +4,9 @@ REM Creates standalone EXE installer with all dependencies bundled
 
 setlocal enabledelayedexpansion
 
+REM Fix working directory if run as Administrator
+cd /d "%~dp0"
+
 echo ========================================
 echo RAS Agent - Build Standalone EXE
 echo ========================================
@@ -50,8 +53,12 @@ pyinstaller --onefile ^
     --hidden-import "win32api" ^
     --hidden-import "win32event" ^
     --hidden-import "pywintypes" ^
+    --hidden-import "win32timezone" ^
+    --hidden-import "win32com" ^
+    --hidden-import "win32com.client" ^
     --noconfirm ^
     --clean ^
+    --noconsole ^
     ras_agent_main.py
 
 if %errorlevel% neq 0 (
@@ -74,49 +81,21 @@ if %errorlevel% neq 0 (
     echo Error: Failed to copy executable
         exit /b 1
 )
+del /q "dist\ras_agent.exe" 2>nul
 
-REM Copy configuration templates
-copy "config.json.template" "%DIST_DIR%\"
-copy "config.ngrok.json" "%DIST_DIR%\"
-copy "config.local.json.template" "%DIST_DIR%\"
-copy "config.production.json.template" "%DIST_DIR%\"
+REM Copy configuration templates - REMOVED FOR SECURITY (Client package should only contain what's needed)
 
-REM Copy documentation
-copy "README.md" "%DIST_DIR%\"
-copy "NGROK_SETUP.md" "%DIST_DIR%\"
-copy "CONFIGURATION_GUIDE.md" "%DIST_DIR%\"
-if exist "CLIENT_INSTALL_GUIDE.md" (
-    copy "CLIENT_INSTALL_GUIDE.md" "%DIST_DIR%\INSTALL_GUIDE.md"
-) else if exist "INSTALL_GUIDE.md" (
-    copy "INSTALL_GUIDE.md" "%DIST_DIR%\INSTALL_GUIDE.md"
+REM Copy documentation - Only include the client install guide as a .txt file
+if exist "docs\CLIENT_INSTALL_GUIDE.md" (
+    copy "docs\CLIENT_INSTALL_GUIDE.md" "%DIST_DIR%\PANDUAN_INSTALASI.txt" >nul
+) else if exist "docs\INSTALL_GUIDE.md" (
+    copy "docs\INSTALL_GUIDE.md" "%DIST_DIR%\PANDUAN_INSTALASI.txt" >nul
 )
 
-REM Create empty config.json for first run
-echo { > "%DIST_DIR%\config.json"
-echo   "agent": { >> "%DIST_DIR%\config.json"
-echo     "device_id": "", >> "%DIST_DIR%\config.json"
-echo     "hostname": "", >> "%DIST_DIR%\config.json"
-echo     "api_endpoint": "https://your-server.com/RAS/admin/api/metrics.php", >> "%DIST_DIR%\config.json"
-echo     "api_key": "change-this-to-secure-key", >> "%DIST_DIR%\config.json"
-echo     "collect_interval": 60, >> "%DIST_DIR%\config.json"
-echo     "extended_refresh_interval": 300, >> "%DIST_DIR%\config.json"
-echo     "command_poll_interval": 15, >> "%DIST_DIR%\config.json"
-echo     "buffer_max_size": 1000, >> "%DIST_DIR%\config.json"
-echo     "buffer_flush_batch_size": 100, >> "%DIST_DIR%\config.json"
-echo     "buffer_file": "buffer.json", >> "%DIST_DIR%\config.json"
-echo     "log_file": "ras_agent.log", >> "%DIST_DIR%\config.json"
-echo     "log_max_size_mb": 10, >> "%DIST_DIR%\config.json"
-echo     "log_backup_count": 5 >> "%DIST_DIR%\config.json"
-echo   }, >> "%DIST_DIR%\config.json"
-echo   "thresholds": { >> "%DIST_DIR%\config.json"
-echo     "cpu_warning": 80, >> "%DIST_DIR%\config.json"
-echo     "cpu_critical": 90, >> "%DIST_DIR%\config.json"
-echo     "memory_warning": 80, >> "%DIST_DIR%\config.json"
-echo     "memory_critical": 90, >> "%DIST_DIR%\config.json"
-echo     "disk_warning": 75, >> "%DIST_DIR%\config.json"
-echo     "disk_critical": 85 >> "%DIST_DIR%\config.json"
-echo   } >> "%DIST_DIR%\config.json"
-echo } >> "%DIST_DIR%\config.json"
+REM Copy existing config.json so API URL and settings are preserved
+if exist "config.json" (
+    copy "config.json" "%DIST_DIR%\config.json" >nul
+)
 
 echo.
 echo Step 4: Creating installer script...
@@ -134,6 +113,13 @@ echo ) > "%DIST_DIR%\test_connection.bat"
 
 REM Create uninstall script
 echo @echo off > "%DIST_DIR%\uninstall.bat"
+echo REM Request Admin Privileges >> "%DIST_DIR%\uninstall.bat"
+echo net session ^>nul 2^>^&1 >> "%DIST_DIR%\uninstall.bat"
+echo if %%errorLevel%% neq 0 ( >> "%DIST_DIR%\uninstall.bat"
+echo     powershell -Command "Start-Process cmd -ArgumentList '/c ""%%~dpnx0""' -Verb RunAs" >> "%DIST_DIR%\uninstall.bat"
+echo     exit /b >> "%DIST_DIR%\uninstall.bat"
+echo ) >> "%DIST_DIR%\uninstall.bat"
+echo cd /d "%%~dp0" >> "%DIST_DIR%\uninstall.bat"
 echo echo ======================================== >> "%DIST_DIR%\uninstall.bat"
 echo echo RAS Agent Uninstallation >> "%DIST_DIR%\uninstall.bat"
 echo echo ======================================== >> "%DIST_DIR%\uninstall.bat"
@@ -143,16 +129,18 @@ echo     echo Uninstallation cancelled >> "%DIST_DIR%\uninstall.bat"
 echo     pause >> "%DIST_DIR%\uninstall.bat"
 echo     exit /b 0 >> "%DIST_DIR%\uninstall.bat"
 echo ^) >> "%DIST_DIR%\uninstall.bat"
-echo echo Stopping service... >> "%DIST_DIR%\uninstall.bat"
-echo ras_agent.exe stop >> "%DIST_DIR%\uninstall.bat"
+echo echo Stopping agent and services... >> "%DIST_DIR%\uninstall.bat"
+echo net stop RASAgent 2^>nul >> "%DIST_DIR%\uninstall.bat"
+echo taskkill /F /IM ras_agent.exe /T 2^>nul >> "%DIST_DIR%\uninstall.bat"
 echo echo Removing service... >> "%DIST_DIR%\uninstall.bat"
-echo ras_agent.exe remove >> "%DIST_DIR%\uninstall.bat"
-echo echo Cleaning up files... >> "%DIST_DIR%\uninstall.bat"
-echo del /q config.json buffer.json ras_agent.log 2^>nul >> "%DIST_DIR%\uninstall.bat"
+echo sc delete RASAgent 2^>nul >> "%DIST_DIR%\uninstall.bat"
+echo echo Cleaning up files and folders... >> "%DIST_DIR%\uninstall.bat"
 echo echo ======================================== >> "%DIST_DIR%\uninstall.bat"
-echo echo Uninstallation Complete! >> "%DIST_DIR%\uninstall.bat"
+echo echo Uninstallation Complete! This folder will now self-destruct. >> "%DIST_DIR%\uninstall.bat"
 echo echo ======================================== >> "%DIST_DIR%\uninstall.bat"
-echo pause >> "%DIST_DIR%\uninstall.bat"
+echo ping 127.0.0.1 -n 3 ^> nul >> "%DIST_DIR%\uninstall.bat"
+echo cd \ >> "%DIST_DIR%\uninstall.bat"
+echo start cmd /c "timeout /t 2 ^>nul ^& rmdir /s /q ""%%~dp0""" >> "%DIST_DIR%\uninstall.bat"
 
 echo.
 echo ========================================
@@ -165,8 +153,7 @@ echo.
 echo Package contains:
 echo   - ras_agent.exe (standalone executable)
 echo   - config.json (default configuration)
-echo   - Configuration templates
-echo   - Documentation
+echo   - PANDUAN_INSTALASI.txt (Installation Guide)
 echo   - install.bat (installer script)
 echo   - test_connection.bat (connection tester)
 echo   - uninstall.bat (uninstaller script)
@@ -177,4 +164,3 @@ echo   2. Or distribute the directory directly
 echo.
 echo For NSIS script, run: makensis /DVERSION=1.0.0 installer.nsi
 echo.
-

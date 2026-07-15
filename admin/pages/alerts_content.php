@@ -61,65 +61,76 @@ try {
 } catch (PDOException $e) {
     $db_error = $e->getMessage();
 }
+
+function getAlertSeverityColor($severity) {
+    switch ($severity) {
+        case 'critical':
+            return '#e74c3c';
+        case 'warning':
+            return '#f39c12';
+        default:
+            return '#3498db';
+    }
+}
 ?>
 
 <!-- Alert Statistics -->
-<div class="stats-grid" style="grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 6px;">
-    <div class="stat-card" style="padding: 8px 10px; min-height: 56px;">
-        <div class="stat-icon primary" style="width: 34px; height: 34px; margin-right: 8px;">
-            <i class="material-icons" style="font-size: 18px;">notifications</i>
+<div class="stats-grid alerts-stats-grid">
+    <div class="stat-card alerts-stat-card">
+        <div class="stat-icon primary alerts-stat-icon">
+            <i class="material-icons">notifications</i>
         </div>
-        <div class="stat-info" style="line-height: 1.1;">
-            <div class="stat-label" style="font-size: 0.72rem; margin-bottom: 2px;">Total Alerts</div>
-            <div class="stat-value" style="font-size: 1.1rem;"><?php echo $stats['total']; ?></div>
-        </div>
-    </div>
-
-    <div class="stat-card" style="padding: 8px 10px; min-height: 56px;">
-        <div class="stat-icon danger" style="width: 34px; height: 34px; margin-right: 8px;">
-            <i class="material-icons" style="font-size: 18px;">error</i>
-        </div>
-        <div class="stat-info" style="line-height: 1.1;">
-            <div class="stat-label" style="font-size: 0.72rem; margin-bottom: 2px;">Open Alerts</div>
-            <div class="stat-value" style="font-size: 1.1rem;"><?php echo $stats['open']; ?></div>
+        <div class="stat-info alerts-stat-info">
+            <div class="stat-label alerts-stat-label">Total Alerts</div>
+            <div class="stat-value alerts-stat-value"><?php echo $stats['total']; ?></div>
         </div>
     </div>
 
-    <div class="stat-card" style="padding: 8px 10px; min-height: 56px;">
-        <div class="stat-icon warning" style="width: 34px; height: 34px; margin-right: 8px;">
-            <i class="material-icons" style="font-size: 18px;">pending</i>
+    <div class="stat-card alerts-stat-card">
+        <div class="stat-icon danger alerts-stat-icon">
+            <i class="material-icons">error</i>
         </div>
-        <div class="stat-info" style="line-height: 1.1;">
-            <div class="stat-label" style="font-size: 0.72rem; margin-bottom: 2px;">Acknowledged</div>
-            <div class="stat-value" style="font-size: 1.1rem;"><?php echo $stats['acknowledged']; ?></div>
+        <div class="stat-info alerts-stat-info">
+            <div class="stat-label alerts-stat-label">Open Alerts</div>
+            <div class="stat-value alerts-stat-value"><?php echo $stats['open']; ?></div>
         </div>
     </div>
 
-    <div class="stat-card" style="padding: 8px 10px; min-height: 56px;">
-        <div class="stat-icon success" style="width: 34px; height: 34px; margin-right: 8px;">
-            <i class="material-icons" style="font-size: 18px;">check_circle</i>
+    <div class="stat-card alerts-stat-card">
+        <div class="stat-icon warning alerts-stat-icon">
+            <i class="material-icons">pending</i>
         </div>
-        <div class="stat-info" style="line-height: 1.1;">
-            <div class="stat-label" style="font-size: 0.72rem; margin-bottom: 2px;">Resolved</div>
-            <div class="stat-value" style="font-size: 1.1rem;"><?php echo $stats['resolved']; ?></div>
+        <div class="stat-info alerts-stat-info">
+            <div class="stat-label alerts-stat-label">Acknowledged</div>
+            <div class="stat-value alerts-stat-value"><?php echo $stats['acknowledged']; ?></div>
+        </div>
+    </div>
+
+    <div class="stat-card alerts-stat-card">
+        <div class="stat-icon success alerts-stat-icon">
+            <i class="material-icons">check_circle</i>
+        </div>
+        <div class="stat-info alerts-stat-info">
+            <div class="stat-label alerts-stat-label">Resolved</div>
+            <div class="stat-value alerts-stat-value"><?php echo $stats['resolved']; ?></div>
         </div>
     </div>
 </div>
 
 <!-- Mode Switch & Refresh -->
-<div class="card" style="margin-bottom: 6px;">
-    <div class="card-content" style="padding: 4px 8px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.3rem;">
+<div class="card alerts-toolbar-card">
+    <div class="card-content alerts-toolbar-content">
+        <div class="page-toolbar alerts-toolbar">
             <div class="filter-tabs">
                 <button class="filter-tab active filter-tab-sm" onclick="switchMode('group')" id="btn-mode-group">
-                    <i class="material-icons left" style="font-size:14px;">view_agenda</i> Group by Device
+                    <i class="material-icons left">view_agenda</i> Group by Device
                 </button>
                 <button class="filter-tab filter-tab-sm" onclick="switchMode('list')" id="btn-mode-list">
-                    <i class="material-icons left" style="font-size:14px;">view_list</i> Flat List
+                    <i class="material-icons left">view_list</i> Flat List
                 </button>
             </div>
-            <button class="btn btn-primary btn-sm" style="height: 26px; line-height: 26px; padding: 0 8px; font-size: 0.72rem;" onclick="AdminPanel.loadAlertsData()">
-                <i class="material-icons left" style="font-size: 14px; margin-right: 4px;">refresh</i>
+            <button class="btn btn-primary btn-sm alerts-refresh-btn" onclick="AdminPanel.loadAlertsData()">
+                <i class="material-icons left">refresh</i>
                 Refresh
             </button>
         </div>
@@ -132,29 +143,29 @@ try {
         <div class="card"><div class="card-content center-align"><div class="empty-state"><i class="material-icons">notifications_none</i><p>Belum ada alert tercatat</p></div></div></div>
     <?php else: ?>
         <?php foreach ($grouped_alerts as $dev_id => $group): ?>
-            <div class="card" style="margin-bottom: 4px; border-radius: 6px; overflow: hidden; border-left: 4px solid <?php echo $group['worst_severity'] === 'critical' ? '#e74c3c' : ($group['worst_severity'] === 'warning' ? '#f39c12' : '#3498db'); ?>;">
-                <div class="card-content" style="padding: 6px 10px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: #fcfcfc;" onclick="toggleDeviceAlerts('<?php echo htmlspecialchars($dev_id); ?>')">
-                    <div style="display: flex; align-items: center; gap: 10px;">
+            <div class="card alerts-device-card" style="--alert-group-accent: <?php echo getAlertSeverityColor($group['worst_severity']); ?>;">
+                <div class="card-content alerts-device-head" onclick="toggleDeviceAlerts('<?php echo htmlspecialchars($dev_id); ?>')">
+                    <div class="alerts-device-main">
                         <div>
-                            <i class="material-icons" style="font-size: 24px; color: #555;">computer</i>
+                            <i class="material-icons alerts-device-icon">computer</i>
                         </div>
                         <div>
-                            <div style="font-weight: 600; font-size: 0.95rem; color: #2c3e50; line-height: 1.2;"><?php echo htmlspecialchars($group['hostname']); ?></div>
-                            <div style="font-size: 0.75rem; color: #7f8c8d;"><?php echo htmlspecialchars($group['ip_address']); ?></div>
+                            <div class="alerts-device-title"><?php echo htmlspecialchars($group['hostname']); ?></div>
+                            <div class="alerts-device-subtitle"><?php echo htmlspecialchars($group['ip_address']); ?></div>
                         </div>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <div style="text-align: right;">
-                            <div style="font-size: 0.95rem; font-weight: 600; color: <?php echo $group['open'] > 0 ? '#e74c3c' : '#7f8c8d'; ?>; line-height: 1.2;"><?php echo $group['open']; ?> Open Alerts</div>
-                            <div style="font-size: 0.75rem; color: #95a5a6;"><?php echo $group['total']; ?> Total</div>
+                    <div class="alerts-device-meta">
+                        <div class="alerts-device-counts">
+                            <div class="alerts-device-open <?php echo $group['open'] > 0 ? 'has-open' : ''; ?>"><?php echo $group['open']; ?> Open Alerts</div>
+                            <div class="alerts-device-total"><?php echo $group['total']; ?> Total</div>
                         </div>
-                        <i class="material-icons" id="icon-<?php echo htmlspecialchars($dev_id); ?>" style="color: #bdc3c7;">expand_more</i>
+                        <i class="material-icons alerts-device-chevron" id="icon-<?php echo htmlspecialchars($dev_id); ?>">expand_more</i>
                     </div>
                 </div>
                 
-                <div id="alerts-<?php echo htmlspecialchars($dev_id); ?>" style="display: none; border-top: 1px solid #eee; padding: 2px 6px; background: #fff;">
+                <div id="alerts-<?php echo htmlspecialchars($dev_id); ?>" class="alerts-device-body" style="display: none;">
                     <!-- List alerts for this device -->
-                    <?php renderAlertsTable($group['alerts']); ?>
+                    <?php renderAlertsTable($group['alerts'], false, 'group'); ?>
                 </div>
             </div>
         <?php endforeach; ?>
@@ -164,9 +175,9 @@ try {
 <!-- List Mode View -->
 <div id="view-list" style="display: none;">
     <div class="card">
-        <div class="card-content" style="padding: 8px 10px;">
+        <div class="card-content alerts-list-content">
             <!-- Filter Actions for List -->
-            <div style="margin-bottom: 8px;">
+            <div class="alerts-list-filters">
                 <div class="filter-tabs" id="list-filters">
                     <button class="filter-tab active" data-filter="all">Semua</button>
                     <button class="filter-tab" data-filter="open">Open</button>
@@ -177,59 +188,59 @@ try {
             </div>
             
             <div class="table-container">
-                <?php renderAlertsTable($alerts, true); ?>
+                <?php renderAlertsTable($alerts, true, 'list'); ?>
             </div>
         </div>
     </div>
 </div>
 
 <?php
-function renderAlertsTable($alertsList, $showDevice = false) {
+function renderAlertsTable($alertsList, $showDevice = false, $idPrefix = 'list') {
     if (empty($alertsList)) {
         echo '<div class="empty-state"><p>Belum ada alert</p></div>';
         return;
     }
     ?>
-    <table class="data-table" style="font-size: 0.8rem;">
+    <table class="data-table alerts-table">
         <thead>
             <tr>
-                <th style="padding: 6px 8px;">Waktu</th>
-                <?php if ($showDevice): ?><th style="padding: 6px 8px;">Perangkat</th><?php endif; ?>
-                <th style="padding: 6px 8px;">Tipe</th>
-                <th style="padding: 6px 8px;">Severity</th>
-                <th style="padding: 6px 8px;">Pesan</th>
-                <th style="padding: 6px 8px; width: 80px; text-align: center;">Snapshot</th>
+                <th>Waktu</th>
+                <?php if ($showDevice): ?><th>Perangkat</th><?php endif; ?>
+                <th>Tipe</th>
+                <th>Severity</th>
+                <th>Pesan</th>
+                <th class="alerts-table-snapshot-col">Snapshot</th>
             </tr>
         </thead>
         <tbody class="alerts-table-body">
             <?php foreach ($alertsList as $alert): ?>
                 <tr data-status="<?php echo $alert['status']; ?>" data-severity="<?php echo $alert['severity']; ?>">
-                    <td style="padding: 6px 8px; white-space: nowrap;">
-                        <div style="font-weight: 500;"><?php echo date('M j, Y', strtotime($alert['timestamp'])); ?></div>
-                        <small style="color: #7f8c8d;"><?php echo date('H:i:s', strtotime($alert['timestamp'])); ?></small>
+                    <td class="alerts-table-time">
+                        <div class="table-cell-title"><?php echo date('M j, Y', strtotime($alert['timestamp'])); ?></div>
+                        <small class="table-cell-subtitle"><?php echo date('H:i:s', strtotime($alert['timestamp'])); ?></small>
                     </td>
                     <?php if ($showDevice): ?>
-                    <td style="padding: 6px 8px;">
-                        <div style="font-weight: 500;"><?php echo htmlspecialchars($alert['hostname']); ?></div>
-                        <small style="color: #636e72;"><?php echo htmlspecialchars($alert['ip_address']); ?></small>
+                    <td>
+                        <div class="table-cell-title"><?php echo htmlspecialchars($alert['hostname']); ?></div>
+                        <small class="table-cell-subtitle"><?php echo htmlspecialchars($alert['ip_address']); ?></small>
                     </td>
                     <?php endif; ?>
-                    <td style="padding: 6px 8px;">
-                        <span class="status-badge" style="background: #e3f2fd; color: #0277bd; padding: 1px 4px; font-size: 0.7rem;">
+                    <td>
+                        <span class="status-badge offline alerts-inline-badge">
                             <?php echo strtoupper($alert['alert_type']); ?>
                         </span>
                     </td>
-                    <td style="padding: 6px 8px;">
-                        <span class="status-badge <?php echo $alert['severity']; ?>" style="padding: 1px 4px; font-size: 0.7rem;">
+                    <td>
+                        <span class="status-badge <?php echo $alert['severity']; ?> alerts-inline-badge">
                             <?php echo ucfirst($alert['severity']); ?>
                         </span>
                     </td>
-                    <td style="padding: 6px 8px;">
-                        <div style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="<?php echo htmlspecialchars($alert['message']); ?>">
+                    <td>
+                        <div class="alerts-message-ellipsis" title="<?php echo htmlspecialchars($alert['message']); ?>">
                             <?php echo htmlspecialchars($alert['message']); ?>
                         </div>
                     </td>
-                    <td style="padding: 6px 8px; text-align: center;">
+                    <td class="alerts-table-snapshot">
                         <?php 
                         $snapshot = null;
                         if (!empty($alert['snapshot_data'])) {
@@ -237,49 +248,54 @@ function renderAlertsTable($alertsList, $showDevice = false) {
                         }
                         if ($snapshot && (empty($snapshot['top_cpu']) === false || empty($snapshot['top_memory']) === false)): 
                         ?>
-                            <div style="position: relative; display: inline-block;">
-                                <button type="button" class="btn btn-tiny" style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #475569; padding: 1px 5px; font-size: 0.7rem; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; height: 24px; line-height: 24px;" onclick="document.getElementById('snapshot-global-<?php echo $alert['id']; ?>').style.display = document.getElementById('snapshot-global-<?php echo $alert['id']; ?>').style.display === 'none' ? 'block' : 'none'; event.stopPropagation();">
-                                    <i class="material-icons" style="font-size: 13px;">camera_alt</i>
-                                    <span>Lihat</span>
-                                </button>
-                                
-                                <div id="snapshot-global-<?php echo $alert['id']; ?>" style="display: none; position: absolute; z-index: 100; right: 0; top: 100%; margin-top: 4px; width: 450px; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);" onclick="event.stopPropagation();">
-                                    <div style="display: flex; gap: 16px; text-align: left;">
-                                        <?php if (!empty($snapshot['top_cpu'])): ?>
-                                        <div style="flex: 1;">
-                                            <strong style="font-size: 0.75rem; color: #64748b; text-transform: uppercase;">Top CPU</strong>
-                                            <table style="width: 100%; font-size: 0.75rem; margin-top: 4px; border-collapse: collapse;">
-                                                <?php foreach($snapshot['top_cpu'] as $proc): ?>
-                                                    <tr>
-                                                        <td style="padding: 3px 0; border-bottom: 1px solid #f1f5f9;"><?php echo htmlspecialchars($proc['name']); ?></td>
-                                                        <td style="padding: 3px 0; border-bottom: 1px solid #f1f5f9; text-align: right; color: #ef4444; font-family: monospace; font-weight: 600;"><?php echo $proc['cpu_percent']; ?>%</td>
-                                                    </tr>
-                                                <?php endforeach; ?>
-                                            </table>
-                                        </div>
-                                        <?php endif; ?>
-                                        
-                                        <?php if (!empty($snapshot['top_memory'])): ?>
-                                        <div style="flex: 1;">
-                                            <strong style="font-size: 0.75rem; color: #64748b; text-transform: uppercase;">Top Memory</strong>
-                                            <table style="width: 100%; font-size: 0.75rem; margin-top: 4px; border-collapse: collapse;">
-                                                <?php foreach($snapshot['top_memory'] as $proc): ?>
-                                                    <tr>
-                                                        <td style="padding: 3px 0; border-bottom: 1px solid #f1f5f9;"><?php echo htmlspecialchars($proc['name']); ?></td>
-                                                        <td style="padding: 3px 0; border-bottom: 1px solid #f1f5f9; text-align: right; color: #3b82f6; font-family: monospace; font-weight: 600;"><?php echo $proc['memory_percent']; ?>%</td>
-                                                    </tr>
-                                                <?php endforeach; ?>
-                                            </table>
-                                        </div>
-                                        <?php endif; ?>
-                                    </div>
-                                </div>
-                            </div>
+                            <button type="button" class="btn btn-tiny btn-outline alerts-snapshot-btn" onclick="document.getElementById('snap-row-<?php echo $idPrefix . '-' . $alert['id']; ?>').style.display = document.getElementById('snap-row-<?php echo $idPrefix . '-' . $alert['id']; ?>').style.display === 'none' ? 'table-row' : 'none'; event.stopPropagation();">
+                                <i class="material-icons">camera_alt</i>
+                                <span>Lihat</span>
+                            </button>
                         <?php else: ?>
-                            <span style="color: #ccc; font-size: 0.75rem;">-</span>
+                            <span class="subtle-text">-</span>
                         <?php endif; ?>
                     </td>
                 </tr>
+                <?php if ($snapshot && (empty($snapshot['top_cpu']) === false || empty($snapshot['top_memory']) === false)): ?>
+                <tr id="snap-row-<?php echo $idPrefix . '-' . $alert['id']; ?>" class="alerts-snapshot-row" style="display: none;">
+                    <td colspan="<?php echo $showDevice ? '6' : '5'; ?>" class="alerts-snapshot-cell">
+                        <div class="alerts-snapshot-panel">
+                            <div class="alerts-snapshot-grid">
+                                <?php if (!empty($snapshot['top_cpu'])): ?>
+                                <div>
+                                    <strong class="alerts-snapshot-title">Top CPU</strong>
+                                    <table class="alerts-snapshot-table">
+                                        <?php foreach($snapshot['top_cpu'] as $proc): ?>
+                                            <tr>
+                                                <td><?php echo htmlspecialchars($proc['name']); ?></td>
+                                                <td class="alerts-snapshot-value danger"><?php echo $proc['cpu_percent']; ?>%</td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </table>
+                                </div>
+                                <?php endif; ?>
+                                
+                                <?php if (!empty($snapshot['top_memory'])): ?>
+                                <div>
+                                    <strong class="alerts-snapshot-title">Top Memory</strong>
+                                    <table class="alerts-snapshot-table">
+                                        <?php foreach($snapshot['top_memory'] as $proc): ?>
+                                            <tr>
+                                                <td><?php echo htmlspecialchars($proc['name']); ?></td>
+                                                <td class="alerts-snapshot-value info">
+                                                    <?php echo isset($proc['memory_mb']) ? $proc['memory_mb'] . ' MB' : $proc['memory_percent'] . '%'; ?>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </table>
+                                </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                <?php endif; ?>
             <?php endforeach; ?>
         </tbody>
     </table>
@@ -288,37 +304,265 @@ function renderAlertsTable($alertsList, $showDevice = false) {
 ?>
 
 <style>
-.filter-tabs {
-    display: flex;
-    gap: 4px;
+.alerts-stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 8px;
+    margin-bottom: 8px;
 }
 
-.filter-tab {
-    padding: 4px 10px;
-    border: 1px solid #e0e0e0;
-    border-radius: 14px;
-    background: white;
+.alerts-stat-card {
+    padding: 8px 10px;
+    min-height: 56px;
+}
+
+.alerts-stat-icon {
+    width: 34px;
+    height: 34px;
+    margin-right: 8px;
+}
+
+.alerts-stat-icon .material-icons {
+    font-size: 18px;
+}
+
+.alerts-stat-info {
+    line-height: 1.1;
+}
+
+.alerts-stat-label {
+    font-size: 0.72rem;
+    margin-bottom: 2px;
+}
+
+.alerts-stat-value {
+    font-size: 1.1rem;
+}
+
+.alerts-toolbar-card {
+    margin-bottom: 6px;
+}
+
+.alerts-toolbar-content {
+    padding: 6px 8px;
+}
+
+.alerts-toolbar {
+    gap: 6px;
+    margin-bottom: 0;
+}
+
+.filter-tab-sm {
+    min-height: 28px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+}
+
+.filter-tab-sm .material-icons {
+    font-size: 14px;
+}
+
+.alerts-refresh-btn {
+    min-height: 28px;
+    padding: 0 8px;
+    font-size: 0.72rem;
+}
+
+.alerts-refresh-btn .material-icons {
+    font-size: 14px;
+}
+
+.alerts-device-card {
+    margin-bottom: 4px;
+    border-radius: 8px;
+    overflow: hidden;
+    border-left: 4px solid var(--alert-group-accent);
+}
+
+.alerts-device-head {
+    padding: 6px 10px;
     cursor: pointer;
-    transition: all 0.2s ease;
-    font-size: 0.75rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    background: var(--bg-surface-2);
+}
+
+.alerts-device-main,
+.alerts-device-meta {
     display: flex;
     align-items: center;
+    gap: 10px;
+}
+
+.alerts-device-icon {
+    font-size: 22px;
+    color: var(--text-secondary);
+}
+
+.alerts-device-title {
+    font-weight: 600;
+    font-size: 0.92rem;
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
+.alerts-device-subtitle,
+.alerts-device-total {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.alerts-device-counts {
+    text-align: right;
+}
+
+.alerts-device-open {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    line-height: 1.2;
+}
+
+.alerts-device-open.has-open {
+    color: var(--danger-color);
+}
+
+.alerts-device-chevron {
+    color: var(--text-muted);
+}
+
+.alerts-device-body {
+    border-top: 1px solid var(--border-color);
+    padding: 2px 6px;
+    background: var(--bg-surface);
+}
+
+.alerts-list-content {
+    padding: 8px 10px;
+}
+
+.alerts-list-filters {
+    margin-bottom: 8px;
+}
+
+.alerts-table {
+    font-size: 0.8rem;
+}
+
+.alerts-table th,
+.alerts-table td {
+    padding: 6px 8px;
+}
+
+.alerts-table-snapshot-col,
+.alerts-table-snapshot {
+    width: 80px;
+    text-align: center;
+}
+
+.alerts-table-time {
+    white-space: nowrap;
+}
+
+.alerts-inline-badge {
+    padding: 1px 4px;
+    font-size: 0.7rem;
+}
+
+.alerts-message-ellipsis {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.alerts-snapshot-btn {
+    padding: 1px 5px;
+    font-size: 0.7rem;
+    height: 24px;
+    min-height: 24px;
     line-height: 1;
-    min-height: 28px;
+    gap: 3px;
 }
 
-.filter-tab:hover {
-    background: #f5f5f5;
+.alerts-snapshot-btn .material-icons {
+    font-size: 13px;
 }
 
-.filter-tab.active {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border-color: transparent;
+.alerts-snapshot-row {
+    background: var(--bg-surface-2);
 }
-.filter-tab-sm {
-    padding-top: 3px;
-    padding-bottom: 3px;
+
+.alerts-snapshot-cell {
+    padding: 0 !important;
+}
+
+.alerts-snapshot-panel {
+    padding: 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.alerts-snapshot-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    text-align: left;
+}
+
+.alerts-snapshot-title {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+}
+
+.alerts-snapshot-table {
+    width: 100%;
+    font-size: 0.75rem;
+    margin-top: 4px;
+    border-collapse: collapse;
+}
+
+.alerts-snapshot-table td {
+    padding: 3px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.alerts-snapshot-table td:last-child {
+    text-align: right;
+    font-family: monospace;
+    font-weight: 600;
+}
+
+.alerts-snapshot-value.danger {
+    color: #ef4444;
+}
+
+.alerts-snapshot-value.info {
+    color: #3b82f6;
+}
+
+html[data-theme="dark"] .status-badge {
+    border: 1px solid var(--border-color);
+}
+
+@media (max-width: 768px) {
+    .alerts-snapshot-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .alerts-device-head {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .alerts-device-meta {
+        width: 100%;
+        justify-content: space-between;
+    }
 }
 </style>
 

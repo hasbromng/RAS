@@ -133,7 +133,7 @@ INSERT INTO settings (setting_key, setting_value, setting_type, description) VAL
 ('email_to_address', '', 'string', 'Recipient email for alerts'),
 ('alert_threshold_cpu', '90', 'integer', 'CPU alert threshold percentage'),
 ('alert_threshold_memory', '90', 'integer', 'Memory alert threshold percentage'),
-('alert_threshold_disk', '85', 'integer', 'Disk alert threshold percentage'),
+('alert_threshold_disk', '90', 'integer', 'Disk alert threshold percentage'),
 ('device_offline_minutes', '5', 'integer', 'Minutes before device marked offline'),
 ('metrics_retention_days', '30', 'integer', 'Days to retain metrics history'),
 ('dashboard_refresh_seconds', '30', 'integer', 'Dashboard auto-refresh interval');

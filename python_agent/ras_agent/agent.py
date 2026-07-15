@@ -9,6 +9,8 @@ import signal
 import sys
 import time
 import threading
+import ctypes
+import platform
 from typing import Optional
 
 # Import agent modules
@@ -97,13 +99,16 @@ class RASAgent:
             self.shutdown_requested = True
 
         # Register signal handlers
-        signal.signal(signal.SIGINT, signal_handler)
-        signal.signal(signal.SIGTERM, signal_handler)
-
-        # Windows doesn't have SIGBREAK, ignore if not available
-        if hasattr(signal, 'SIGBREAK'):
-            signal.signal(signal.SIGBREAK, signal_handler)
-
+        try:
+            signal.signal(signal.SIGINT, signal_handler)
+            signal.signal(signal.SIGTERM, signal_handler)
+            
+            # Windows doesn't have SIGBREAK, ignore if not available
+            if hasattr(signal, 'SIGBREAK'):
+                signal.signal(signal.SIGBREAK, signal_handler)
+        except ValueError:
+            # ValueError is raised if not called from the main thread (e.g. inside a Windows Service)
+            self.logger.debug("Could not register signal handlers (not running in main thread)")
     def test_connection(self) -> bool:
         """
         Test connection to the API endpoint.
@@ -228,6 +233,19 @@ class RASAgent:
                 # Calculate sleep time
                 elapsed = time.time() - cycle_start_time
                 sleep_time = max(0, self.collect_interval - elapsed)
+
+                # Aggressively trim working set memory before sleeping to reduce RAM usage footprint
+                try:
+                    if platform.system().lower() == "windows":
+                        import ctypes
+                        GetCurrentProcess = ctypes.windll.kernel32.GetCurrentProcess
+                        GetCurrentProcess.restype = ctypes.c_void_p
+                        EmptyWorkingSet = ctypes.windll.psapi.EmptyWorkingSet
+                        EmptyWorkingSet.argtypes = [ctypes.c_void_p]
+                        handle = GetCurrentProcess()
+                        EmptyWorkingSet(handle)
+                except Exception as e:
+                    self.logger.debug(f"Failed to trim memory: {e}")
 
                 # Sleep with interrupt check
                 if sleep_time > 0:

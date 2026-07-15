@@ -13,7 +13,7 @@
                     <i class="material-icons">rocket_launch</i>
                     Quick Start
                 </h5>
-                <ol style="line-height: 2;">
+                <ol class="help-list">
                     <li>
                         <strong>Setup Agent Python</strong><br>
                         Install agent Python pada perangkat yang ingin dimonitor. Lihat dokumentasi <code>MVP_Client_Python_Agent.md</code>
@@ -114,20 +114,20 @@
                     <i class="material-icons">folder</i>
                     Dokumentasi
                 </h5>
-                <div style="display: flex; flex-direction: column; gap: 8px;">
-                    <a href="../MVP_Admin_PHP_MySQL.md" target="_blank" class="btn btn-sm" style="text-align: left;">
+                <div class="help-link-list">
+                    <a href="../MVP_Admin_PHP_MySQL.md" target="_blank" class="btn btn-sm help-link-btn">
                         <i class="material-icons left">description</i>
                         Admin Dashboard Specs
                     </a>
-                    <a href="../MVP_Client_Python_Agent.md" target="_blank" class="btn btn-sm" style="text-align: left;">
+                    <a href="../MVP_Client_Python_Agent.md" target="_blank" class="btn btn-sm help-link-btn">
                         <i class="material-icons left">description</i>
                         Python Agent Specs
                     </a>
-                    <a href="../IMPLEMENTATION_SUMMARY.md" target="_blank" class="btn btn-sm" style="text-align: left;">
+                    <a href="../IMPLEMENTATION_SUMMARY.md" target="_blank" class="btn btn-sm help-link-btn">
                         <i class="material-icons left">description</i>
                         Implementation Summary
                     </a>
-                    <a href="../README.md" target="_blank" class="btn btn-sm btn-primary" style="text-align: left;">
+                    <a href="../README.md" target="_blank" class="btn btn-sm btn-primary help-link-btn">
                         <i class="material-icons left">home</i>
                         Main README
                     </a>
@@ -142,16 +142,16 @@
                     <i class="material-icons">link</i>
                     Quick Links
                 </h5>
-                <div style="display: flex; flex-direction: column; gap: 8px;">
-                    <a href="../test_client.php" target="_blank" class="btn btn-sm" style="text-align: left;">
+                <div class="help-link-list">
+                    <a href="../test_client.php" target="_blank" class="btn btn-sm help-link-btn">
                         <i class="material-icons left">bug_report</i>
                         Test API Client
                     </a>
-                    <a href="../install.php" class="btn btn-sm" style="text-align: left; background: linear-gradient(135deg, #ffab00 0%, #ffca28 100%);">
+                    <a href="../install.php" class="btn btn-sm btn-secondary help-link-btn">
                         <i class="material-icons left">settings</i>
                         Re-install System
                     </a>
-                    <a href="?page=settings" class="btn btn-sm" style="text-align: left;">
+                    <a href="?page=settings" class="btn btn-sm help-link-btn">
                         <i class="material-icons left">tune</i>
                         System Settings
                     </a>
@@ -166,7 +166,7 @@
                     <i class="material-icons">info</i>
                     System Info
                 </h5>
-                <table class="data-table" style="font-size: 0.875rem;">
+                <table class="data-table help-info-table">
                     <tbody>
                         <tr>
                             <td>Version</td>
@@ -188,17 +188,33 @@
 </div>
 
 <style>
-code {
-    background: #f5f5f5;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-family: 'Courier New', monospace;
-    color: #667eea;
+.help-list {
+    line-height: 1.9;
+    padding-left: 18px;
+}
+
+.help-link-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.help-link-btn {
+    justify-content: flex-start;
+    text-align: left;
+}
+
+.help-info-table {
     font-size: 0.875rem;
 }
 
-.btn {
-    display: flex !important;
-    align-items: center !important;
+code {
+    background: var(--bg-surface-2);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    color: var(--primary-color);
+    font-size: 0.875rem;
+    border: 1px solid var(--border-color);
 }
 </style>

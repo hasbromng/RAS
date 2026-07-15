@@ -59,7 +59,7 @@ try {
     // Get alert thresholds
     $cpu_threshold = getSetting($pdo, 'alert_threshold_cpu', 90);
     $memory_threshold = getSetting($pdo, 'alert_threshold_memory', 90);
-    $disk_threshold = getSetting($pdo, 'alert_threshold_disk', 85);
+    $disk_threshold = getSetting($pdo, 'alert_threshold_disk', 90);
     $offline_minutes = getSetting($pdo, 'device_offline_minutes', 5);
 
     // Prepare device data
@@ -107,20 +107,34 @@ try {
         }
     }
 
-    if (isset($data['disk_usage']) && $data['disk_usage'] >= $disk_threshold) {
-        $status = 'critical';
-        $alerts_to_create[] = [
-            'type' => 'disk',
-            'severity' => 'critical',
-            'message' => "Disk usage critical: {$data['disk_usage']}%"
-        ];
-    } elseif (isset($data['disk_usage']) && $data['disk_usage'] >= ($disk_threshold - 10)) {
-        $status = ($status === 'online') ? 'warning' : $status;
-        $alerts_to_create[] = [
-            'type' => 'disk',
-            'severity' => 'warning',
-            'message' => "Disk usage high: {$data['disk_usage']}%"
-        ];
+    // Check all individual disks in additional_info, if available
+    $all_disks = [];
+    if (!empty($data['additional_info']['all_disks'])) {
+        $all_disks = $data['additional_info']['all_disks'];
+    } elseif (isset($data['disk_usage'])) {
+        // Fallback to main disk if all_disks isn't present
+        $all_disks = ['Main Disk' => ['percent' => $data['disk_usage'], 'mountpoint' => 'System']];
+    }
+
+    foreach ($all_disks as $disk_name => $disk_info) {
+        $percent = $disk_info['percent'] ?? 0;
+        $mountpoint = $disk_info['mountpoint'] ?? $disk_name;
+        
+        if ($percent >= $disk_threshold) {
+            $status = 'critical';
+            $alerts_to_create[] = [
+                'type' => 'disk',
+                'severity' => 'critical',
+                'message' => "Disk {$mountpoint} usage critical: {$percent}%"
+            ];
+        } elseif ($percent >= ($disk_threshold - 10)) {
+            $status = ($status === 'online') ? 'warning' : $status;
+            $alerts_to_create[] = [
+                'type' => 'disk',
+                'severity' => 'warning',
+                'message' => "Disk {$mountpoint} usage high: {$percent}%"
+            ];
+        }
     }
 
     if (isset($data['storage_health']) && $data['storage_health'] === 'critical') {
@@ -181,18 +195,26 @@ try {
             WHERE device_id = ?
             AND alert_type = ?
             AND severity = ?
-            AND timestamp > DATE_SUB(NOW(), INTERVAL 1 HOUR)
+            AND timestamp > DATE_SUB(?, INTERVAL 1 HOUR)
             AND status = 'open'
             LIMIT 1
         ");
-        $check_stmt->execute([$device_id, $alert['type'], $alert['severity']]);
+        $check_stmt->execute([$device_id, $alert['type'], $alert['severity'], $now]);
 
-        if (!$check_stmt->fetch()) {
-            $snapshot_data = null;
-            if (isset($data['additional_info']['top_processes'])) {
+        $existing_alert = $check_stmt->fetch();
+        
+        $snapshot_data = null;
+        if (isset($data['additional_info'])) {
+            if (in_array($alert['type'], ['cpu', 'memory']) && isset($data['additional_info']['top_processes'])) {
                 $snapshot_data = json_encode($data['additional_info']['top_processes']);
+            } elseif (in_array($alert['type'], ['disk', 'storage']) && isset($data['additional_info']['all_disks'])) {
+                $snapshot_data = json_encode($data['additional_info']['all_disks']);
+            } elseif ($alert['type'] === 'network' && isset($data['additional_info']['network_interfaces'])) {
+                $snapshot_data = json_encode($data['additional_info']['network_interfaces']);
             }
+        }
 
+        if (!$existing_alert) {
             // Create new alert
             $alert_stmt = $pdo->prepare("
                 INSERT INTO alerts (device_id, timestamp, alert_type, severity, message, snapshot_data)
@@ -211,6 +233,19 @@ try {
             if ($alert['severity'] === 'critical') {
                 sendEmailNotification($pdo, $device_id, $hostname, $alert);
             }
+        } else {
+            // Update existing alert with latest snapshot and message
+            $update_alert = $pdo->prepare("
+                UPDATE alerts 
+                SET message = ?, snapshot_data = ?, timestamp = ?
+                WHERE id = ?
+            ");
+            $update_alert->execute([
+                $alert['message'],
+                $snapshot_data,
+                $now,
+                $existing_alert['id']
+            ]);
         }
     }
 
@@ -227,13 +262,13 @@ try {
                     resolved_at = ?
                 WHERE device_id = ? 
                 AND alert_type = ? 
-                AND status = 'open'
+                AND status IN ('open', 'acknowledged')
             ");
             $resolve_stmt->execute([$now, $device_id, $type]);
         }
     }
 
-    // Update offline devices
+    // Update offline devices — gunakan NOW() MySQL agar tidak ada timezone mismatch dengan PHP
     $offline_stmt = $pdo->prepare("
         UPDATE devices
         SET status = 'offline'

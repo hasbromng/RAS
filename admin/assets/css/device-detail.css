@@ -2,13 +2,145 @@
  * RAS Device Detail — compact single-view layout
  */
 
+:root {
+    --dd-bg: #f8fafc;
+    --dd-surface: #ffffff;
+    --dd-surface-2: #f8fafc;
+    --dd-surface-3: #eef2f7;
+    --dd-text: #334155;
+    --dd-text-2: #64748b;
+    --dd-border: #e2e8f0;
+}
+
+body[data-theme="dark"] {
+    --dd-bg: #0b1220;
+    --dd-surface: #111827;
+    --dd-surface-2: #0f172a;
+    --dd-surface-3: #1e293b;
+    --dd-text: #e5eefb;
+    --dd-text-2: #9fb0c7;
+    --dd-border: #243244;
+}
+
 .dd-page {
     display: flex;
     flex-direction: column;
     gap: 12px;
     max-width: 1440px;
     font-size: 13px;
-    color: #334155;
+    color: var(--dd-text);
+}
+
+.dd-inline-stack {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.dd-chip-value-tight {
+    font-size: 11px;
+    padding: 2px 6px;
+}
+
+.dd-export-btn-refresh {
+    margin-right: 8px;
+    background: rgba(16, 185, 129, 0.12);
+    color: #0f766e;
+    border: 1px solid rgba(16, 185, 129, 0.26);
+    cursor: pointer;
+}
+
+body[data-theme="dark"] .dd-export-btn-refresh {
+    background: rgba(16, 185, 129, 0.16);
+    color: #99f6e4;
+    border-color: rgba(45, 212, 191, 0.24);
+}
+
+.dd-inline-badge {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 4px;
+    padding: 1px 5px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 700;
+    background: #3b82f6;
+    color: #fff;
+}
+
+.dd-phys-disk-card.is-external {
+    background: color-mix(in srgb, #3b82f6 6%, var(--dd-surface));
+    border-left: 4px solid var(--dd-disk-accent, #3b82f6);
+}
+
+.dd-snapshot-wrap {
+    margin-top: 8px;
+}
+
+.dd-snapshot-btn {
+    font-size: 11px;
+}
+
+.dd-snapshot-btn .material-icons {
+    font-size: 14px;
+}
+
+.dd-snapshot-panel {
+    margin-top: 8px;
+    background: var(--dd-surface-2);
+    border: 1px solid var(--dd-border);
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.dd-snapshot-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.dd-snapshot-title {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 11px;
+    color: var(--dd-text-2);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.dd-snapshot-table {
+    width: 100%;
+    margin-top: 4px;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.dd-snapshot-table td {
+    padding: 3px 0;
+    color: var(--dd-text);
+    border-bottom: 1px solid var(--dd-border);
+}
+
+.dd-snapshot-table td:last-child {
+    text-align: right;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-weight: 600;
+}
+
+.dd-snapshot-value.danger {
+    color: #ef4444;
+}
+
+.dd-snapshot-value.info {
+    color: #3b82f6;
+}
+
+@media (max-width: 768px) {
+    .dd-snapshot-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
 }
 
 /* ── Header ─────────────────────────────────────────── */
@@ -18,8 +150,8 @@
     align-items: center;
     gap: 16px;
     flex-wrap: wrap;
-    background: #fff;
-    border: 1px solid #e2e8f0;
+    background: var(--dd-surface);
+    border: 1px solid var(--dd-border);
     border-radius: 12px;
     padding: 12px 16px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
@@ -57,9 +189,9 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: #64748b;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    color: var(--dd-text-2);
+    background: var(--dd-surface-2);
+    border: 1px solid var(--dd-border);
     text-decoration: none;
     flex-shrink: 0;
     transition: all 0.15s;
@@ -119,7 +251,7 @@
     margin: 0;
     font-size: 1.15rem;
     font-weight: 700;
-    color: #0f172a;
+    color: var(--dd-text);
     letter-spacing: -0.02em;
     line-height: 1.2;
 }
@@ -129,7 +261,7 @@
     flex-wrap: wrap;
     gap: 4px 12px;
     font-size: 12px;
-    color: #64748b;
+    color: var(--dd-text-2);
 }
 
 .dd-header-meta span {
@@ -141,14 +273,14 @@
 
 .dd-header-meta .material-icons {
     font-size: 14px;
-    color: #94a3b8;
+    color: var(--dd-text-2);
 }
 
 .dd-header-meta code {
     font-family: 'Consolas', 'Monaco', monospace;
     font-size: 11px;
     background: transparent;
-    color: #475569;
+    color: var(--dd-text);
     word-break: break-all;
 }
 
@@ -164,8 +296,8 @@
     flex-direction: column;
     gap: 1px;
     padding: 6px 12px;
-    background: #f8fafc;
-    border: 1px solid #eef2f7;
+    background: var(--dd-surface-2);
+    border: 1px solid var(--dd-border);
     border-radius: 8px;
     min-width: 72px;
 }
@@ -173,7 +305,7 @@
 .dd-chip-label {
     font-size: 10px;
     font-weight: 600;
-    color: #94a3b8;
+    color: var(--dd-text-2);
     text-transform: uppercase;
     letter-spacing: 0.04em;
 }
@@ -181,7 +313,7 @@
 .dd-chip-value {
     font-size: 12px;
     font-weight: 700;
-    color: #1e293b;
+    color: var(--dd-text);
 }
 
 /* ── Badges ─────────────────────────────────────────── */
@@ -1129,6 +1261,18 @@
     border-radius: 50%;
 }
 
+.dd-chart-dot.cpu {
+    background: #667eea;
+}
+
+.dd-chart-dot.mem {
+    background: #764ba2;
+}
+
+.dd-chart-dot.disk {
+    background: #22c55e;
+}
+
 .dd-chart-body {
     min-height: 160px;
     padding-top: 4px !important;
@@ -1379,3 +1523,240 @@
 .dd-level-text-moderate { color: #ca8a04 !important; }
 .dd-level-text-unknown  { color: #94a3b8 !important; }
 
+body[data-theme="dark"] .dd-header {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.24);
+}
+
+body[data-theme="dark"] .dd-status-dot {
+    border-color: var(--dd-surface);
+}
+
+body[data-theme="dark"] .dd-badge-online {
+    background: rgba(34, 197, 94, 0.14);
+    color: #86efac;
+}
+
+body[data-theme="dark"] .dd-badge-offline {
+    background: rgba(148, 163, 184, 0.14);
+    color: #cbd5e1;
+}
+
+body[data-theme="dark"] .dd-badge-warning {
+    background: rgba(245, 158, 11, 0.14);
+    color: #fcd34d;
+}
+
+body[data-theme="dark"] .dd-badge-critical {
+    background: rgba(239, 68, 68, 0.15);
+    color: #fca5a5;
+}
+
+body[data-theme="dark"] .dd-badge-alert {
+    background: rgba(234, 88, 12, 0.16);
+    color: #fdba74;
+}
+
+body[data-theme="dark"] .dd-panel,
+body[data-theme="dark"] .dd-phys-disk-card,
+body[data-theme="dark"] .dd-partition-detail-pop,
+body[data-theme="dark"] .dd-detail-pop,
+body[data-theme="dark"] .dd-smart-row,
+body[data-theme="dark"] .dd-mem-slot-row {
+    background: var(--dd-surface);
+    border-color: var(--dd-border);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.22);
+}
+
+body[data-theme="dark"] .dd-panel-head h3,
+body[data-theme="dark"] .dd-panel-head-inner h3,
+body[data-theme="dark"] .dd-metric-label,
+body[data-theme="dark"] .dd-phys-disk-num,
+body[data-theme="dark"] .dd-partition-drive,
+body[data-theme="dark"] .dd-net-name strong,
+body[data-theme="dark"] .dd-net-info,
+body[data-theme="dark"] .dd-net-ips,
+body[data-theme="dark"] .dd-net-ips code,
+body[data-theme="dark"] .dd-sys-value,
+body[data-theme="dark"] .dd-alert-type,
+body[data-theme="dark"] .dd-smart-name,
+body[data-theme="dark"] .dd-detail-pop-row strong,
+body[data-theme="dark"] .dd-detail-pop-row code,
+body[data-theme="dark"] .dd-mem-slot-label,
+body[data-theme="dark"] .dd-mem-slot-cap {
+    color: var(--dd-text);
+}
+
+body[data-theme="dark"] .dd-panel-toggle:hover,
+body[data-theme="dark"] .dd-phys-disk-header,
+body[data-theme="dark"] .dd-phys-partition-row,
+body[data-theme="dark"] .dd-disk-grouped,
+body[data-theme="dark"] .dd-disk-row,
+body[data-theme="dark"] .dd-net-row,
+body[data-theme="dark"] .dd-sys-item,
+body[data-theme="dark"] .dd-alert-row,
+body[data-theme="dark"] .dd-smart-row,
+body[data-theme="dark"] .dd-mem-slot-row {
+    background: var(--dd-surface-2);
+    border-color: var(--dd-border);
+}
+
+body[data-theme="dark"] .dd-alert-row:hover,
+body[data-theme="dark"] .dd-partition-block-inner:hover,
+body[data-theme="dark"] .dd-phys-disk-card:hover,
+body[data-theme="dark"] .dd-smart-row:hover,
+body[data-theme="dark"] .dd-mem-slot-row:hover {
+    background: var(--dd-surface);
+    border-color: #3b4d63;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.24);
+}
+
+body[data-theme="dark"] .dd-metric-detail,
+body[data-theme="dark"] .dd-panel-count,
+body[data-theme="dark"] .dd-chevron,
+body[data-theme="dark"] .dd-phys-disk-model,
+body[data-theme="dark"] .dd-phys-disk-serial,
+body[data-theme="dark"] .dd-phys-disk-size,
+body[data-theme="dark"] .dd-partition-fstype,
+body[data-theme="dark"] .dd-partition-total,
+body[data-theme="dark"] .dd-net-speed,
+body[data-theme="dark"] .dd-net-ips.dd-muted,
+body[data-theme="dark"] .dd-alert-time,
+body[data-theme="dark"] .dd-alert-msg,
+body[data-theme="dark"] .dd-empty-sm,
+body[data-theme="dark"] .dd-hw-section-title,
+body[data-theme="dark"] .dd-mem-slot-mfr,
+body[data-theme="dark"] .dd-mem-slot-spd,
+body[data-theme="dark"] .dd-smart-health {
+    color: var(--dd-text-2);
+}
+
+body[data-theme="dark"] .dd-bar,
+body[data-theme="dark"] .dd-partition-usage-bar {
+    background: var(--dd-surface-3);
+}
+
+body[data-theme="dark"] .dd-panel-body-scroll {
+    scrollbar-color: #3b4d63 transparent;
+}
+
+body[data-theme="dark"] .dd-panel-body-scroll::-webkit-scrollbar-thumb {
+    background: #3b4d63;
+}
+
+body[data-theme="dark"] .dd-partition-block-inner,
+body[data-theme="dark"] .dd-detail-btn,
+body[data-theme="dark"] .dd-net-ips code,
+body[data-theme="dark"] .dd-detail-pop-row code,
+body[data-theme="dark"] .dd-export-btn-refresh,
+body[data-theme="dark"] .dd-smart-row .dd-sys-item,
+body[data-theme="dark"] .dd-mem-slot-spec,
+body[data-theme="dark"] .dd-alert-status,
+body[data-theme="dark"] .dd-snapshot-panel,
+body[data-theme="dark"] .dd-snapshot-table td {
+    border-color: var(--dd-border);
+}
+
+body[data-theme="dark"] .dd-partition-block-inner,
+body[data-theme="dark"] .dd-net-ips code,
+body[data-theme="dark"] .dd-detail-btn,
+body[data-theme="dark"] .dd-detail-pop-row code,
+body[data-theme="dark"] .dd-partition-fstype,
+body[data-theme="dark"] .dd-phys-disk-size,
+body[data-theme="dark"] .dd-phys-disk-serial,
+body[data-theme="dark"] .dd-alert-status,
+body[data-theme="dark"] .dd-snapshot-panel,
+body[data-theme="dark"] .dd-empty-sm {
+    background: var(--dd-surface-3);
+}
+
+body[data-theme="dark"] .dd-panel-body,
+body[data-theme="dark"] .dd-panel-body.dd-chart-body,
+body[data-theme="dark"] .dd-phys-partition-row {
+    background: var(--dd-surface);
+}
+
+body[data-theme="dark"] .dd-detail-btn {
+    color: var(--dd-text-2);
+}
+
+body[data-theme="dark"] .dd-detail-btn:hover,
+body[data-theme="dark"] .dd-detail-btn.is-active,
+body[data-theme="dark"] .dd-back:hover {
+    color: #9fb8ff;
+    border-color: #5b7cff;
+    background: rgba(91, 124, 255, 0.12);
+}
+
+body[data-theme="dark"] .dd-detail-pop-row span,
+body[data-theme="dark"] .dd-sys-label,
+body[data-theme="dark"] .dd-cores-title,
+body[data-theme="dark"] .dd-core-id {
+    color: var(--dd-text-2);
+}
+
+body[data-theme="dark"] .dd-core-pct,
+body[data-theme="dark"] .dd-partition-free {
+    color: var(--dd-text);
+}
+
+body[data-theme="dark"] .dd-cores,
+body[data-theme="dark"] .dd-hw-section-title,
+body[data-theme="dark"] .dd-snapshot-table td,
+body[data-theme="dark"] .dd-phys-disk-header,
+body[data-theme="dark"] .dd-smart-header {
+    border-color: var(--dd-border);
+}
+
+body[data-theme="dark"] .dd-partition-block-inner:hover .dd-partition-fstype {
+    opacity: 0;
+}
+
+body[data-theme="dark"] .dd-alert-row.sev-critical {
+    background: rgba(127, 29, 29, 0.22);
+    border-color: rgba(248, 113, 113, 0.22);
+}
+
+body[data-theme="dark"] .dd-alert-row.sev-warning {
+    background: rgba(120, 53, 15, 0.22);
+    border-color: rgba(251, 191, 36, 0.22);
+}
+
+body[data-theme="dark"] .dd-alert-row.status-resolved {
+    opacity: 0.78;
+}
+
+body[data-theme="dark"] .dd-alert-status {
+    color: #cbd5e1;
+}
+
+body[data-theme="dark"] .dd-alert-status.status-open {
+    background: rgba(234, 88, 12, 0.18);
+    color: #fdba74;
+}
+
+body[data-theme="dark"] .dd-alert-status.status-acknowledged {
+    background: rgba(99, 102, 241, 0.18);
+    color: #c7d2fe;
+}
+
+body[data-theme="dark"] .dd-alert-status.status-resolved {
+    background: rgba(34, 197, 94, 0.16);
+    color: #86efac;
+}
+
+body[data-theme="dark"] .dd-empty-sm .material-icons {
+    color: #64748b;
+}
+
+body[data-theme="dark"] .dd-empty-sm.success,
+body[data-theme="dark"] .dd-empty-sm.success .material-icons {
+    color: #4ade80;
+}
+
+body[data-theme="dark"] .dd-chart-legend-inline span {
+    color: var(--dd-text-2);
+}
+
+body[data-theme="dark"] .dd-text-warn {
+    color: #fb923c;
+}

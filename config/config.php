@@ -53,6 +53,7 @@ function getDbConnection() {
         ];
 
         $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
+        seedDefaultSettings($pdo);
         return $pdo;
     } catch (PDOException $e) {
         error_log("Database connection failed: " . $e->getMessage());
@@ -146,6 +147,50 @@ function setSetting($pdo, $key, $value, $type = 'string', $description = null) {
 }
 
 /**
+ * Ensure default settings rows exist in the database without overwriting custom values.
+ *
+ * @param PDO $pdo Database connection
+ * @return void
+ */
+function seedDefaultSettings($pdo) {
+    static $seeded = false;
+    if ($seeded) {
+        return;
+    }
+
+    $seeded = true;
+
+    try {
+        $defaults = [
+            ['email_enabled', 'false', 'boolean', 'Enable email notifications'],
+            ['email_smtp_host', 'smtp.gmail.com', 'string', 'SMTP server hostname'],
+            ['email_smtp_port', '587', 'integer', 'SMTP server port'],
+            ['email_smtp_secure', 'tls', 'string', 'SMTP security (tls/ssl)'],
+            ['email_from_address', 'noreply@ras.local', 'string', 'From email address'],
+            ['email_from_name', 'RAS Monitor', 'string', 'From email name'],
+            ['email_to_address', '', 'string', 'Recipient email for alerts'],
+            ['alert_threshold_cpu', '90', 'integer', 'CPU alert threshold percentage'],
+            ['alert_threshold_memory', '90', 'integer', 'Memory alert threshold percentage'],
+            ['alert_threshold_disk', '90', 'integer', 'Disk alert threshold percentage'],
+            ['device_offline_minutes', '5', 'integer', 'Minutes before device marked offline'],
+            ['metrics_retention_days', '30', 'integer', 'Days to retain metrics history'],
+            ['dashboard_refresh_seconds', '30', 'integer', 'Dashboard auto-refresh interval'],
+        ];
+
+        $stmt = $pdo->prepare("
+            INSERT IGNORE INTO settings (setting_key, setting_value, setting_type, description)
+            VALUES (?, ?, ?, ?)
+        ");
+
+        foreach ($defaults as $row) {
+            $stmt->execute($row);
+        }
+    } catch (PDOException $e) {
+        logMessage("Error seeding default settings: " . $e->getMessage(), 'ERROR');
+    }
+}
+
+/**
  * Send JSON response
  *
  * @param array $data Response data
@@ -167,16 +212,22 @@ function validateApiKey() {
     $headers = getallheaders();
     $providedKey = '';
 
-    // Check in headers
-    if (isset($headers['X-API-Key'])) {
-        $providedKey = $headers['X-API-Key'];
-    } elseif (isset($headers['Authorization'])) {
-        $auth = $headers['Authorization'];
-        if (preg_match('/Bearer\s+(.*)$/i', $auth, $matches)) {
-            $providedKey = $matches[1];
+    // Check in $_SERVER first
+    if (isset($_SERVER['HTTP_X_API_KEY'])) {
+        $providedKey = $_SERVER['HTTP_X_API_KEY'];
+    } else {
+        // Fallback to headers with case-insensitive check
+        $headers = array_change_key_case($headers, CASE_UPPER);
+        if (isset($headers['X-API-KEY'])) {
+            $providedKey = $headers['X-API-KEY'];
+        } elseif (isset($headers['AUTHORIZATION'])) {
+            $auth = $headers['AUTHORIZATION'];
+            if (preg_match('/Bearer\s+(.*)$/i', $auth, $matches)) {
+                $providedKey = $matches[1];
+            }
+        } elseif (isset($_GET['api_key'])) {
+            $providedKey = $_GET['api_key'];
         }
-    } elseif (isset($_GET['api_key'])) {
-        $providedKey = $_GET['api_key'];
     }
 
     return hash_equals(API_KEY, $providedKey);

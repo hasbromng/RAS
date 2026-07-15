@@ -2,7 +2,7 @@
     "agent": {
         "device_id": "",
         "hostname": "",
-        "api_endpoint": "http://localhost/RAS/admin/api/metrics.php",
+        "api_endpoint": "https://heathered-dortha-unparsed.ngrok-free.dev/RAS/admin/api/metrics.php",
         "api_key": "change-this-to-secure-key",
         "collect_interval": 10,
         "extended_refresh_interval": 300,

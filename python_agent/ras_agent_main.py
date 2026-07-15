@@ -11,6 +11,8 @@ import sys
 import os
 import argparse
 import signal
+import shutil
+import ctypes
 
 # Add current directory to path for imports
 if hasattr(sys, 'frozen'):
@@ -126,8 +128,75 @@ def run_agent(config_path=None):
         return 1
 
 
+def auto_install():
+    """Automatically install the agent if double-clicked from a random location."""
+    if not hasattr(sys, 'frozen'):
+        return False  # Not running as EXE, skip auto-install
+    
+    current_exe = sys.executable
+    target_dir = os.path.join(os.environ.get('ProgramFiles', 'C:\\Program Files'), 'RAS Agent')
+    target_exe = os.path.join(target_dir, 'ras_agent.exe')
+    
+    # If already running from target dir, just run normally
+    if current_exe.lower() == target_exe.lower():
+        return False
+        
+    import ctypes
+    if ctypes.windll.shell32.IsUserAnAdmin() == 0:
+        # Prompt for UAC Elevation
+        ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv[1:]), None, 1)
+        sys.exit(0)
+        
+    try:
+        # Create directory
+        os.makedirs(target_dir, exist_ok=True)
+        
+        import subprocess
+        import time
+        
+        # Hentikan dan hapus service yang berjalan SEBELUM menimpa file
+        # untuk mencegah 'Permission denied' karena file exe terkunci oleh Windows
+        if os.path.exists(target_exe):
+            subprocess.run([target_exe, 'stop'], creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0x08000000))
+            subprocess.run([target_exe, 'remove'], creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0x08000000))
+            time.sleep(1) # Beri waktu sejenak agar Windows melepas lock file
+        
+        # Copy executable
+        shutil.copy2(current_exe, target_exe)
+        
+        # Copy config.json if it exists in current dir
+        source_dir = os.path.dirname(current_exe)
+        config_src = os.path.join(source_dir, 'config.json')
+        if os.path.exists(config_src):
+            shutil.copy2(config_src, os.path.join(target_dir, 'config.json'))
+            
+        # Install and start service using the NEW executable
+        subprocess.run([target_exe, 'install'], check=True, creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0x08000000))
+        subprocess.run([target_exe, 'start'], check=True, creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0x08000000))
+        
+        # Show success message box
+        ctypes.windll.user32.MessageBoxW(0, "Instalasi Berhasil!\nRAS Agent kini berjalan otomatis di latar belakang.", "RAS Agent Installer", 0x40 | 0x0)
+        return True
+    except Exception as e:
+        ctypes.windll.user32.MessageBoxW(0, f"Gagal menginstal agen:\n{str(e)}", "RAS Agent Error", 0x10 | 0x0)
+        return True
+
 def main():
     """Main entry point."""
+    # Handle Windows Service startup
+    if len(sys.argv) > 1 and sys.argv[1] == 'run_service':
+        import servicemanager
+        from service.windows_service import RASAgentService
+        servicemanager.Initialize()
+        servicemanager.PrepareToHostSingle(RASAgentService)
+        servicemanager.StartServiceCtrlDispatcher()
+        return 0
+
+    # Check for auto-install if no arguments provided
+    if len(sys.argv) == 1:
+        if auto_install():
+            return 0
+            
     parser = argparse.ArgumentParser(
         description='RAS Monitoring Agent - System metrics collection and reporting',
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -186,9 +255,8 @@ For more information, visit: https://github.com/your-repo/RAS
         print("Python:", sys.version)
         return 0
     else:
-        # Default: run agent
+        # Default: run agent (only reached if running from install dir without args)
         return run_agent(config_path)
-
 
 if __name__ == '__main__':
     sys.exit(main())

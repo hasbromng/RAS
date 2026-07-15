@@ -156,13 +156,17 @@ def install_service(config_path: str = None) -> bool:
 
     try:
         service_class = f"{RASAgentService.__module__}.{RASAgentService.__name__}"
+        exe_name = sys.executable if getattr(sys, 'frozen', False) else None
+        exe_args = "run_service" if getattr(sys, 'frozen', False) else None
 
         win32serviceutil.InstallService(
             service_class,
             RASAgentService._svc_name_,
             RASAgentService._svc_display_name_,
             description=RASAgentService._svc_description_,
-            startType=win32service.SERVICE_AUTO_START
+            startType=win32service.SERVICE_AUTO_START,
+            exeName=exe_name,
+            exeArgs=exe_args
         )
 
         print(f"Service '{RASAgentService._svc_name_}' installed successfully")

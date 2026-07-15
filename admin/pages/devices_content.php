@@ -5,6 +5,18 @@
 try {
     $pdo = getDbConnection();
 
+    // --- FIX: Paksa update status offline untuk device yang sudah lama tidak kirim data.
+    // Gunakan NOW() MySQL murni (bukan date() PHP) untuk menghindari timezone mismatch.
+    // PHP pakai Asia/Jakarta (UTC+7), MySQL SYSTEM bisa berbeda timezone.
+    $offline_minutes = getSetting($pdo, 'device_offline_minutes', 5);
+    $pdo->prepare("
+        UPDATE devices
+        SET status = 'offline'
+        WHERE last_seen < DATE_SUB(NOW(), INTERVAL ? MINUTE)
+        AND status != 'offline'
+    ")->execute([$offline_minutes]);
+    // --- END FIX
+
     // Get all devices with latest metrics
     $stmt = $pdo->query("
         SELECT
@@ -28,7 +40,7 @@ try {
     ");
     $devices = $stmt->fetchAll();
 
-    // Get stats
+    // Get stats dari status yang sudah dikoreksi
     $stats = ['total' => count($devices)];
     foreach ($devices as $d) {
         $stats[$d['status']] = ($stats[$d['status']] ?? 0) + 1;
@@ -91,13 +103,13 @@ try {
                          <?php foreach ($devices as $device): ?>
                              <tr data-status="<?php echo $device['status']; ?>">
                                  <td>
-                                     <div style="font-weight: 500;"><?php echo htmlspecialchars($device['hostname']); ?></div>
-                                     <div style="font-size: 0.75rem; color: #636e72;">
+                                     <div class="table-cell-title"><?php echo htmlspecialchars($device['hostname']); ?></div>
+                                     <div class="table-cell-subtitle">
                                          ID: <?php echo htmlspecialchars(substr($device['device_id'], 0, 8)); ?>...
                                      </div>
                                  </td>
                                 <td>
-                                    <span style="font-family: monospace; background: #f5f5f5; padding: 4px 8px; border-radius: 4px;">
+                                    <span class="code-pill">
                                         <?php echo htmlspecialchars($device['ip_address']); ?>
                                     </span>
                                 </td>
@@ -110,11 +122,11 @@ try {
                                     </span>
                                 </td>
                                 <td>
-                                    <div style="display: flex; align-items: center; gap: 8px;">
-                                        <div style="flex: 1; max-width: 60px; height: 6px; background: #e0e0e0; border-radius: 3px; overflow: hidden;">
-                                            <div style="width: <?php echo min($device['cpu_usage'] ?? 0, 100); ?>%; height: 100%; background: <?php echo getMetricColor($device['cpu_usage'] ?? 0); ?>;"></div>
+                                    <div class="metric-inline compact">
+                                        <div class="metric-track">
+                                            <div class="metric-fill" style="width: <?php echo min($device['cpu_usage'] ?? 0, 100); ?>%; background: <?php echo getMetricColor($device['cpu_usage'] ?? 0); ?>;"></div>
                                         </div>
-                                        <span style="font-size: 0.85rem;"><?php echo number_format($device['cpu_usage'] ?? 0, 1); ?>%</span>
+                                        <span class="metric-value"><?php echo number_format($device['cpu_usage'] ?? 0, 1); ?>%</span>
                                     </div>
                                 </td>
                                 <td>
@@ -122,11 +134,11 @@ try {
                                     $mem_percent = $device['memory_total'] > 0 ?
                                         (($device['memory_used'] / $device['memory_total']) * 100) : 0;
                                     ?>
-                                    <div style="display: flex; align-items: center; gap: 8px;">
-                                        <div style="flex: 1; max-width: 60px; height: 6px; background: #e0e0e0; border-radius: 3px; overflow: hidden;">
-                                            <div style="width: <?php echo min($mem_percent, 100); ?>%; height: 100%; background: <?php echo getMetricColor($mem_percent); ?>;"></div>
+                                    <div class="metric-inline compact">
+                                        <div class="metric-track">
+                                            <div class="metric-fill" style="width: <?php echo min($mem_percent, 100); ?>%; background: <?php echo getMetricColor($mem_percent); ?>;"></div>
                                         </div>
-                                        <span style="font-size: 0.85rem;"><?php echo number_format($mem_percent, 1); ?>%</span>
+                                        <span class="metric-value"><?php echo number_format($mem_percent, 1); ?>%</span>
                                     </div>
                                 </td>
                                 <td>
@@ -142,7 +154,7 @@ try {
                                     
                                     if (!empty($all_disks)):
                                     ?>
-                                        <div style="display: flex; align-items: center; gap: 6px; font-size: 0.75rem;">
+                                        <div class="disk-inline-list">
                                             <?php 
                                             $counter = 0;
                                             foreach ($all_disks as $disk_key => $disk): 
@@ -155,22 +167,22 @@ try {
                                                 $counter++;
                                                 if ($counter > 2) break; // Show max 2 disks in table
                                             ?>
-                                                <div style="display: flex; align-items: center; gap: 4px;">
-                                                    <span style="width: 30px; text-align: right;"><strong><?php echo $disk_name; ?></strong></span>
-                                                    <span style="width: 6px; height: 6px; border-radius: 50%; background: <?php echo $color; ?>;"></span>
-                                                    <span style="color: #636e72; font-family: monospace;"><?php echo $percent; ?>%</span>
+                                                <div class="disk-inline-item">
+                                                    <span class="disk-inline-label"><?php echo $disk_name; ?></span>
+                                                    <span class="disk-inline-dot" style="background: <?php echo $color; ?>;"></span>
+                                                    <span class="disk-inline-meta"><?php echo $percent; ?>%</span>
                                                 </div>
                                             <?php endforeach; ?>
                                             <?php if (count($all_disks) > 2): ?>
-                                                <span style="color: #636e72; font-style: italic;">+<?php echo count($all_disks) - 2; ?> more</span>
+                                                <span class="table-cell-subtitle">+<?php echo count($all_disks) - 2; ?> more</span>
                                             <?php endif; ?>
                                         </div>
                                     <?php else: ?>
-                                        <div style="display: flex; align-items: center; gap: 8px;">
-                                            <div style="flex: 1; max-width: 60px; height: 6px; background: #e0e0e0; border-radius: 3px; overflow: hidden;">
-                                                <div style="width: <?php echo min($device['disk_usage'] ?? 0, 100); ?>%; height: 100%; background: <?php echo getMetricColor($device['disk_usage'] ?? 0); ?>;"></div>
+                                        <div class="metric-inline compact">
+                                            <div class="metric-track">
+                                                <div class="metric-fill" style="width: <?php echo min($device['disk_usage'] ?? 0, 100); ?>%; background: <?php echo getMetricColor($device['disk_usage'] ?? 0); ?>;"></div>
                                             </div>
-                                            <span style="font-size: 0.85rem;"><?php echo number_format($device['disk_usage'] ?? 0, 1); ?>%</span>
+                                            <span class="metric-value"><?php echo number_format($device['disk_usage'] ?? 0, 1); ?>%</span>
                                         </div>
                                     <?php endif; ?>
                                 </td>
@@ -183,25 +195,25 @@ try {
                                     </span>
                                 </td>
                                 <td>
-                                    <small style="color: #636e72; font-size: 0.85rem;"><?php echo date('M j, H:i', strtotime($device['last_seen'])); ?></small>
+                                    <small class="subtle-text"><?php echo date('M j, H:i', strtotime($device['last_seen'])); ?></small>
                                 </td>
                                 <td>
                                     <?php if ($device['status'] === 'warning' || $device['status'] === 'critical'): ?>
-                                        <span class="status-badge <?php echo $device['status']; ?>" style="margin-bottom: 4px; display: inline-block;">
+                                        <span class="status-badge <?php echo $device['status']; ?>" style="margin-bottom: 4px;">
                                             <?php echo strtoupper($device['status']); ?>
                                         </span><br>
                                     <?php endif; ?>
                                     
                                     <?php if ($device['open_alerts'] > 0): ?>
-                                        <span class="status-badge critical" style="display: inline-block; padding: 2px 6px; font-size: 0.75rem;">
+                                        <span class="status-badge critical">
                                             <?php echo $device['open_alerts']; ?> Alert
                                         </span>
                                     <?php elseif ($device['status'] !== 'warning' && $device['status'] !== 'critical'): ?>
-                                        <span style="color: #bdc3c7;">-</span>
+                                        <span class="subtle-text">-</span>
                                     <?php endif; ?>
                                 </td>
                                  <td>
-                                     <div style="display: flex; gap: 6px; justify-content: center;">
+                                     <div class="compact-actions" style="justify-content: center;">
                                          <a href="?page=devices&device_id=<?php echo htmlspecialchars($device['device_id']); ?>"
                                             class="btn btn-tiny btn-primary" title="Lihat Detail">
                                              <i class="material-icons">visibility</i>
@@ -309,7 +321,7 @@ try {
                                 <span>Alerts</span>
                                 <strong>
                                     <?php if ($device['open_alerts'] > 0): ?>
-                                        <span class="status-badge critical" style="padding: 2px 6px; font-size: 0.72rem;"><?php echo $device['open_alerts']; ?> Alert</span>
+                                        <span class="status-badge critical"><?php echo $device['open_alerts']; ?> Alert</span>
                                     <?php else: ?>
                                         -
                                     <?php endif; ?>
@@ -356,17 +368,18 @@ try {
 }
 
 .filter-tab {
-    padding: 8px 16px;
-    border: 1px solid #e0e0e0;
-    border-radius: 20px;
-    background: white;
+    padding: 7px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    background: var(--bg-surface);
     cursor: pointer;
     transition: all 0.2s ease;
-    font-size: 0.875rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
 }
 
 .filter-tab:hover {
-    background: #f5f5f5;
+    background: var(--bg-surface-2);
 }
 
 .filter-tab.active {
@@ -475,11 +488,11 @@ try {
 }
 
 .device-mobile-card {
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--border-color);
     border-radius: 10px;
     padding: 8px 10px;
     margin-bottom: 6px;
-    background: #fff;
+    background: var(--bg-surface);
 }
 
 .device-mobile-head {
@@ -493,13 +506,13 @@ try {
 .device-mobile-host {
     font-size: 0.9rem;
     font-weight: 600;
-    color: #1f2937;
+    color: var(--text-primary);
     line-height: 1.2;
 }
 
 .device-mobile-id {
     font-size: 0.68rem;
-    color: #6b7280;
+    color: var(--text-secondary);
     margin-top: 2px;
 }
 
@@ -522,7 +535,7 @@ try {
 .device-mobile-meta span,
 .device-mobile-extra span {
     font-size: 0.65rem;
-    color: #6b7280;
+    color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.4px;
 }
@@ -530,7 +543,7 @@ try {
 .device-mobile-meta strong,
 .device-mobile-extra strong {
     font-size: 0.78rem;
-    color: #111827;
+    color: var(--text-primary);
     font-weight: 600;
     word-break: break-word;
 }
@@ -610,7 +623,7 @@ try {
 }
 
 .custom-modal-card {
-    background: white;
+    background: var(--bg-surface);
     border-radius: 12px;
     width: 90%;
     max-width: 450px;
@@ -624,14 +637,14 @@ try {
     justify-content: space-between;
     align-items: center;
     padding: 16px 20px;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .custom-modal-header h5 {
     margin: 0;
     font-weight: 700;
     font-size: 1.1rem;
-    color: #0f172a;
+    color: var(--text-primary);
 }
 
 .custom-modal-close-btn {
@@ -639,12 +652,12 @@ try {
     border: none;
     font-size: 1.5rem;
     cursor: pointer;
-    color: #94a3b8;
+    color: var(--text-secondary);
     transition: color 0.15s;
 }
 
 .custom-modal-close-btn:hover {
-    color: #0f172a;
+    color: var(--text-primary);
 }
 
 .custom-modal-card form {
@@ -662,19 +675,19 @@ try {
     margin-bottom: 6px;
     font-weight: 600;
     font-size: 0.85rem;
-    color: #475569;
+    color: var(--text-secondary);
     text-align: left;
 }
 
 .custom-modal-card input {
     width: 100%;
     padding: 10px 12px;
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--border-color);
     border-radius: 6px;
     font-size: 0.9rem;
-    color: #0f172a;
+    color: var(--text-primary);
     box-sizing: border-box;
-    background: #fff;
+    background: var(--bg-surface);
     margin-bottom: 15px;
 }
 
@@ -689,8 +702,8 @@ try {
     justify-content: flex-end;
     gap: 8px;
     padding: 16px 20px;
-    background: #f8fafc;
-    border-top: 1px solid #f1f5f9;
+    background: var(--bg-surface-2);
+    border-top: 1px solid var(--border-color);
 }
 
 @keyframes modal-fade-in {
@@ -738,7 +751,7 @@ try {
         </div>
         <div class="custom-modal-body">
             <p>Apakah Anda yakin ingin menghapus perangkat <strong id="delete-device-name"></strong>?</p>
-            <p style="color: #ff5252; font-size: 0.85rem; margin-top: 10px; display: flex; align-items: center; gap: 4px;">
+            <p class="danger-text" style="font-size: 0.85rem; margin-top: 10px; display: flex; align-items: center; gap: 4px;">
                 <i class="material-icons" style="font-size: 16px;">warning</i>
                 Tindakan ini akan menghapus semua metrik dan log alert terkait secara permanen.
             </p>

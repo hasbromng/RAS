@@ -151,9 +151,12 @@ class MetricsCollector:
         """
         try:
             disk_info = {}
-            disk_partitions = psutil.disk_partitions(all=False)
+            # Use all=True to include removable drives like USB flash drives
+            disk_partitions = psutil.disk_partitions(all=True)
 
             for partition in disk_partitions:
+                if 'cdrom' in partition.opts:
+                    continue
                 try:
                     usage = psutil.disk_usage(partition.mountpoint)
 
@@ -242,7 +245,7 @@ class MetricsCollector:
                 "$disk = $_; Get-Partition -DiskNumber $disk.Number | "
                 "Where-Object { $_.DriveLetter } | ForEach-Object { "
                 "[PSCustomObject]@{disk_number=$disk.Number; model=$disk.FriendlyName; "
-                "serial_number=$disk.SerialNumber; drive_letter=$_.DriveLetter; size=$_.Size} "
+                "serial_number=$disk.SerialNumber; drive_letter=$_.DriveLetter; size=$_.Size; bustype=$disk.BusType; is_removable=$disk.IsRemovable} "
                 "} } | ConvertTo-Json -Compress"
             )
             try:
@@ -264,21 +267,60 @@ class MetricsCollector:
 
     def get_storage_health(self) -> str:
         """
-        Get storage health status.
+        Get storage health status based on S.M.A.R.T. and WMI hardware data.
 
         Returns:
             Storage health status: 'healthy', 'warning', 'critical', 'unknown'
         """
         try:
-            disk_info = self.get_disk_info()
-            disk_usage = disk_info.get("disk_usage", 0)
+            import subprocess
+            import json
+            
+            # 1. Check SMART PredictFailure (Requires Admin/SYSTEM rights)
+            cmd_smart = ['powershell', '-NoProfile', '-Command', 
+                         "Get-WmiObject -Namespace root\\wmi -Class MSStorageDriver_FailurePredictStatus -ErrorAction SilentlyContinue | Select-Object PredictFailure | ConvertTo-Json"]
+            
+            try:
+                res_smart = subprocess.run(cmd_smart, capture_output=True, text=True, creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0x08000000), timeout=5)
+                if res_smart.returncode == 0 and res_smart.stdout.strip():
+                    data = json.loads(res_smart.stdout)
+                    if isinstance(data, dict):
+                        data = [data]
+                    # If any drive predicts failure, return critical
+                    for drive in data:
+                        if drive.get('PredictFailure') is True:
+                            return 'critical'
+            except Exception as e:
+                if self.logger:
+                    self.logger.debug(f"Failed to query SMART PredictFailure: {e}")
 
-            if disk_usage >= 90:
-                return "critical"
-            elif disk_usage >= 75:
-                return "warning"
-            else:
-                return "healthy"
+            # 2. Check Win32_DiskDrive Status (Works without admin)
+            cmd_status = ['powershell', '-NoProfile', '-Command', 
+                          "Get-WmiObject Win32_DiskDrive -ErrorAction SilentlyContinue | Select-Object Status | ConvertTo-Json"]
+            
+            try:
+                res_status = subprocess.run(cmd_status, capture_output=True, text=True, creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0x08000000), timeout=5)
+                if res_status.returncode == 0 and res_status.stdout.strip():
+                    data2 = json.loads(res_status.stdout)
+                    if isinstance(data2, dict):
+                        data2 = [data2]
+                        
+                    has_warning = False
+                    for drive in data2:
+                        status = str(drive.get('Status', 'OK')).upper()
+                        if status in ('DEGRADED', 'PRED FAIL', 'ERROR', 'FAILING'):
+                            return 'critical'
+                        elif status != 'OK':
+                            has_warning = True
+                    
+                    if has_warning:
+                        return 'warning'
+            except Exception as e:
+                if self.logger:
+                    self.logger.debug(f"Failed to query DiskDrive Status: {e}")
+
+            # Default to healthy if no errors found
+            return "healthy"
 
         except Exception as e:
             if self.logger:
@@ -743,7 +785,7 @@ class MetricsCollector:
             # Get CPU count for normalization (Task Manager style)
             cpu_count = max(1, psutil.cpu_count() or 1)
 
-            for p in psutil.process_iter(['pid', 'name', 'memory_percent']):
+            for p in psutil.process_iter(['pid', 'name', 'memory_percent', 'memory_info']):
                 try:
                     info = p.info
                     cpu = p.cpu_percent(interval=None)
@@ -753,11 +795,13 @@ class MetricsCollector:
 
                         # Filter out mostly idle processes and System Idle Process
                         if info['name'] != 'System Idle Process' and (normalized_cpu > 1.0 or info['memory_percent'] > 1.0):
+                            memory_mb = round(info['memory_info'].rss / (1024 * 1024), 1) if info.get('memory_info') else 0
                             processes.append({
                                 'pid': info['pid'],
                                 'name': info['name'] or 'Unknown',
                                 'cpu_percent': round(normalized_cpu, 1),
-                                'memory_percent': round(info['memory_percent'], 1)
+                                'memory_percent': round(info['memory_percent'], 1),
+                                'memory_mb': memory_mb
                             })
                 except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                     pass

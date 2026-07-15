@@ -444,40 +444,147 @@ const AdminPanel = {
             return;
         }
 
-        tbody.innerHTML = alerts.map(alert => `
-            <tr data-status="${alert.status}" data-severity="${alert.severity}">
-                <td>
-                    <div>${this.formatDateTime(alert.timestamp)}</div>
-                </td>
-                <td>
-                    <div style="font-weight: 500;">${this.escapeHtml(alert.hostname)}</div>
-                    <small style="color: #6c757d;">${this.escapeHtml(alert.ip_address)}</small>
-                </td>
-                <td>
-                    <span class="status-badge" style="background: #e3f2fd; color: #0277bd;">
-                        ${alert.alert_type.toUpperCase()}
-                    </span>
-                </td>
-                <td>
-                    <span class="status-badge ${alert.severity}">${alert.severity}</span>
-                </td>
-                <td>
-                    <div style="max-width: 250px;">${this.escapeHtml(alert.message)}</div>
-                </td>
-                <td>
-                    <span class="status-badge ${alert.status}">${alert.status}</span>
-                </td>
-                <td>
-                    ${alert.acknowledged_at ? this.formatDateTime(alert.acknowledged_at) : '-'}
-                </td>
-                <td>
-                    ${alert.status === 'open' ? `
-                        <button class="btn btn-sm" onclick="AdminPanel.acknowledgeAlert(${alert.id})">Ack</button>
-                        <button class="btn btn-sm btn-primary" onclick="AdminPanel.resolveAlert(${alert.id})">Resolve</button>
-                    ` : '<span style="color: #6c757d; font-size: 13px;">Resolved</span>'}
-                </td>
-            </tr>
-        `).join('');
+        tbody.innerHTML = alerts.map(alert => {
+            let snapshotHtml = '<span style="color: #ccc; font-size: 0.75rem;">-</span>';
+            let snapshotRow = '';
+            
+            if (alert.snapshot_data) {
+                try {
+                    const snap = JSON.parse(alert.snapshot_data);
+                    if (snap) {
+                        const snapId = 'list-' + alert.id;
+                        
+                        // Default content structure
+                        let contentHtml = '';
+                        let hasContent = false;
+                        
+                        if (alert.alert_type === 'disk' || alert.alert_type === 'storage') {
+                            // Disk snapshot is a dictionary of disks
+                            const diskKeys = Object.keys(snap);
+                            if (diskKeys.length > 0) {
+                                hasContent = true;
+                                contentHtml = `
+                                    <div style="flex: 1;">
+                                        <strong style="font-size: 0.75rem; color: #64748b; text-transform: uppercase;">Storage Layout</strong>
+                                        <table style="width: 100%; font-size: 0.75rem; margin-top: 4px; border-collapse: collapse;">
+                                            ${diskKeys.map(k => {
+                                                const d = snap[k];
+                                                const pct = d.percent || 0;
+                                                const color = pct >= 90 ? '#ef4444' : (pct >= 80 ? '#f59e0b' : '#3b82f6');
+                                                return `
+                                                <tr>
+                                                    <td style="padding: 3px 0; border-bottom: 1px solid #f1f5f9; font-weight: bold;">${this.escapeHtml(d.mountpoint || k)}</td>
+                                                    <td style="padding: 3px 0; border-bottom: 1px solid #f1f5f9;">${d.fstype || ''}</td>
+                                                    <td style="padding: 3px 0; border-bottom: 1px solid #f1f5f9; text-align: right;">
+                                                        <div style="width: 50px; height: 4px; background: #e2e8f0; display: inline-block; vertical-align: middle; margin-right: 4px;">
+                                                            <div style="width: ${Math.min(pct, 100)}%; height: 100%; background: ${color};"></div>
+                                                        </div>
+                                                        <span style="color: ${color}; font-family: monospace; font-weight: 600;">${pct}%</span>
+                                                    </td>
+                                                </tr>
+                                                `;
+                                            }).join('')}
+                                        </table>
+                                    </div>
+                                `;
+                            }
+                        } else if (snap.top_cpu?.length > 0 || snap.top_memory?.length > 0) {
+                            hasContent = true;
+                            let cpuHtml = '';
+                            if (snap.top_cpu && snap.top_cpu.length > 0) {
+                                cpuHtml = `
+                                    <div style="flex: 1;">
+                                        <strong style="font-size: 0.75rem; color: #64748b; text-transform: uppercase;">Top CPU</strong>
+                                        <table style="width: 100%; font-size: 0.75rem; margin-top: 4px; border-collapse: collapse;">
+                                            ${snap.top_cpu.map(p => `
+                                                <tr>
+                                                    <td style="padding: 3px 0; border-bottom: 1px solid #f1f5f9;">${this.escapeHtml(p.name)}</td>
+                                                    <td style="padding: 3px 0; border-bottom: 1px solid #f1f5f9; text-align: right; color: #ef4444; font-family: monospace; font-weight: 600;">${p.cpu_percent}%</td>
+                                                </tr>
+                                            `).join('')}
+                                        </table>
+                                    </div>
+                                `;
+                            }
+                            
+                            let memHtml = '';
+                            if (snap.top_memory && snap.top_memory.length > 0) {
+                                memHtml = `
+                                    <div style="flex: 1;">
+                                        <strong style="font-size: 0.75rem; color: #64748b; text-transform: uppercase;">Top Memory</strong>
+                                        <table style="width: 100%; font-size: 0.75rem; margin-top: 4px; border-collapse: collapse;">
+                                            ${snap.top_memory.map(p => `
+                                                <tr>
+                                                    <td style="padding: 3px 0; border-bottom: 1px solid #f1f5f9;">${this.escapeHtml(p.name)}</td>
+                                                    <td style="padding: 3px 0; border-bottom: 1px solid #f1f5f9; text-align: right; color: #3b82f6; font-family: monospace; font-weight: 600;">
+                                                        ${p.memory_mb !== undefined ? p.memory_mb + ' MB' : p.memory_percent + '%'}
+                                                    </td>
+                                                </tr>
+                                            `).join('')}
+                                        </table>
+                                    </div>
+                                `;
+                            }
+                            
+                            contentHtml = cpuHtml + memHtml;
+                        }
+                        
+                        if (hasContent) {
+                            snapshotHtml = `
+                                <button type="button" class="btn btn-tiny" style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #475569; padding: 1px 5px; font-size: 0.7rem; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; height: 24px; line-height: 24px;" onclick="document.getElementById('snap-row-${snapId}').style.display = document.getElementById('snap-row-${snapId}').style.display === 'none' ? 'table-row' : 'none'; event.stopPropagation();">
+                                    <i class="material-icons" style="font-size: 13px;">camera_alt</i>
+                                    <span>Lihat</span>
+                                </button>
+                            `;
+                            
+                            snapshotRow = `
+                                <tr id="snap-row-${snapId}" style="display: none; background: #fafafa;">
+                                    <td colspan="6" style="padding: 0;">
+                                        <div style="padding: 12px; border-bottom: 1px solid #eee;">
+                                            <div style="display: flex; gap: 16px; text-align: left;">
+                                                ${contentHtml}
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `;
+                        }
+                    }
+                } catch(e) {}
+            }
+
+            return `
+                <tr data-status="${alert.status}" data-severity="${alert.severity}">
+                    <td style="padding: 6px 8px; white-space: nowrap;">
+                        <div style="font-weight: 500;">${this.formatDateTime(alert.timestamp).split(' ')[0]}</div>
+                        <small style="color: #7f8c8d;">${this.formatDateTime(alert.timestamp).split(' ')[1]}</small>
+                    </td>
+                    <td style="padding: 6px 8px;">
+                        <div style="font-weight: 500;">${this.escapeHtml(alert.hostname)}</div>
+                        <small style="color: #636e72;">${this.escapeHtml(alert.ip_address)}</small>
+                    </td>
+                    <td style="padding: 6px 8px;">
+                        <span class="status-badge" style="background: #e3f2fd; color: #0277bd; padding: 1px 4px; font-size: 0.7rem;">
+                            ${alert.alert_type.toUpperCase()}
+                        </span>
+                    </td>
+                    <td style="padding: 6px 8px;">
+                        <span class="status-badge ${alert.severity}" style="padding: 1px 4px; font-size: 0.7rem;">
+                            ${alert.severity.charAt(0).toUpperCase() + alert.severity.slice(1)}
+                        </span>
+                    </td>
+                    <td style="padding: 6px 8px;">
+                        <div style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${this.escapeHtml(alert.message)}">
+                            ${this.escapeHtml(alert.message)}
+                        </div>
+                    </td>
+                    <td style="padding: 6px 8px; text-align: center;">
+                        ${snapshotHtml}
+                    </td>
+                </tr>
+                ${snapshotRow}
+            `;
+        }).join('');
     },
 
     // Acknowledge alert

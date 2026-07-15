@@ -106,12 +106,28 @@ class Config:
         config = self._apply_env_overrides(config)
 
         # Auto-generate device_id if empty
+        needs_save = False
         if not config["agent"]["device_id"]:
             config["agent"]["device_id"] = self._generate_device_id()
+            needs_save = True
 
         # Auto-detect hostname if empty
         if not config["agent"]["hostname"]:
             config["agent"]["hostname"] = platform.node()
+            needs_save = True
+
+        # Save back to file if auto-generated
+        if needs_save:
+            try:
+                # Only save the agent and thresholds sections
+                save_config = {
+                    "agent": config["agent"],
+                    "thresholds": config["thresholds"]
+                }
+                with open(self.config_path, 'w', encoding='utf-8') as f:
+                    json.dump(save_config, f, indent=4)
+            except Exception as e:
+                print(f"Warning: Could not save auto-generated config to {self.config_path}: {e}")
 
         # Resolve paths relative to config file directory
         config = self._resolve_paths(config)

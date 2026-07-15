@@ -5,7 +5,18 @@
 try {
     $pdo = getDbConnection();
 
-    // Get detailed stats
+    // --- FIX: Paksa update status offline sebelum query stats.
+    // Gunakan NOW() MySQL murni (bukan date() PHP) untuk menghindari timezone mismatch.
+    $offline_minutes = getSetting($pdo, 'device_offline_minutes', 5);
+    $pdo->prepare("
+        UPDATE devices
+        SET status = 'offline'
+        WHERE last_seen < DATE_SUB(NOW(), INTERVAL ? MINUTE)
+        AND status != 'offline'
+    ")->execute([$offline_minutes]);
+    // --- END FIX
+
+    // Get detailed stats (setelah offline update, angka ini sudah akurat)
     $device_stats = ['total' => 0, 'online' => 0, 'offline' => 0, 'warning' => 0, 'critical' => 0];
     $stmt = $pdo->query("SELECT status, COUNT(*) as count FROM devices GROUP BY status");
     while ($row = $stmt->fetch()) {
@@ -186,8 +197,8 @@ try {
                         <?php foreach ($recent_devices as $device): ?>
                             <tr>
                                 <td>
-                                    <div style="font-weight: 500;"><?php echo htmlspecialchars($device['hostname']); ?></div>
-                                    <div style="font-size: 0.75rem; color: #636e72;">
+                                    <div class="table-cell-title"><?php echo htmlspecialchars($device['hostname']); ?></div>
+                                    <div class="table-cell-subtitle">
                                         <?php echo htmlspecialchars($device['device_id']); ?>
                                     </div>
                                 </td>
@@ -243,7 +254,7 @@ try {
             <?php else: ?>
                 <?php foreach ($critical_alerts as $alert): ?>
                     <div class="alert-item alert-<?php echo $alert['severity']; ?>">
-                        <div class="alert-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <div class="alert-header">
                             <div>
                                 <strong><?php echo htmlspecialchars($alert['hostname']); ?></strong>
                                 <span class="status-badge <?php echo $alert['severity']; ?>">
@@ -253,7 +264,7 @@ try {
                             <small><?php echo date('M j, H:i', strtotime($alert['timestamp'])); ?></small>
                         </div>
                         <div class="alert-message"><?php echo htmlspecialchars($alert['message']); ?></div>
-                        <div class="alert-actions" style="margin-top: 8px;">
+                        <div class="alert-actions">
                             <button class="btn btn-sm" onclick="AdminPanel.acknowledgeAlert(<?php echo $alert['id']; ?>)">
                                 <i class="material-icons tiny">check</i> Acknowledge
                             </button>
@@ -269,55 +280,12 @@ try {
     </div>
 </div>
 
-<style>
-.alert-item {
-    padding: 1rem;
-    border-radius: 8px;
-    margin-bottom: 0.5rem;
-    border-left: 4px solid;
-    background: white;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-.alert-critical {
-    border-color: #ff5252;
-    background: #ffebee;
-}
-
-.alert-warning {
-    border-color: #ffab00;
-    background: #fff3e0;
-}
-
-.alert-info {
-    border-color: #33b5e5;
-    background: #e3f2fd;
-}
-
-.alert-header small {
-    color: #636e72;
-}
-
-.alert-message {
-    color: #2d3436;
-}
-
-.alert-actions {
-    display: flex;
-    gap: 8px;
-}
-
-.alert-actions button,
-.alert-actions a {
-    padding: 6px 12px;
-    font-size: 0.875rem;
-}
-</style>
-
 <script>
 // Status distribution chart
 const statusCtx = document.getElementById('statusChart');
 if (statusCtx) {
+    const uiStyles = getComputedStyle(document.body);
+    const chartTextColor = uiStyles.getPropertyValue('--text-secondary').trim() || '#64748b';
     new Chart(statusCtx, {
         type: 'doughnut',
         data: {
@@ -337,7 +305,10 @@ if (statusCtx) {
             maintainAspectRatio: false,
             plugins: {
                 legend: {
-                    position: 'bottom'
+                    position: 'bottom',
+                    labels: {
+                        color: chartTextColor
+                    }
                 }
             }
         }
