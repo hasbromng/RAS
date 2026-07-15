@@ -473,6 +473,72 @@ $core_count = !empty($additional_info['cpu_per_core']) && is_array($additional_i
                                     <span class="dd-phys-disk-size"><?php echo formatBytesDetail($disk_total); ?></span>
                                 </div>
                             </div>
+                            
+                            <?php
+                            // Find corresponding SMART data for this physical disk
+                            $sd = null;
+                            if (isset($additional_info['storage_smart'])) {
+                                foreach ($additional_info['storage_smart'] as $smart_disk) {
+                                    if (($smart_disk['name'] ?? '') === $disk_model) {
+                                        $sd = $smart_disk;
+                                        break;
+                                    }
+                                }
+                            }
+                            if ($sd): 
+                                $health = strtolower($sd['health_status'] ?? 'unknown');
+                                
+                                // Calculate Health Percentage
+                                $health_pct = 100;
+                                if (isset($sd['wear_percent']) && $sd['wear_percent'] !== null) {
+                                    $health_pct = max(0, 100 - (int)$sd['wear_percent']);
+                                } else if ($health !== 'healthy' && $health !== 'good') {
+                                    $health_pct = 50;
+                                    if ($health === 'critical' || $health === 'unhealthy') $health_pct = 10;
+                                }
+                                $health_color = $health_pct >= 80 ? 'linear-gradient(90deg, #4ade80, #16a34a)' : ($health_pct >= 50 ? 'linear-gradient(90deg, #facc15, #ca8a04)' : 'linear-gradient(90deg, #f87171, #dc2626)');
+                                $health_icon_color = $health_pct >= 80 ? 'good' : ($health_pct >= 50 ? 'warning' : 'critical');
+                                
+                                // Calculate Temperature
+                                $temp_val = isset($sd['temperature_celsius']) ? (int)$sd['temperature_celsius'] : 0;
+                                $temp_width = min(100, max(0, $temp_val));
+                                if ($temp_val === 0) {
+                                    $temp_display = 'N/A';
+                                    $temp_color = '#94a3b8';
+                                    $temp_icon_color = 'muted';
+                                    $temp_status = 'Not Measured';
+                                } else {
+                                    $temp_display = $temp_val . ' °C';
+                                    $temp_color = $temp_val < 45 ? 'linear-gradient(90deg, #4ade80, #16a34a)' : ($temp_val < 60 ? 'linear-gradient(90deg, #facc15, #ca8a04)' : 'linear-gradient(90deg, #f87171, #dc2626)');
+                                    $temp_icon_color = $temp_val < 45 ? 'good' : ($temp_val < 60 ? 'warning' : 'critical');
+                                    $temp_status = $temp_val < 60 ? 'OK' : 'High';
+                                }
+                            ?>
+                            <div class="dd-snt-container">
+                                <!-- Health Bar -->
+                                <div class="dd-snt-row">
+                                    <div class="dd-snt-icon"><i class="material-icons dd-level-text-<?php echo $health_icon_color; ?>">check_circle</i></div>
+                                    <div class="dd-snt-label">Health:</div>
+                                    <div class="dd-snt-bar-wrap">
+                                        <div class="dd-snt-bar" style="width: <?php echo $health_pct; ?>%; background: <?php echo $health_color; ?>;">
+                                            <span class="dd-snt-bar-text"><?php echo $health_pct; ?> %</span>
+                                        </div>
+                                    </div>
+                                    <div class="dd-snt-value"><?php echo htmlspecialchars(ucfirst($sd['health_status'] ?? 'Unknown')); ?></div>
+                                </div>
+                                <!-- Temp Bar -->
+                                <div class="dd-snt-row">
+                                    <div class="dd-snt-icon"><i class="material-icons dd-level-text-<?php echo $temp_icon_color; ?>">thermostat</i></div>
+                                    <div class="dd-snt-label">Temp.:</div>
+                                    <div class="dd-snt-bar-wrap">
+                                        <div class="dd-snt-bar" style="width: <?php echo $temp_width; ?>%; background: <?php echo $temp_color; ?>;">
+                                            <span class="dd-snt-bar-text"><?php echo $temp_display; ?></span>
+                                        </div>
+                                    </div>
+                                    <div class="dd-snt-value"><?php echo $temp_status; ?></div>
+                                </div>
+                            </div>
+                            <?php endif; ?>
 
                             <!-- Partitions — horizontal proportional blocks -->
                             <div class="dd-phys-partition-row">
@@ -928,77 +994,7 @@ $core_count = !empty($additional_info['cpu_per_core']) && is_array($additional_i
             </section>
             <?php endif; ?>
 
-            <!-- SMART / Health Storage -->
-            <?php if (!empty($storage_smart)): ?>
-            <section class="dd-panel">
-                <button type="button" class="dd-panel-toggle" data-dd-toggle="smart" aria-expanded="false">
-                    <div class="dd-panel-head-inner">
-                        <h3><i class="material-icons">health_and_safety</i> SMART / Health Storage</h3>
-                        <span class="dd-panel-count"><?php echo count($storage_smart); ?> disk</span>
-                    </div>
-                    <i class="material-icons dd-chevron">expand_more</i>
-                </button>
-                <div class="dd-panel-collapse is-collapsed" id="dd-collapse-smart">
-                    <div class="dd-panel-body">
-                        <?php foreach ($storage_smart as $sd):
-                            $health = strtolower($sd['health_status'] ?? 'unknown');
-                            $health_class = ($health === 'healthy') ? 'good' : (($health === 'warning') ? 'warning' : (($health === 'unhealthy') ? 'critical' : 'unknown'));
-                        ?>
-                        <div class="dd-smart-row">
-                            <div class="dd-smart-header">
-                                <span class="dd-smart-name"><i class="material-icons">storage</i> <?php echo htmlspecialchars($sd['name'] ?? 'Disk'); ?></span>
-                                <span class="dd-smart-health dd-level-text-<?php echo $health_class; ?>">
-                                    <?php echo htmlspecialchars(ucfirst($sd['health_status'] ?? '—')); ?>
-                                </span>
-                            </div>
-                            <div class="dd-sys-grid dd-smart-grid">
-                                <?php if (!empty($sd['media_type'])): ?>
-                                <div class="dd-sys-item">
-                                    <span class="dd-sys-label">Tipe</span>
-                                    <span class="dd-sys-value"><?php echo htmlspecialchars($sd['media_type']); ?></span>
-                                </div>
-                                <?php endif; ?>
-                                <?php if (!empty($sd['size_bytes'])): ?>
-                                <div class="dd-sys-item">
-                                    <span class="dd-sys-label">Kapasitas</span>
-                                    <span class="dd-sys-value"><?php echo formatBytesDetail($sd['size_bytes']); ?></span>
-                                </div>
-                                <?php endif; ?>
-                                <?php if (isset($sd['temperature_celsius']) && $sd['temperature_celsius'] !== null): ?>
-                                <div class="dd-sys-item">
-                                    <span class="dd-sys-label">Temperatur</span>
-                                    <span class="dd-sys-value dd-level-text-<?php echo intval($sd['temperature_celsius']) >= 60 ? 'critical' : (intval($sd['temperature_celsius']) >= 45 ? 'warning' : 'good'); ?>">
-                                        <?php echo (int)$sd['temperature_celsius']; ?>°C
-                                    </span>
-                                </div>
-                                <?php endif; ?>
-                                <?php if (isset($sd['wear_percent']) && $sd['wear_percent'] !== null): ?>
-                                <div class="dd-sys-item">
-                                    <span class="dd-sys-label">Wear</span>
-                                    <span class="dd-sys-value"><?php echo (int)$sd['wear_percent']; ?>%</span>
-                                </div>
-                                <?php endif; ?>
-                                <?php if (isset($sd['read_errors_total']) && $sd['read_errors_total'] !== null): ?>
-                                <div class="dd-sys-item dd-item-full">
-                                    <span class="dd-sys-label">Read Errors</span>
-                                    <span class="dd-sys-value <?php echo intval($sd['read_errors_total']) > 0 ? 'dd-level-text-warning' : ''; ?>">
-                                        <?php echo (int)$sd['read_errors_total']; ?>
-                                    </span>
-                                </div>
-                                <?php endif; ?>
-                                <?php if (!empty($sd['operational_status'])): ?>
-                                <div class="dd-sys-item dd-item-full">
-                                    <span class="dd-sys-label">Status Operasional</span>
-                                    <span class="dd-sys-value"><?php echo htmlspecialchars(implode(', ', (array)$sd['operational_status'])); ?></span>
-                                </div>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                        <?php endforeach; ?>
-                    </div>
-                </div>
-            </section>
-            <?php endif; ?>
+
 
             <section class="dd-panel dd-panel-alerts">
                 <button type="button" class="dd-panel-toggle" data-dd-toggle="alerts" aria-expanded="false">
@@ -1231,23 +1227,118 @@ $core_count = !empty($additional_info['cpu_per_core']) && is_array($additional_i
     });
 })();
 </script>
+<style>
+/* Audit Minimap Console */
+.audit-minimap-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+}
+.audit-minimap {
+    background: #0f111a;
+    border: 1px solid #3b4261;
+    border-radius: 8px;
+    width: 600px;
+    max-width: 90%;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+.audit-minimap-header {
+    background: #1a1e2d;
+    padding: 10px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #3b4261;
+}
+.audit-minimap-title {
+    color: #a9b1d6;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.audit-minimap-title i {
+    font-size: 16px;
+    color: #7aa2f7;
+}
+.audit-minimap-close {
+    color: #565f89;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.audit-minimap-close:hover { color: #f7768e; }
+.audit-minimap-body {
+    padding: 15px;
+    height: 300px;
+    overflow-y: auto;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.5;
+}
+.audit-log-line { margin-bottom: 6px; }
+.log-time { color: #565f89; margin-right: 10px; }
+.log-info { color: #7aa2f7; }
+.log-success { color: #9ece6a; }
+.log-error { color: #f7768e; }
+.log-warning { color: #e0af68; }
+.log-command { color: #bb9af7; }
+</style>
+
+<div class="audit-minimap-overlay" id="auditMinimap">
+    <div class="audit-minimap">
+        <div class="audit-minimap-header">
+            <div class="audit-minimap-title">
+                <i class="material-icons">terminal</i> Agent Audit Minimap
+            </div>
+            <i class="material-icons audit-minimap-close" id="auditMinimapClose">close</i>
+        </div>
+        <div class="audit-minimap-body" id="auditMinimapBody">
+        </div>
+    </div>
+</div>
+
 <script>
 (function () {
 
 // Refresh Device (Audit) Logic
+// Refresh Device (Audit) Logic with Minimap
+const minimapOverlay = document.getElementById('auditMinimap');
+const minimapBody = document.getElementById('auditMinimapBody');
+const minimapClose = document.getElementById('auditMinimapClose');
+
+function addMinimapLog(text, type = 'info') {
+    const time = new Date().toLocaleTimeString();
+    const div = document.createElement('div');
+    div.className = 'audit-log-line';
+    div.innerHTML = `<span class="log-time">[${time}]</span> <span class="log-${type}">${text}</span>`;
+    minimapBody.appendChild(div);
+    minimapBody.scrollTop = minimapBody.scrollHeight;
+}
+
+minimapClose.addEventListener('click', () => {
+    minimapOverlay.style.display = 'none';
+});
+
 document.querySelectorAll('.btn-refresh-detail').forEach(btn => {
     btn.addEventListener('click', function(e) {
         e.preventDefault();
         const deviceId = this.dataset.id;
-        const icon = this.querySelector('i');
-        const span = this.querySelector('span');
-        const originalText = span.textContent;
-        const originalIcon = icon.textContent;
         
-        icon.textContent = 'hourglass_empty';
-        span.textContent = 'Meminta...';
-        this.disabled = true;
-        this.style.opacity = '0.7';
+        // Open minimap
+        minimapBody.innerHTML = '';
+        minimapOverlay.style.display = 'flex';
+        
+        addMinimapLog(`Inisiasi koneksi ke Agent untuk perangkat ID: ${deviceId}...`, 'info');
+        addMinimapLog(`> POST /api/commands.php (action: create, command: audit)`, 'command');
         
         fetch('api/commands.php', {
             method: 'POST',
@@ -1257,7 +1348,13 @@ document.querySelectorAll('.btn-refresh-detail').forEach(btn => {
         .then(res => res.json())
         .then(data => {
             if (data.success && data.command_id) {
+                addMinimapLog(`Berhasil mengirim antrean! Command ID: ${data.command_id}`, 'success');
+                addMinimapLog(`Menunggu respons dari agent (polling setiap 2 detik)...`, 'warning');
+                
+                let attempt = 1;
                 let pollInterval = setInterval(() => {
+                    addMinimapLog(`> POST /api/commands.php (action: check) [Percobaan ${attempt++}]`, 'command');
+                    
                     fetch('api/commands.php', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -1265,36 +1362,30 @@ document.querySelectorAll('.btn-refresh-detail').forEach(btn => {
                     })
                     .then(res => res.json())
                     .then(checkData => {
-                        if (checkData.success && checkData.status === 'completed') {
-                            clearInterval(pollInterval);
-                            location.reload();
+                        if (checkData.success) {
+                            addMinimapLog(`Status agent: ${checkData.status.toUpperCase()}`, checkData.status === 'completed' ? 'success' : 'info');
+                            if (checkData.status === 'completed') {
+                                clearInterval(pollInterval);
+                                addMinimapLog(`Sinkronisasi data berhasil! Memuat ulang halaman...`, 'success');
+                                setTimeout(() => location.reload(), 1500);
+                            }
                         }
                     });
                 }, 2000);
                 
                 setTimeout(() => {
                     clearInterval(pollInterval);
-                    icon.textContent = originalIcon;
-                    span.textContent = originalText;
-                    this.disabled = false;
-                    this.style.opacity = '1';
-                    alert('Timeout (45s): Agent mungkin offline atau proses audit memakan waktu lebih lama.');
+                    addMinimapLog(`TIMEOUT (45s). Agent mungkin offline atau sedang sibuk.`, 'error');
                 }, 45000);
             } else {
-                icon.textContent = originalIcon;
-                span.textContent = originalText;
-                this.disabled = false;
-                this.style.opacity = '1';
-                alert('Gagal mengirim perintah.');
+                addMinimapLog(`Gagal membuat antrean perintah audit!`, 'error');
             }
         })
         .catch(err => {
             console.error(err);
-            icon.textContent = originalIcon;
-            span.textContent = originalText;
-            this.disabled = false;
-            this.style.opacity = '1';
+            addMinimapLog(`Kesalahan jaringan: ${err.message}`, 'error');
         });
     });
 });
+
 </script>

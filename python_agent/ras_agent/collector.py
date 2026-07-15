@@ -11,6 +11,7 @@ import time
 import json
 import subprocess
 import threading
+import os
 from typing import Dict, Any, List, Optional
 
 try:
@@ -273,51 +274,34 @@ class MetricsCollector:
             Storage health status: 'healthy', 'warning', 'critical', 'unknown'
         """
         try:
-            import subprocess
-            import json
+            import wmi
             
             # 1. Check SMART PredictFailure (Requires Admin/SYSTEM rights)
-            cmd_smart = ['powershell', '-NoProfile', '-Command', 
-                         "Get-WmiObject -Namespace root\\wmi -Class MSStorageDriver_FailurePredictStatus -ErrorAction SilentlyContinue | Select-Object PredictFailure | ConvertTo-Json"]
-            
             try:
-                res_smart = subprocess.run(cmd_smart, capture_output=True, text=True, creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0x08000000), timeout=5)
-                if res_smart.returncode == 0 and res_smart.stdout.strip():
-                    data = json.loads(res_smart.stdout)
-                    if isinstance(data, dict):
-                        data = [data]
-                    # If any drive predicts failure, return critical
-                    for drive in data:
-                        if drive.get('PredictFailure') is True:
-                            return 'critical'
+                w_wmi = wmi.WMI(namespace=r"root\wmi")
+                for drive in w_wmi.MSStorageDriver_FailurePredictStatus():
+                    if drive.PredictFailure:
+                        return 'critical'
             except Exception as e:
                 if self.logger:
-                    self.logger.debug(f"Failed to query SMART PredictFailure: {e}")
+                    self.logger.debug(f"Failed to query SMART PredictFailure via WMI: {e}")
 
             # 2. Check Win32_DiskDrive Status (Works without admin)
-            cmd_status = ['powershell', '-NoProfile', '-Command', 
-                          "Get-WmiObject Win32_DiskDrive -ErrorAction SilentlyContinue | Select-Object Status | ConvertTo-Json"]
-            
             try:
-                res_status = subprocess.run(cmd_status, capture_output=True, text=True, creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0x08000000), timeout=5)
-                if res_status.returncode == 0 and res_status.stdout.strip():
-                    data2 = json.loads(res_status.stdout)
-                    if isinstance(data2, dict):
-                        data2 = [data2]
-                        
-                    has_warning = False
-                    for drive in data2:
-                        status = str(drive.get('Status', 'OK')).upper()
-                        if status in ('DEGRADED', 'PRED FAIL', 'ERROR', 'FAILING'):
-                            return 'critical'
-                        elif status != 'OK':
-                            has_warning = True
-                    
-                    if has_warning:
-                        return 'warning'
+                w_cimv2 = wmi.WMI()
+                has_warning = False
+                for drive in w_cimv2.Win32_DiskDrive():
+                    status = str(drive.Status).upper() if drive.Status else "OK"
+                    if status in ('DEGRADED', 'PRED FAIL', 'ERROR', 'FAILING'):
+                        return 'critical'
+                    elif status != 'OK':
+                        has_warning = True
+                
+                if has_warning:
+                    return 'warning'
             except Exception as e:
                 if self.logger:
-                    self.logger.debug(f"Failed to query DiskDrive Status: {e}")
+                    self.logger.debug(f"Failed to query DiskDrive Status via WMI: {e}")
 
             # Default to healthy if no errors found
             return "healthy"
@@ -639,45 +623,53 @@ class MetricsCollector:
         """Get basic SMART/health data via Get-PhysicalDisk and reliability counters (Windows)."""
         if platform.system().lower() != "windows":
             return []
-        command = (
-            "Get-PhysicalDisk | ForEach-Object { "
-            "$d = $_; "
-            "try { $r = Get-StorageReliabilityCounter -PhysicalDisk $d -ErrorAction Stop } catch { $r = $null }; "
-            "[PSCustomObject]@{ "
-            "FriendlyName=$d.FriendlyName; MediaType=$d.MediaType; HealthStatus=$d.HealthStatus; "
-            "OperationalStatus=$d.OperationalStatus; Size=$d.Size; "
-            "Temperature=if($r){$r.Temperature}else{$null}; "
-            "Wear=if($r){$r.Wear}else{$null}; "
-            "ReadErrorsTotal=if($r){$r.ReadErrorsTotal}else{$null} "
-            "} } | ConvertTo-Json -Compress"
-        )
         def _collect() -> List[Dict[str, Any]]:
             try:
-                result = subprocess.run(
-                    ["powershell", "-NoProfile", "-NonInteractive", "-Command", command],
-                    capture_output=True, text=True, timeout=15,
-                    creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0)
-                )
-                if result.returncode != 0 or not result.stdout.strip():
-                    return []
-                data = json.loads(result.stdout)
-                disks = data if isinstance(data, list) else [data]
+                import wmi
+                w = wmi.WMI(namespace=r"root\Microsoft\Windows\Storage")
+                disks = w.MSFT_PhysicalDisk()
+                
+                # Fetch reliability counters
+                counters_dict = {}
+                try:
+                    counters = w.MSFT_StorageReliabilityCounter()
+                    for c in counters:
+                        counters_dict[c.DeviceId] = c
+                except Exception as e:
+                    if self.logger:
+                        self.logger.debug(f"Unable to read WMI Reliability Counters (may need Admin rights): {e}")
+
                 out = []
                 for d in disks:
+                    device_id = d.DeviceId
+                    c = counters_dict.get(device_id)
+                    
+                    # Convert MediaType to string manually based on WMI standard
+                    media_type = "Unspecified"
+                    if d.MediaType == 3: media_type = "HDD"
+                    elif d.MediaType == 4: media_type = "SSD"
+                    elif d.MediaType == 5: media_type = "SCM"
+                    
+                    # Convert HealthStatus to string
+                    health_status = "Unknown"
+                    if d.HealthStatus == 0: health_status = "Healthy"
+                    elif d.HealthStatus == 1: health_status = "Warning"
+                    elif d.HealthStatus == 2: health_status = "Unhealthy"
+
                     out.append({
-                        "name": d.get("FriendlyName", ""),
-                        "media_type": d.get("MediaType", ""),
-                        "health_status": d.get("HealthStatus", ""),
-                        "operational_status": d.get("OperationalStatus", ""),
-                        "size_bytes": d.get("Size", 0),
-                        "temperature_celsius": d.get("Temperature"),
-                        "wear_percent": d.get("Wear"),
-                        "read_errors_total": d.get("ReadErrorsTotal"),
+                        "name": d.FriendlyName if d.FriendlyName else "",
+                        "media_type": media_type,
+                        "health_status": health_status,
+                        "operational_status": str(d.OperationalStatus[0]) if d.OperationalStatus else "",
+                        "size_bytes": int(d.Size) if d.Size else 0,
+                        "temperature_celsius": c.Temperature if c else None,
+                        "wear_percent": c.Wear if c else None,
+                        "read_errors_total": c.ReadErrorsTotal if c else None,
                     })
                 return out
-            except (OSError, subprocess.SubprocessError, json.JSONDecodeError) as e:
+            except Exception as e:
                 if self.logger:
-                    self.logger.debug(f"Unable to read SMART data: {e}")
+                    self.logger.debug(f"Unable to read SMART data via WMI: {e}")
                 return []
 
         return self._get_cached_value("storage_smart", _collect, force_refresh=force_refresh)
@@ -700,11 +692,6 @@ class MetricsCollector:
                 "motherboard_serial=$board.SerialNumber; bios_version=$bios.SMBIOSBIOSVersion; bios_date=$bios.ReleaseDate}}catch{$out.windows_device_details=@{}}; "
                 "try{$out.memory_slots=Get-CimInstance Win32_PhysicalMemory | Select-Object BankLabel, Manufacturer, Capacity, Speed, MemoryType, SMBIOSMemoryType}catch{$out.memory_slots=@()}; "
                 "try{$out.gpu=Get-CimInstance Win32_VideoController | Select-Object Name, AdapterRAM, DriverVersion, VideoProcessor}catch{$out.gpu=@()}; "
-                "try{$out.storage_smart=Get-PhysicalDisk | ForEach-Object { "
-                "$d=$_; try{$r=Get-StorageReliabilityCounter -PhysicalDisk $d -ErrorAction Stop}catch{$r=$null}; "
-                "[PSCustomObject]@{FriendlyName=$d.FriendlyName; MediaType=$d.MediaType; HealthStatus=$d.HealthStatus; "
-                "OperationalStatus=$d.OperationalStatus; Size=$d.Size; Temperature=if($r){$r.Temperature}else{$null}; "
-                "Wear=if($r){$r.Wear}else{$null}; ReadErrorsTotal=if($r){$r.ReadErrorsTotal}else{$null}} }catch{$out.storage_smart=@()}; "
                 "try{$fw=(Get-NetFirewallProfile -ErrorAction Stop | Where-Object Enabled -eq True | Measure-Object).Count}catch{$fw=$null}; "
                 "try{$mp=Get-MpComputerStatus -ErrorAction Stop}catch{$mp=$null}; "
                 "try{$wu=(New-Object -ComObject Microsoft.Update.Session).CreateUpdateSearcher().QueryHistory(0,1) | Select-Object -First 1 -ExpandProperty Date}catch{$wu=$null}; "
@@ -727,6 +714,77 @@ class MetricsCollector:
                 if result.returncode != 0 or not result.stdout.strip():
                     return {}
                 raw = json.loads(result.stdout)
+                
+                # Fetch SMART data natively via WMI to ensure it works reliably
+                raw["storage_smart"] = self.get_storage_smart(force_refresh=True)
+
+                # Enhance WMI data with smartctl (calculates accurate health % considering bad sectors)
+                smartctl_path = r"C:\Program Files\smartmontools\bin\smartctl.exe"
+                if os.path.exists(smartctl_path) and isinstance(raw, dict) and "storage_smart" in raw:
+                    for i, disk in enumerate(raw["storage_smart"]):
+                        try:
+                            # Try to query smartctl for the physical drive
+                            s_out = subprocess.run([smartctl_path, "-a", "-j", f"/dev/pd{i}"], capture_output=True, text=True, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+                            if s_out.stdout:
+                                s_json = json.loads(s_out.stdout)
+                                
+                                # Temperature Parsing (override if missing)
+                                if disk.get("temperature_celsius") is None:
+                                    if "temperature" in s_json and isinstance(s_json["temperature"], dict) and s_json["temperature"].get("current"):
+                                        disk["temperature_celsius"] = s_json["temperature"]["current"]
+                                    elif "ata_smart_attributes" in s_json and "table" in s_json["ata_smart_attributes"]:
+                                        for attr in s_json["ata_smart_attributes"]["table"]:
+                                            if attr.get("id") == 194 or "Temperature" in str(attr.get("name")):
+                                                disk["temperature_celsius"] = attr.get("raw", {}).get("value")
+                                                break
+                                                
+                                # Health and Wear Parsing (Mimic HD Sentinel Logic)
+                                base_health = 100
+                                if disk.get("wear_percent") is not None:
+                                    base_health = max(0, 100 - disk.get("wear_percent"))
+                                
+                                # 1. NVMe Wear
+                                if "nvme_smart_health_information_log" in s_json:
+                                    log = s_json["nvme_smart_health_information_log"]
+                                    if "percentage_used" in log:
+                                        base_health = min(base_health, max(0, 100 - int(log["percentage_used"])))
+                                
+                                # 2. ATA Wear and Bad Sectors
+                                bad_sectors = 0
+                                if "ata_smart_attributes" in s_json and "table" in s_json["ata_smart_attributes"]:
+                                    for attr in s_json["ata_smart_attributes"]["table"]:
+                                        name = str(attr.get("name", "")).lower()
+                                        attr_id = attr.get("id")
+                                        
+                                        # Base wear indicators (231: SSD Life Left, 233: Media Wearout)
+                                        if "life_left" in name or "wear" in name or attr_id in (231, 233, 202, 169):
+                                            val = attr.get("value")
+                                            if val is not None:
+                                                base_health = min(base_health, int(val))
+                                                
+                                        # Bad sectors (5: Reallocated, 197: Current Pending, 198: Uncorrectable)
+                                        # We only take the maximum of these to avoid double-counting the same physical bad sector
+                                        if attr_id in (5, 197, 198):
+                                            raw_val = attr.get("raw", {}).get("value", 0)
+                                            if isinstance(raw_val, int):
+                                                bad_sectors = max(bad_sectors, raw_val)
+                                
+                                # Apply penalty for bad sectors (Aligned closer to HD Sentinel)
+                                if bad_sectors > 0:
+                                    # HD Sentinel typically penalizes ~5% for the first few bad sectors on SSDs.
+                                    # We use 1.5% per sector, cap at a reasonable number.
+                                    penalty = int(bad_sectors * 1.6)
+                                    if penalty < 5 and bad_sectors > 0:
+                                        penalty = 5  # Minimum 5% drop if there's any bad sector
+                                    
+                                    base_health = max(1, base_health - penalty)
+                                
+                                # Convert base_health back to wear_percent (which UI uses as 100 - wear_percent)
+                                disk["wear_percent"] = max(0, 100 - base_health)
+                        except Exception as e:
+                            if self.logger:
+                                self.logger.debug(f"Smartctl error on pd{i}: {e}")
+
                 return raw if isinstance(raw, dict) else {}
             except (OSError, subprocess.SubprocessError, json.JSONDecodeError) as e:
                 if self.logger:
