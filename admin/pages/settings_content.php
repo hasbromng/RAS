@@ -162,11 +162,11 @@ try {
             Aksi Cepat
         </h5>
         <div class="quick-actions">
-            <a href="../test_client.php" target="_blank" class="btn">
+            <a href="test_client.php" target="_blank" class="btn">
                 <i class="material-icons left">bug_report</i>
                 Test API
             </a>
-            <a href="../install.php" class="btn btn-secondary">
+            <a href="install.php" class="btn btn-secondary">
                 <i class="material-icons left">settings</i>
                 Re-install
             </a>

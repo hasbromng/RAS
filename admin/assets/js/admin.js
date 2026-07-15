@@ -260,7 +260,39 @@ const AdminPanel = {
             return;
         }
 
-        tbody.innerHTML = devices.map(device => this.createDeviceRow(device)).join('');
+        tbody.innerHTML = devices.map(device => this.createRecentDeviceRow(device)).join('');
+    },
+
+    // Create recent device table row (for dashboard, 7 columns)
+    createRecentDeviceRow(device) {
+        const memPercent = device.memory_total > 0 ? 
+            ((device.memory_used / device.memory_total) * 100).toFixed(1) : 0;
+
+        return `
+            <tr>
+                <td>
+                    <div class="table-cell-title">${this.escapeHtml(device.hostname)}</div>
+                    <div class="table-cell-subtitle">${this.escapeHtml(device.device_id)}</div>
+                </td>
+                <td>
+                    <span class="status-badge ${device.status}">${device.status}</span>
+                </td>
+                <td>${this.formatPercentage(device.cpu_usage)}</td>
+                <td>${memPercent}%</td>
+                <td>${this.formatPercentage(device.disk_usage)}</td>
+                <td>
+                    ${device.open_alerts > 0 ? 
+                        \`<span class="status-badge critical">\${device.open_alerts}</span>\` : 
+                        '<span class="text-muted">-</span>'}
+                </td>
+                <td>
+                    <a href="?page=devices&device_id=${encodeURIComponent(device.device_id)}"
+                       class="btn btn-sm btn-primary">
+                        <i class="material-icons tiny">visibility</i>
+                    </a>
+                </td>
+            </tr>
+        `;
     },
 
     // Create device table row
